@@ -8,7 +8,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
-          <!--  main nav-bar links -->
+          {% comment %} main nav-bar links {% endcomment %}
           <ul class="navbar-nav">
             <li class="nav-item active">
               <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
@@ -20,20 +20,27 @@
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Categories
               </a>
-              <!--  categories list -->
+              {% comment %} categories list {% endcomment %}
               <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                {% for article in article_list %}
-                  <li class="dropdown-submenu">
-                    <a class="dropdown-item dropdown-toggle" href="#">{{ article.category.title }}</a>
-                    <!--  list of categorie's articles -->
-                    <ul class="dropdown-menu">
-                      {% for article in article.category.articles.all %}
-                        <li>
-                          <a class="dropdown-item" href="#">{{ article.title }}</a>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  </li>                        
+                {% for category in categories %}
+                  {% comment %} are there articles in a category? If yes, create category submenu {% endcomment %}
+                  {% if category.articles.all %}
+                    <li class="dropdown-submenu">
+                      <a class="dropdown-item dropdown-toggle" href="#">{{ category.title }}</a>
+                      {% comment %} list of categorie's articles {% endcomment %}
+                      <ul class="dropdown-menu">
+                        {% for article in articles %}
+                        {% comment %} does article belong to this category? {% endcomment %}
+                          {% if article.category.title == category.title %}
+                            <li>
+                              <a class="dropdown-item" href="#">{{ article.title }}</a>
+                            </li>
+                          {% endif %}
+                        {% endfor %}
+                      </ul>
+                    </li>  
+                  {% endif %}
+                                        
                 {% endfor %}
               </ul>
             </li>

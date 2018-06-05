@@ -13,7 +13,7 @@ class Article(models.Model):
     text = models.TextField()
     short_description = models.TextField(max_length=300)
     image = models.ImageField()
-    pub_date = models.DateField(auto_now_add=True)
+    pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, related_name='articles', on_delete=models.DO_NOTHING)
     category = models.ForeignKey(Category, related_name='articles', on_delete=models.CASCADE)
 

@@ -27,7 +27,7 @@
     <h1 class="padding-top-30 padding-bottom-30 text-cornflowerblue">Latest Articles</h1>
     <hr>
   </div>
-  {% for article in article_list  %}
+  {% for article in articles  %}
     <div class="container">
       <div class="row padding-top-20 padding-bottom-20">
         <div class="col-md-2">
@@ -40,7 +40,7 @@
         <div class="col-md-4 text-lightbrown padding-top-20 text-right">
           <p>Category: {{ article.category }}</p>
           <p>Written by {{ article.author }}</p>
-          <p>{{ article.pub_date }}</p>
+          <p>{{ article.pub_date.date }}</p> {% comment %} date() metoda vraća samo datum; bez nje ispisuje se i datum i vrijeme {% endcomment %}
         </div>
       </div>
       <hr>
