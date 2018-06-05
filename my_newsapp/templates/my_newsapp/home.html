@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% load staticfiles thumbnail %}
+
+{% block title %}Latest Articles{% endblock title %}
+
+{% block style %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'my_newsapp/home_style.css' %}">  
+{% endblock style %}
+
+{% block jumbo %}
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">Welcome to Newsapp </h1>
+      <p class="lead">Everything you need to share your knowledge...</p>
+    </div>
+  </div>
+{% endblock jumbo %}
+
+{% block navigation %}
+  
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <button type="button" class="btn btn-success">
+          <a href="#">Write something</a>
+        </button>
+        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Categories
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" href="#">Action</a>
+                <a class="dropdown-item" href="#">Another action</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Contact</a>
+            </li>
+          </ul>
+        </div>
+    </div>
+  </nav>
+  
+
+{% endblock navigation %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="padding-top-30 padding-bottom-30 text-cornflowerblue">Latest Articles</h1>
+    <hr>
+  </div>
+  {% for article in article_list  %}
+    <div class="container">
+      <div class="row padding-top-20 padding-bottom-20">
+        <div class="col-md-2">
+          <img src="{% thumbnail article.image 150x150 crop %}">
+        </div>
+        <div class="col-md-6">
+          <h3>{{ article.title }}</h3>
+          <p>{{ article.short_description }}</p>
+        </div>
+        <div class="col-md-4 text-lightbrown padding-top-20 text-right">
+          <p>Category: {{ article.category }}</p>
+          <p>Written by {{ article.author }}</p>
+          <p>{{ article.pub_date }}</p>
+          
+        </div>
+      </div>
+      <hr>
+    </div>
+  {% endfor %}
+{% endblock content %}
+
+{% block script %}
+  {{ block.super }}
+  <script src="{% static 'my_newsapp/script.js' %}"></script>
+{% endblock script %}

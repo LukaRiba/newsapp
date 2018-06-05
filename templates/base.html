@@ -1,0 +1,27 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title%}{% endblock title%}</title>
+  {% block style %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap-4.0.0.css' %}">
+  {% endblock style %}
+</head>
+<body>
+
+  {% block jumbo %}  
+  {% endblock jumbo %}
+
+  {% block navigation %}
+  {% endblock navigation %}
+
+  {% block content %}
+  {% endblock content %}
+  
+  {% block script %}
+    <script src="{% static 'js/jquery-3.3.1.js' %}"></script>
+    <script src="{% static 'js/bootstrap-4.0.0.js' %}"></script>
+  {% endblock script %}
+</body>
+</html>
