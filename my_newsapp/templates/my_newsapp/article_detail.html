@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% load staticfiles thumbnail %}
+
+{% block title %}{{ object.title }}{% endblock title %}
+
+{% block style %}
+  {{ block.super }}
+{% endblock style %}
+
+{% block jumbo %}
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">{{ object.category }}</h1>
+      {% comment %} <p class="lead">Everything you need to share your knowledge...</p> {% endcomment %}
+    </div>
+  </div>
+{% endblock jumbo %}
+
+{% block navigation %}
+  {% include 'my_newsapp/home_navbar.html' %}
+{% endblock navigation %}
+
+{% block content %}
+  
+  <p>Put your article details here.</p>  
+
+{% endblock content %}
+
+{% block script %}
+  {{ block.super }}
+{% endblock script %}

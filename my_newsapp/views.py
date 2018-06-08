@@ -1,6 +1,6 @@
-from django.views.generic.list import ListView
+from django.views import generic
  
-from my_newsapp.models import  Article, Category
+from .models import  Article, Category
 
 #comment
     # Rješenje za korištenje 2 queriset-a u ListView-u:
@@ -12,7 +12,7 @@ from my_newsapp.models import  Article, Category
     #    {% for article in articles %}. 'categories' i 'articles' su key-evi context dictionary-a koje smo definirali
     #    u get_context_data
 #endcomment
-class HomeView(ListView):
+class HomeView(generic.ListView):
     template_name = 'my_newsapp/home.html'
     
     def get_queryset(self):
@@ -24,7 +24,19 @@ class HomeView(ListView):
         context['articles'] = self.get_queryset()
         return context
 
+class CategoryView(generic.ListView):
+    template_name = 'my_newsapp/category.html'
+    
+    def get_queryset(self):
+        return Category.objects.all()
 
-        
+class ArticleDetailView(generic.DetailView):
+    template_name = 'my_newsapp/article_detail.html'
+    model = Article
+
+
+
+
+    
     
 

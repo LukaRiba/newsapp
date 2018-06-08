@@ -1,7 +1,6 @@
 .vscode/
 manage.py
 *.pyc
-migrations/
 __init__.py
 /static/
 media/
