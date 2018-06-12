@@ -8,14 +8,13 @@
   {{ block.super }}
 {% endblock style %}
 
-{% comment %} {% block jumbo %}
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-      <h1 class="display-4">{{ article.category.title }}</h1>
-      <p class="lead">Everything you need to share your knowledge...</p>
-    </div>
+{% block jumbo %}
+  {% comment %} Dodaje pozadinsku sliku iz image field-a Category {% endcomment %}
+  <div class="jumbotron jumbotron-fluid category-view"
+       style="background-image: url('{{ article.category.image.url }}');
+              background-size: cover">
   </div>
-{% endblock jumbo %} {% endcomment %}
+{% endblock jumbo %}
 
 {% block navigation %}
   {% include 'my_newsapp/home_navbar.html' %}
@@ -23,9 +22,16 @@
 
 {% block content %}
   
-  <h3>{{ article.title }}</h3>
-  <p>{{ article.author }}</p>
-  <p>{{ article.text }}</p>  
+  <div class="article">
+    <h2>{{ article.title }}</h2>
+    <pre class="padding-bottom-20">In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
+    {% if article.image1 %}
+     <img class="image-fit padding-bottom-20" src="{{ article.image1.url }}">
+      
+    {% endif %}
+    <p>{{ article.text }}</p>  
+  </div>
+  
 
 {% endblock content %}
 

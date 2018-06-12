@@ -1,6 +1,7 @@
 nav a {
   color: white;
   text-decoration: none;
+  font-weight: 400;
 }
 
 nav a:hover {
@@ -61,6 +62,14 @@ h3 a:hover {
   color: rgb(125, 20, 20);
 }
 
+.image-fit {
+  width: 90%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
 /* Bootstrap override */
 
 .navbar-nav > li{
@@ -86,6 +95,28 @@ h3 a:hover {
   text-decoration: none;
   background-color: #fff;
 }
+
+.article {
+  width: 100%;
+  padding-right: 300px;
+  padding-left: 300px;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: justify;
+  line-height: 1.7;
+  padding-top: 45px;
+  
+}
+
+.article pre, a {
+  color: rgb(144, 77, 25);
+  font-weight: 600;
+}
+
+.article a:hover {
+  text-decoration: none;
+}
+
 
 /* open all dropdown-menus on hover */
 /* .navbar-nav li:hover > ul.dropdown-menu {
