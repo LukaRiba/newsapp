@@ -2,20 +2,20 @@
 
 {% load staticfiles thumbnail %}
 
-{% block title %}{{ object.title }}{% endblock title %}
+{% block title %}{{ article.title }}{% endblock title %}
 
 {% block style %}
   {{ block.super }}
 {% endblock style %}
 
-{% block jumbo %}
+{% comment %} {% block jumbo %}
 <div class="jumbotron jumbotron-fluid">
     <div class="container">
-      <h1 class="display-4">{{ object.category }}</h1>
-      {% comment %} <p class="lead">Everything you need to share your knowledge...</p> {% endcomment %}
+      <h1 class="display-4">{{ article.category.title }}</h1>
+      <p class="lead">Everything you need to share your knowledge...</p>
     </div>
   </div>
-{% endblock jumbo %}
+{% endblock jumbo %} {% endcomment %}
 
 {% block navigation %}
   {% include 'my_newsapp/home_navbar.html' %}
@@ -23,7 +23,9 @@
 
 {% block content %}
   
-  <p>Put your article details here.</p>  
+  <h3>{{ article.title }}</h3>
+  <p>{{ article.author }}</p>
+  <p>{{ article.text }}</p>  
 
 {% endblock content %}
 

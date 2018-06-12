@@ -44,6 +44,14 @@ a:hover {
   background-color: #ffffff;
 }
 
+.color-black {
+  color: #16181b;
+}
+
+.color-black:hover {
+  color: rgb(125, 20, 20);
+}
+
 /* Bootstrap override */
 
 .navbar-nav > li{

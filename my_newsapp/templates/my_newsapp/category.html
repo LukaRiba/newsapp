@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% load staticfiles thumbnail %}
+
+{% block title %}{{ category.title }}{% endblock title %}
+
+{% block style %}
+  {{ block.super }}
+{% endblock style %}
+
+{% block jumbo %}
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">{{ category.title }}</h1>
+      {% comment %} <p class="lead">Everything you need to share your knowledge...</p> {% endcomment %}
+    </div>
+  </div>
+{% endblock jumbo %}
+
+{% block navigation %}
+  {% include 'my_newsapp/home_navbar.html' %}
+{% endblock navigation %}
+
+{% block content %}
+  <ul>
+    {% for article in filtered_articles %}
+      <li>
+        <a class= "color-black" href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+  
+{% endblock content %}
+
+{% block script %}
+  {{ block.super }}
+{% endblock script %}

@@ -26,14 +26,25 @@ class HomeView(generic.ListView):
 
 class CategoryView(generic.ListView):
     template_name = 'my_newsapp/category.html'
-    
+
+    #comment
+    # Kada kliknemo na neku kategoriju u navbaru, filtriramo artikle na temelju slug-a kategiruje koji je dostupan u url-u
+    # To nam omogućuje get_absolute_path() metoda modela, koja pomoću reverse() metode izvlači trenutnu vrijednost slug-a i 
+    # sprema ga u kwargs dict
+    #endcomment
     def get_queryset(self):
-        return Category.objects.all()
+        return Article.objects.filter(category__title=self.kwargs['slug'])
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(CategoryView, self).get_context_data(*args, **kwargs)
+        context['filtered_articles'] = self.get_queryset()
+        context['category'] = Category.objects.get(slug=self.kwargs['slug']) 
+        return context
 
 class ArticleDetailView(generic.DetailView):
-    template_name = 'my_newsapp/article_detail.html'
+    template_name = 'my_newsapp/detail.html'
     model = Article
-
+    
 
 
 
