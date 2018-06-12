@@ -14,8 +14,41 @@
   {% block jumbo %}  
   {% endblock jumbo %}
 
-  {% block navigation %}
-  {% endblock navigation %}
+<!-- base nav-bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <button type="button" class="btn btn-success">
+      <a href="#">Write something</a>
+    </button>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      {% comment %} main nav-bar links {% endcomment %}
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="/home/">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">About</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Categories
+          </a>
+
+          {% block navbar_categories_dropdown %}
+            
+          {% endblock navbar_categories_dropdown %}
+                                                    
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact</a>
+        </li>
+      </ul>
+    </div>
+</div>
+</nav>
 
   {% block content %}
   {% endblock content %}

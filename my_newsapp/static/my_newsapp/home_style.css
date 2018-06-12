@@ -1,3 +1,22 @@
+nav a {
+  color: white;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: white;
+  text-decoration: none;  
+}
+
+h3 a {
+  color: rgb(49, 49, 49);
+}
+
+h3 a:hover {
+  color: rgb(105, 102, 102);
+  text-decoration: none;
+}
+
 .padding-bottom-30 {
   padding-bottom: 30px;
 }
@@ -24,16 +43,6 @@
 
 .background-lightgrey {
   background-color: #e9ecef !important;
-}
-
-a {
-  color: white;
-  text-decoration: none;
-}
-
-a:hover {
-  color: white;
-  text-decoration: none;  
 }
 
 .background-grey {
@@ -113,4 +122,11 @@ a:hover {
   transform: rotate(-90deg);
 }  */
 
+.jumbotron {
+  margin-bottom: 0; 
+}
+
+.jumbotron.category-view {
+  padding-bottom: 185px;
+}
 

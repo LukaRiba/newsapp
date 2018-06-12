@@ -2,6 +2,15 @@ from django.views import generic
  
 from .models import  Article, Category
 
+# defines context used by navigation which has to be shared between views
+class NavigationContextMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        return context
+
+
 #comment
     # Rješenje za korištenje 2 queriset-a u ListView-u:
     #    ListView MORA imati svoj queryset - definiramo get_queryset() metodu koja će vratiti
@@ -12,36 +21,36 @@ from .models import  Article, Category
     #    {% for article in articles %}. 'categories' i 'articles' su key-evi context dictionary-a koje smo definirali
     #    u get_context_data
 #endcomment
-class HomeView(generic.ListView):
+class HomeView(NavigationContextMixin, generic.ListView):
     template_name = 'my_newsapp/home.html'
     
     def get_queryset(self):
-        return Article.objects.all().order_by('-pub_date')
+        return Article.objects.all()
 
     def get_context_data(self, *args, **kwargs):
         context = super(HomeView, self).get_context_data(*args, **kwargs)
-        context['categories'] = Category.objects.all()
+        # context['categories'] = Category.objects.all()
         context['articles'] = self.get_queryset()
         return context
 
-class CategoryView(generic.ListView):
+class CategoryView(NavigationContextMixin, generic.ListView):
     template_name = 'my_newsapp/category.html'
-
-    #comment
-    # Kada kliknemo na neku kategoriju u navbaru, filtriramo artikle na temelju slug-a kategiruje koji je dostupan u url-u
-    # To nam omogućuje get_absolute_path() metoda modela, koja pomoću reverse() metode izvlači trenutnu vrijednost slug-a i 
-    # sprema ga u kwargs dict
-    #endcomment
+    context_object_name = 'category'
+    
+    # gett-a Category instancu na temelju slug-a u url-u
     def get_queryset(self):
-        return Article.objects.filter(category__title=self.kwargs['slug'])
+        return Category.objects.get(slug=self.kwargs['slug']) 
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(CategoryView, self).get_context_data(*args, **kwargs)
-        context['filtered_articles'] = self.get_queryset()
-        context['category'] = Category.objects.get(slug=self.kwargs['slug']) 
-        return context
+   
 
-class ArticleDetailView(generic.DetailView):
+class ArticleListView(NavigationContextMixin, generic.ListView):
+    template_name = ''
+    
+    def get_queryset(self):
+        return 9
+
+
+class ArticleDetailView(NavigationContextMixin, generic.DetailView):
     template_name = 'my_newsapp/detail.html'
     model = Article
     

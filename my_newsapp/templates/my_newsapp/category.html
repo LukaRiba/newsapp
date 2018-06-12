@@ -9,26 +9,50 @@
 {% endblock style %}
 
 {% block jumbo %}
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-      <h1 class="display-4">{{ category.title }}</h1>
-      {% comment %} <p class="lead">Everything you need to share your knowledge...</p> {% endcomment %}
-    </div>
+  {% comment %} Dodaje pozadinsku sliku iz image field-a Category {% endcomment %}
+  <div class="jumbotron jumbotron-fluid category-view"
+       style="background-image: url('{{ category.image.url }}');
+              background-size: cover">
   </div>
 {% endblock jumbo %}
 
-{% block navigation %}
-  {% include 'my_newsapp/home_navbar.html' %}
-{% endblock navigation %}
-
-{% block content %}
-  <ul>
-    {% for article in filtered_articles %}
+{% block navbar_categories_dropdown %}
+  {% comment %} categories list {% endcomment %}
+  <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+    {% for category in categories %}
+      {% if category.articles.all %}
       <li>
-        <a class= "color-black" href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+        <a class="dropdown-item" href="{{ category.get_absolute_url }}">{{ category.title }}</a>
       </li>
+      {% endif %}       
     {% endfor %}
   </ul>
+{% endblock navbar_categories_dropdown %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="padding-top-30 padding-bottom-30 text-cornflowerblue">{{ category.title }}</h1>
+    <hr>
+  </div>
+  {% for article in category.articles.all  %}
+  <div class="container">
+    <div class="row padding-top-20 padding-bottom-20">
+      <div class="col-md-2">
+        <img src="{% thumbnail article.image 150x150 crop %}">
+      </div>
+      <div class="col-md-6">
+        <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
+        <p>{{ article.short_description }}</p>
+      </div>
+      <div class="col-md-4 text-lightbrown padding-top-20 text-right">
+        <p>Category: {{ article.category }}</p>
+        <p>Written by {{ article.author }}</p>
+        <p>{{ article.pub_date.date }}</p> {% comment %} date() metoda vraća samo datum; bez nje ispisuje se i datum i vrijeme {% endcomment %}
+      </div>
+    </div>
+    <hr>
+  </div>
+{% endfor %}
   
 {% endblock content %}
 

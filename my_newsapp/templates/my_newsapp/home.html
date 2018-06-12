@@ -17,9 +17,27 @@
   </div>
 {% endblock jumbo %}
 
-{% block navigation %}
-  {% include 'my_newsapp/home_navbar.html' %}
-{% endblock navigation %}
+{% block navbar_categories_dropdown %}
+  {% comment %} categories list {% endcomment %}
+  <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+    {% for category in categories %}
+      {% comment %} are there articles in a category? If yes, create category submenu {% endcomment %}
+      {% if category.articles.all %}
+        <li class="dropdown-submenu">
+          <a class="dropdown-item dropdown-toggle" href="{{ category.get_absolute_url }}">{{ category.title }}</a>
+          {% comment %} list of categorie's articles {% endcomment %}
+          <ul class="dropdown-menu">
+            {% for article in category.articles.all %}
+              <li>
+                <a class="dropdown-item" href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </li>  
+      {% endif %}       
+    {% endfor %}
+  </ul>
+{% endblock navbar_categories_dropdown %}
 
 {% block content %}
   <div class="container">
@@ -33,7 +51,7 @@
           <img src="{% thumbnail article.image 150x150 crop %}">
         </div>
         <div class="col-md-6">
-          <h3>{{ article.title }}</h3>
+          <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
           <p>{{ article.short_description }}</p>
         </div>
         <div class="col-md-4 text-lightbrown padding-top-20 text-right">
