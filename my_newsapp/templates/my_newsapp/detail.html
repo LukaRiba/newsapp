@@ -16,18 +16,7 @@
   </div>
 {% endblock jumbo %}
 
-{% block navbar_categories_dropdown %}
-  {% comment %} categories list {% endcomment %}
-  <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-    {% for category in categories %}
-      {% if category.articles.all %}
-      <li>
-        <a class="dropdown-item" href="{{ category.get_absolute_url }}">{{ category.title }}</a>
-      </li>
-      {% endif %}       
-    {% endfor %}
-  </ul>
-{% endblock navbar_categories_dropdown %}
+
 
 {% block content %}
   

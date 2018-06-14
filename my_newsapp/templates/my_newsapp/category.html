@@ -45,8 +45,7 @@
         <p>{{ article.short_description }}</p>
       </div>
       <div class="col-md-4 text-lightbrown padding-top-20 text-right">
-        <p>Category: {{ article.category }}</p>
-        <p>Written by {{ article.author }}</p>
+        <p style="margin-top: 40px">Written by {{ article.author }}</p>
         <p>{{ article.pub_date.date }}</p> {% comment %} date() metoda vraća samo datum; bez nje ispisuje se i datum i vrijeme {% endcomment %}
       </div>
     </div>

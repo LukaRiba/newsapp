@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% load staticfiles thumbnail %}
+
+{% block title %}Latest Articles{% endblock title %}
+
+{% block style %}
+  {{ block.super }}
+{% endblock style %}
+
+{% block jumbo %}
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">New Articles Everyday </h1>
+      <p class="lead">Anything you are intrested in...</p>
+    </div>
+  </div>
+{% endblock jumbo %}
+
+
+
+{% block content %}
+  <div class="container">
+    <h1 class="padding-top-30 padding-bottom-30 text-cornflowerblue">Latest Articles</h1>
+    <hr>
+  </div>
+  {% for article in articles  %}
+    <div class="container">
+      <div class="row padding-top-20 padding-bottom-20">
+        <div class="col-md-2">
+          <img src="{% thumbnail article.thumbnail_image 150x150 crop %}">
+        </div>
+        <div class="col-md-6">
+          <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
+          <p>{{ article.short_description }}</p>
+        </div>
+        <div class="col-md-4 text-lightbrown padding-top-20 text-right">
+          <p>Category: <a href="{{ article.category.get_absolute_url }}">{{ article.category }}</a></p>
+          <p>Written by {{ article.author }}</p>
+          <p>{{ article.pub_date.date }}</p> {% comment %} date() metoda vraća samo datum; bez nje ispisuje se i datum i vrijeme {% endcomment %}
+        </div>
+      </div>
+      <hr>
+    </div>
+  {% endfor %}
+{% endblock content %}
+
+{% block script %}
+  {{ block.super }}
+  <script src="{% static 'my_newsapp/script.js' %}"></script>
+{% endblock script %}
