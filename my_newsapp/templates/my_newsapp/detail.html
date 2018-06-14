@@ -16,23 +16,42 @@
   </div>
 {% endblock jumbo %}
 
-{% block navigation %}
-  {% include 'my_newsapp/home_navbar.html' %}
-{% endblock navigation %}
+{% block navbar_categories_dropdown %}
+  {% comment %} categories list {% endcomment %}
+  <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+    {% for category in categories %}
+      {% if category.articles.all %}
+      <li>
+        <a class="dropdown-item" href="{{ category.get_absolute_url }}">{{ category.title }}</a>
+      </li>
+      {% endif %}       
+    {% endfor %}
+  </ul>
+{% endblock navbar_categories_dropdown %}
 
 {% block content %}
   
+  {% comment %}
+    django documentation -> Built-in filter reference -> linebreaks:
+    Replaces line breaks in plain text with appropriate HTML; a single 
+    newline becomes an HTML line break (<br>) and a new line followed 
+    by a blank line becomes a paragraph break (</p>).
+  {% endcomment %}
   <div class="article">
     <h2>{{ article.title }}</h2>
     <pre class="padding-bottom-20">In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
     {% if article.image1 %}
-     <img class="image-fit padding-bottom-20" src="{{ article.image1.url }}">
-      
+      <img class="image-fit padding-bottom-20" src="{{ article.image1.url }}">  
     {% endif %}
-    <p>{{ article.text }}</p>  
+      <p>{{ article.first_part | linebreaks }}</p> 
+    {% if article.image2 %}
+      <img class="image-fit padding-bottom-20" src="{{ article.image2.url }}">  
+    {% endif %}
+    {% if article.second_part %}
+      <p>{{ article.second_part | linebreaks }}</p>
+    {% endif %}
   </div>
   
-
 {% endblock content %}
 
 {% block script %}

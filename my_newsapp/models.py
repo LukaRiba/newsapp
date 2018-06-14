@@ -25,7 +25,8 @@ class Category(models.Model):
 class Article(models.Model):
     title = models.CharField(max_length=100, unique=True)
     slug = AutoSlugField(null=True, default=None, unique=True, populate_from='title')
-    text = models.TextField()
+    first_part = models.TextField()
+    second_part = models.TextField(blank=True, null=True)
     short_description = models.TextField(max_length=300)
     thumbnail_image = models.ImageField()
     image1 = models.ImageField(blank=True, null=True)
