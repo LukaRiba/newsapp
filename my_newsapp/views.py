@@ -1,6 +1,7 @@
 from django.views import generic
  
 from .models import  Article, Category
+from .utils import get_random_status_none_categories_ids
 
 # defines context used by navigation which has to be shared between views
 class NavigationContextMixin:
@@ -17,13 +18,41 @@ class NavigationContextMixin:
     # {% if prymary_category.exists() %} ili {% if primary_category.all %}, uvijek false ??? Nakon što sam istu stvar definirao u 
     # get_context_data() metodi u Mixin-u, kojeg sam onda proslijedio HomeView-u, {% if primary_category %} u templateu RADI ??!!
 #endcomment
+#comment
+    # get_context_data() prvo sprema id-e Category instanci čiji je status = None u listu - redosljed je
+    # svaki put randomiziran (unutar get_random_status_none_categories_ids() funkciju iz utils.py).
+    # U 1. slučaju ako postoje i Primary i Secondary kategorija, njih se sprema u kontext putem status atributa ,
+    # a ostale kategorije, odnosno artikle koje filtriramo iz kategorija, gett-amo isto prema statusu(u ovom slučaju None)
+    # U 2. slučaju, definirana je samo Primarna kategorija - nju gettamo preko status atributa. Sada imamo id-e ostalih kategorija random,
+    # i jedan moramo izabrati za secondary_category koja će na home pageu zauzimati mjesto sekundarne kategorije. Jednostavno, nju
+    # gett-amo preko id argumenta kojem dodajemo vrijednost koji pop-amo iz rand_ids liste. Sada u listi više nema tog id-a, i listu
+    # možemo koristiti za gettanje Article objectsa putem category__pk__in=rand_ids (možemo predati listu vrijednosti - some_attribute__in=some_list).
+    # Sigurni smo da se artikli 'secondary_category' neće pojaviti među 'other_articles' pošto se id 'secondary_category' više ne nalazi u
+    # rand_ids, pošto smo da pop-ali
+    # U 3. slučaju nisu definirane ni P ni S kategorije, tako da sve gett-amo preko id-a iz rand_ids liste. Sada, kao i u drugom slučaju,
+    # 'primary_category' nalazimo preko id-a iz rand_list kojeg pop-amo i osiguravamo da se ta kategorija ne nađe u nekom drugom kontekstu.
+    # isto tako pop-amo i za 'secondary_category', te preostale id-e koristime za gett-anje ostalih kategorija čije articles-e koristimo za 'other_articles'
+#endcomment
 class HomeViewMixin:
-     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['primary_category'] = Category.objects.get(status='P')
-        context['secondary_category'] = Category.objects.get(status='S')
-        return context
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        rand_ids = get_random_status_none_categories_ids()
+
+        if Category.objects.filter(status='P').exists():
+            if Category.objects.filter(status='S').exists():
+                context['primary_category'] = Category.objects.get(status='P')
+                context['secondary_category'] = Category.objects.get(status='S')
+                context['other_articles'] =  Article.objects.filter(category__status=None).order_by('?')
+            else:
+                context['primary_category'] = Category.objects.get(status='P')
+                context['secondary_category'] = Category.objects.get(id=rand_ids.pop())
+                context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids).order_by('?')
+        else:
+            context['primary_category'] = Category.objects.get(id=rand_ids.pop())
+            context['secondary_category'] = Category.objects.get(id=rand_ids.pop())
+            context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids).order_by('?')
+        return context
 
 class HomeView(NavigationContextMixin, HomeViewMixin, generic.ListView):
     template_name = 'my_newsapp/home.html'
