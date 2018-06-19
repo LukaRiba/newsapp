@@ -4,10 +4,16 @@ from django.urls import reverse
 
 from autoslug import AutoSlugField
 
+CATEGORY_RELEVANCE_CHOICES = (
+    ('P', 'Primary'),
+    ('S', 'Secondary'),
+)
+
 class Category(models.Model):
     title = models.CharField(max_length=100, unique=True)
     slug = AutoSlugField(null=True, default=None, unique=True, populate_from='title') 
     image = models.ImageField()
+    status = models.CharField(max_length=1, choices=CATEGORY_RELEVANCE_CHOICES, unique=True, blank=True, null=True)
 
     #comment
     # metoda za dohvaćanje url-a. U urls.py smo url pattern-u argument 'name' definirali kao 'category': 
@@ -21,6 +27,9 @@ class Category(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        verbose_name_plural = 'categories'
 
 class Article(models.Model):
     title = models.CharField(max_length=100, unique=True)

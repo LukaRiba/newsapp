@@ -30,8 +30,8 @@
 {% endblock navbar_categories_dropdown %}
 
 {% block content %}
-  <div class="container">
-    <h1 class="padding-top-30 padding-bottom-30 text-cornflowerblue">{{ category.title }}</h1>
+  <div class="container mt-60px">
+    <h2 class="padding-bottom-30 text-cornflowerblue">{{ category.title }}</h2>
     <hr>
   </div>
   {% for article in category.articles.all  %}

@@ -9,7 +9,7 @@ nav a:hover {
   text-decoration: none;  
 }
 
-h3 a, p a {
+h3 a, h4 a, h5 a, p a {
   color: rgb(49, 49, 49);
 }
 
@@ -32,6 +32,18 @@ h3 a:hover, p a:hover  {
 
 .padding-bottom-20 {
   padding-bottom: 20px;
+}
+
+.padding-right-20 {
+  padding-right: 20px;
+}
+
+.mt-60px {
+  margin-top: 60px;
+}
+
+.mb-80px {
+  margin-bottom: 80px;
 }
 
 .text-cornflowerblue {
@@ -70,6 +82,65 @@ h3 a:hover, p a:hover  {
   margin: 0 auto;
 }
 
+/* Limitira paragraf na određeni broj linija
+  max-height: = line-height: × <number-of-lines> in em. 
+*/
+.max-lines {
+  display: block; /* or inline-block */
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow: hidden;
+  /* max-height: 3.6em; */
+  line-height: 1.2em;
+  
+}
+
+.article {
+  width: 100%;
+  padding-right: 300px;
+  padding-left: 300px;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: justify;
+  line-height: 1.7;
+  padding-top: 45px;
+  
+}
+
+.article pre, .article a {
+  color: rgb(144, 77, 25);
+  font-weight: 600;
+}
+
+.article a:hover {
+  text-decoration: none;
+}
+
+/* Efekt fade-outa teksta na homepage-u za artikle primarne kategorije */
+.fade-out {
+  position: relative;
+  max-height: 350px;  /* change the height */
+}
+
+/* Efekt fade-outa teksta na homepage-u za artikle primarne kategorije */
+.fade-out:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-image: linear-gradient( rgba(255, 255, 255, 0) 90%, rgba(255, 255, 255, 1) 100% );
+}
+
+.eliminate-overflow {
+  /* width: 300px;
+  height: 200px; */
+  display: flex;
+  flex-flow: column wrap;
+  overflow: hidden;
+}
+
 /* Bootstrap override */
 
 .navbar-nav > li{
@@ -95,28 +166,6 @@ h3 a:hover, p a:hover  {
   text-decoration: none;
   background-color: #fff;
 }
-
-.article {
-  width: 100%;
-  padding-right: 300px;
-  padding-left: 300px;
-  margin-right: auto;
-  margin-left: auto;
-  text-align: justify;
-  line-height: 1.7;
-  padding-top: 45px;
-  
-}
-
-.article pre, a {
-  color: rgb(144, 77, 25);
-  font-weight: 600;
-}
-
-.article a:hover {
-  text-decoration: none;
-}
-
 
 /* open all dropdown-menus on hover */
 /* .navbar-nav li:hover > ul.dropdown-menu {
