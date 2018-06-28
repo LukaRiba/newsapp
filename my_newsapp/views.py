@@ -11,6 +11,7 @@ class NavigationContextMixin:
         return context
 
 #comment
+    # Komentar se odnosi na prijašnju implementaciju - pobledati prijašnje commit-e
     # Zanimljivo je da kada sam isto ovo definirao unutar get_context_data() metode
     # HomeView-a, prymary_category i secondary_category objekti nisu mogli biti učitani unutar template-a -
     # kod if statement-a   {% if primary_category %} , iako je postojao Category instanca sa statusom 'P',
@@ -32,6 +33,9 @@ class NavigationContextMixin:
     # U 3. slučaju nisu definirane ni P ni S kategorije, tako da sve gett-amo preko id-a iz rand_ids liste. Sada, kao i u drugom slučaju,
     # 'primary_category' nalazimo preko id-a iz rand_list kojeg pop-amo i osiguravamo da se ta kategorija ne nađe u nekom drugom kontekstu.
     # isto tako pop-amo i za 'secondary_category', te preostale id-e koristime za gett-anje ostalih kategorija čije articles-e koristimo za 'other_articles'
+    # NAPOMENA : metodu get_random_status_none_categories_ids() sam prvo definirao u HomePageMixin-u i get_context_data() nije radio.
+    # kada bi get_random_status_none_categories_ids() pozvao unutar get_context_data dobivao bih iznimke kod npr. id=rand_ids.pop() 
+    # 'nonetype object has no attribute pop()' ili za category__pk__in=rand_ids 'nonetype object is not iterable' ili sl. Zašto? Neznam točno
 #endcomment
 class HomeViewMixin:
 

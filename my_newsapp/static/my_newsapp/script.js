@@ -6,19 +6,3 @@ $("a.dropdown-item")
         $("li.nav-item.dropdown div").removeClass('show');
         }
     )
-
-
-
-
-
-
-
-
-    
-        
-            
-   
-    
-
-
-    

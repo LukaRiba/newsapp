@@ -19,29 +19,29 @@
 
 
 {% block content %}
-  <div class="container home mt-60px mb-80px" style="max-height: 750px;">
-      <div class="row">
+  <div class="container home mt-60px mb-80px">
+      <div class="row" style="max-height: 750px; min-height: 750px;">
         {% comment %} Left column - Primary category articles {% endcomment %}
         <div class="col-md-7 border-right">
           
             <h1 class="pb-3" style="font-weight: 700">{{ primary_category.title }}</h1>
             {% for article in primary_category.articles.all|slice:':3'  %}
-            <div class="container">
+            <div class="container" style="max-height: 211px;">
                   <div class="row padding-top-20 padding-bottom-20 padding-right-20">
 
                         <div class="col-md-3 pl-0 pt-1">
                           <img src="{% thumbnail article.thumbnail_image 150x150 crop %}">
                         </div>
 
-                        <div class="col-md-9 max-lines fade-out" style="max-height: 150px;">
-                              <div class="row pl-3">
+                        <div class="col-md-9 article-preview" style="max-height: 160px;">
+                              <div class="row pl-3 title">
                                 <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
                               </div>
-                              <div class="row pl-3 text-lightbrown">
+                              <div class="row pl-3 text-lightbrown pub-date">
                                 <p style="margin-bottom: 5px;">{{ article.pub_date.date }}</p>
                               </div>
-                              <div class="row pl-3">
-                                <p  style="color: rgb(63, 63, 63)">{{ article.short_description }}</p>
+                              <div class="row pl-3 short-description max-lines">
+                                <p style="color: rgb(63, 63, 63)">{{ article.short_description }}</p>
                               </div>                                              
                         </div> 
 
@@ -51,22 +51,22 @@
             {% endfor %}
         </div> {% comment %} end of left column - primary category {% endcomment %}
         {% comment %} right column {% endcomment %}
-        <div class="col-md-5 mt-1 pl-4">
+        <div class="col-md-5 mt-1 pl-4 right-column" style="height: 746px;">
         {% comment %} secondary category articles  {% endcomment %}  
-        <div class="row">  
+        <div class="row secondary-articles" style="height: 375px">  
             <h2 class="pb-3 pl-3" style="font-weight: 500">{{ secondary_category.title }}</h2>
             {% for article in secondary_category.articles.all|slice:':2'  %}
             <div class="container">
                   <div class="row padding-right-20 pb-3">                    
-                        <div class="col-md-12 max-lines fade-out" style="max-height: 150px;">
-                              <div class="row pl-3">
+                        <div class="col-md-12 article-preview" style="max-height: 150px;">
+                              <div class="row pl-3 title">
                                 <h4><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h4>
                               </div>
-                              <div class="row pl-3 text-lightbrown">
+                              <div class="row pl-3 text-lightbrown pub-date">
                                 <p style="margin-bottom: 5px;">{{ article.pub_date.date }}</p>
                               </div>
-                              <div class="row pl-3">
-                                <p style="color: rgb(63, 63, 63)">{{ article.short_description }}</p>
+                              <div class="row pl-3 short-description max-lines" style="color: rgb(63, 63, 63); font-size: 14px;">
+                                <p>{{ article.short_description }}</p>
                               </div>                                              
                         </div>            
                   </div>
@@ -75,18 +75,18 @@
         </div> {% comment %} end of secondary category articles  {% endcomment %}
         <hr class="mt-0">
           {% comment %} other articles  {% endcomment %}
-          <div class="row">
+          <div class="row other-articles">
               {% for article in other_articles|slice:':6' %}
                 {% if forloop.counter == 1   %}
                 {% comment %} openning left column div {% endcomment %}
-                <div id=otherArticlesLeftColumn class="col-md-6 border-right" style="max-height: 334px; min-height: 334px;">
+                <div id=otherArticlesLeftColumn class="col-md-6 border-right" style="height: 354px">
                   {% include 'my_newsapp/snippets/other_article.html' %}
                 {% elif forloop.counter == 2 or forloop.counter == 3 %}
                   {% include 'my_newsapp/snippets/other_article.html' %}  
                 {% elif forloop.counter == 4 %}
                 </div>   {% comment %} closing left column div {% endcomment %}
                 {% comment %} openning right column div {% endcomment %}
-                <div id=otherArticlesRightColumn class="col-md-6 pl-4" style="max-height: 334px; min-height: 334px;">
+                <div id=otherArticlesRightColumn class="col-md-6 pl-4" style="height: 354px">
                   {% include 'my_newsapp/snippets/other_article.html' %}
                 {% elif forloop.counter == 5 %} 
                   {% include 'my_newsapp/snippets/other_article.html' %}  

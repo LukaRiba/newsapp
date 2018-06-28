@@ -1,13 +1,16 @@
 // Kod je privremen i brzinski napisan - treba prepraviti i napisati bolje i ljepše funkcije
 // za ovo !!!
 
+
+// *****************************************************************************
+// Sakrivanje otherArticles-a koji prelaze veličinu stupca:
 let otherArticlesLeftColumn = document.querySelector('#otherArticlesLeftColumn');
 let otherArticlesLeft = document.querySelectorAll('#otherArticlesLeftColumn .other-article');
 
 let otherArticlesRightColumn = document.querySelector('#otherArticlesRightColumn');
 let otherArticlesRight = document.querySelectorAll('#otherArticlesRightColumn .other-article');
 
-// Calculates total height of elements contained in a list (margins excluded)
+    // Calculates total height of elements contained in a list (margins excluded)
 let totalHeight = (elements) => {
     let totalHeight = 0;
     for (let i = 0; i < elements.length; i++) {
@@ -16,7 +19,7 @@ let totalHeight = (elements) => {
     return totalHeight;
 }
 
-//Checks if object is HTMLElement
+    //Checks if object is HTMLElement
 function isElement(obj) {
     try {
       //Using W3 DOM2 (works for FF, Opera and Chrome)
@@ -32,11 +35,11 @@ function isElement(obj) {
     }
   }
 
-// Hides child element(s) if owerflowing
-// container = parent element
-//elements = child elements
-//margin = add height to elements totalHeight
-//minElements = minimum number of child elements to be displayed, even if overflowing
+    // Hides child element(s) if owerflowing
+    // container = parent element
+    //elements = child elements
+    //margin = add height to elements totalHeight
+    //minElements = minimum number of child elements to be displayed, even if overflowing
 let hideOverflowed = (container, elements, margin, minElements) => {
     let overflowing = elements.length - 1; 
     if (isElement(elements[overflowing])){
@@ -50,3 +53,36 @@ let hideOverflowed = (container, elements, margin, minElements) => {
 
 hideOverflowed(otherArticlesLeftColumn, otherArticlesLeft, 30, 1);
 hideOverflowed(otherArticlesRightColumn, otherArticlesRight, 30, 1);
+
+//*****************************************************************************
+// Cutting article's short descriptions
+let articlePreviews = document.querySelectorAll('.article-preview');
+let titles = document.querySelectorAll('.title');
+let pubDates = document.querySelectorAll('.pub-date');
+let shortDescriptions = document.querySelectorAll('.short-description');
+
+function lineHeightToNumber(lineHeight){
+    return Number(lineHeight.split('px')[0]);
+}
+
+for (let i = 0; i < articlePreviews.length; i++) {
+    let availableHeight = articlePreviews[i].offsetHeight - (titles[i].offsetHeight + pubDates[i].offsetHeight);
+    let computedLineHeight = window.getComputedStyle(shortDescriptions[i]).lineHeight;
+    let lineHeight = lineHeightToNumber(computedLineHeight);
+    shortDescriptions[i].style.height = String(Math.floor(availableHeight / lineHeight) * lineHeight) + 'px';
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
