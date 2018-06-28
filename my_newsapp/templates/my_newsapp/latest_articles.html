@@ -6,6 +6,7 @@
 
 {% block style %}
   {{ block.super }}
+  <link rel="stylesheet" href="{% static 'my_newsapp/pagination.css' %}">   
 {% endblock style %}
 
 {% block jumbo %}
@@ -20,10 +21,15 @@
 
 
 {% block content %}
+
   <div class="container mt-60px">
-    <h2 class="padding-bottom-30 text-cornflowerblue">Latest Articles</h2>
-    <hr>
+    <h2 class="padding-bottom-20 text-cornflowerblue">Latest Articles</h2>
   </div>
+  {% if is_paginated %}
+    {% include 'my_newsapp/snippets/pagination.html' %}
+  {% endif %}
+  <hr>
+
   {% for article in articles  %}
     <div class="container">
       <div class="row padding-top-20 padding-bottom-20">
@@ -43,6 +49,13 @@
       <hr>
     </div>
   {% endfor %}
+
+  {% if is_paginated %}
+    <div class="mt-5 mb-5">
+      {% include 'my_newsapp/snippets/pagination.html' %}
+    </div>
+  {% endif %}
+
 {% endblock content %}
 
 {% block script %}

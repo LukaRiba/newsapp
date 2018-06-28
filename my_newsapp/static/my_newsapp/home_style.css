@@ -13,7 +13,7 @@ h3 a, h4 a, h5 a, p a {
   color: rgb(49, 49, 49);
 }
 
-h3 a:hover, p a:hover  {
+h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   color: rgb(105, 102, 102);
   text-decoration: none;
 }

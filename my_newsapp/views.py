@@ -1,4 +1,5 @@
 from django.views import generic
+from django.core.paginator import Paginator
  
 from .models import  Article, Category
 from .utils import get_random_status_none_categories_ids
@@ -94,6 +95,8 @@ class LatestArticlesView(NavigationContextMixin, generic.ListView):
     template_name = 'my_newsapp/latest_articles.html'
     context_object_name = 'articles'
     model = Article
+    paginate_by = 5
+
 
 class CategoryView(NavigationContextMixin, generic.ListView):
     template_name = 'my_newsapp/category.html'
