@@ -18,6 +18,8 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   text-decoration: none;
 }
 
+
+
 .padding-bottom-30 {
   padding-bottom: 30px;
 }
@@ -197,5 +199,13 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
 
 .jumbotron.category-view {
   padding-bottom: 185px;
+}
+
+/* Disable << and >> buttons in pagination if on first/last page */
+a:not([href]):not([tabindex]){
+  /* Make the disabled links light-grayish*/
+  color: rgb(200, 200, 200);
+  /* And disable the pointer events */
+  pointer-events: none;
 }
 

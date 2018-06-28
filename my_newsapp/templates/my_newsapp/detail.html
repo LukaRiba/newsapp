@@ -45,4 +45,8 @@
 
 {% block script %}
   {{ block.super }}
+  <script>
+    //On detail page, always scroll to the top of article
+    window.scrollTo(0, 250);
+</script>
 {% endblock script %}

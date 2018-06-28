@@ -6,7 +6,6 @@
 
 {% block style %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'my_newsapp/pagination.css' %}">   
 {% endblock style %}
 
 {% block jumbo %}
@@ -28,7 +27,9 @@
   {% if is_paginated %}
     {% include 'my_newsapp/snippets/pagination.html' %}
   {% endif %}
-  <hr>
+  <div class="container">
+    <hr>
+  </div>
 
   {% for article in articles  %}
     <div class="container">
@@ -60,5 +61,4 @@
 
 {% block script %}
   {{ block.super }}
-  <script src="{% static 'my_newsapp/script.js' %}"></script>
 {% endblock script %}
