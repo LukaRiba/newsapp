@@ -57,4 +57,15 @@
 
 {% block script %}
   {{ block.super }}
+  <script>
+     //Checks if last page was home page, or one of latest-articles pages
+     if (document.referrer.endsWith('home/') || document.referrer.includes('latest-articles/')) {
+         //Checks if scrollToTop exists in localStorage, meaning that category page was accessed through links which have 'scroll-to-top' class attribute
+         if (localStorage.getItem('scrollToTop')) {
+             window.scrollTo(0, 0);
+             localStorage.removeItem('scrollToTop');
+             console.log('scrollToTop removed from local storage');
+         }
+     }
+</script>
 {% endblock script %}

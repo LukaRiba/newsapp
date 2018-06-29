@@ -42,7 +42,7 @@
           <p>{{ article.short_description }}</p>
         </div>
         <div class="col-md-4 text-lightbrown padding-top-20 text-right">
-          <p>Category: <a href="{{ article.category.get_absolute_url }}">{{ article.category }}</a></p>
+          <p>Category: <a class="scroll-to-top" href="{{ article.category.get_absolute_url }}">{{ article.category }}</a></p>
           <p>Written by {{ article.author }}</p>
           <p>{{ article.pub_date.date }}</p> {% comment %} date() metoda vraća samo datum; bez nje ispisuje se i datum i vrijeme {% endcomment %}
         </div>

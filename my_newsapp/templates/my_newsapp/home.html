@@ -23,8 +23,9 @@
       <div class="row" style="max-height: 750px; min-height: 750px;">
         {% comment %} Left column - Primary category articles {% endcomment %}
         <div class="col-md-7 border-right">
-          
-            <h1 class="pb-3" style="font-weight: 700">{{ primary_category.title }}</h1>
+            <h1 class="pb-3" style="font-weight: 700">
+              <a class="cat-title scroll-to-top" href="{{ primary_category.get_absolute_url }}">{{ primary_category.title }}</a>
+            </h1>
             {% for article in primary_category.articles.all|slice:':3'  %}
             <div class="container" style="max-height: 211px;">
                   <div class="row padding-top-20 padding-bottom-20 padding-right-20">
@@ -54,7 +55,9 @@
         <div class="col-md-5 mt-1 pl-4 right-column" style="height: 746px;">
         {% comment %} secondary category articles  {% endcomment %}  
         <div class="row secondary-articles" style="height: 375px">  
-            <h2 class="pb-3 pl-3" style="font-weight: 500">{{ secondary_category.title }}</h2>
+            <h2 class="pb-3 pl-3" style="font-weight: 500">
+              <a class="cat-title scroll-to-top" href="{{ secondary_category.get_absolute_url }}">{{ secondary_category.title }}</a>
+            </h2>
             {% for article in secondary_category.articles.all|slice:':2'  %}
             <div class="container">
                   <div class="row padding-right-20 pb-3">                    

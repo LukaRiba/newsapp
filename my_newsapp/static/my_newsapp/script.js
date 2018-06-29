@@ -37,11 +37,24 @@ will return a different Storage object. Both of these can be manipulated in the 
 */
 //#endregion
 window.addEventListener('scroll',function() {
-    //When scroll change, you save it on localStorage.
+    //When scroll change, it is saved on localStorage.
     localStorage.setItem('scrollPosition',window.scrollY);
-    console.log(localStorage.getItem('scrollPosition'));
 },false);
 
 if(localStorage.getItem('scrollPosition') !== null) {
     window.scrollTo(0, localStorage.getItem('scrollPosition'));
 }
+
+// Scroll to top when accessing category pages from home page and latest-articles page, through links in
+// article previews (a elements with "scroll-to-top" class) - if accessing through navigation links, scroll position is mantained
+// Event listeners are added to these links, and when clicked, in localStorage is stored 'scrollToTop: true' key-value pair.
+// So, when category page loads, it checks for scrollToTop in localStorage, and if it exists, page is scrolled to top, and
+// imediatelly after, scrollToTop is removed from localStorage
+let scrollToTopLinks = document.querySelectorAll('.scroll-to-top');
+
+scrollToTopLinks.forEach(element => {
+    element.addEventListener('click', () => {
+        localStorage.setItem('scrollToTop', true);
+        console.log('scrollToTop added to local storage');
+    })
+});

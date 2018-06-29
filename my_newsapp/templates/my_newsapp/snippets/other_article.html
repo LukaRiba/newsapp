@@ -1,5 +1,7 @@
 <div class="other-article">
-  <p class="mb-0">In {{ article.category.title }}</p>
+  <p class="mb-0">
+    In<a class="cat-title scroll-to-top" href="{{ article.category.get_absolute_url }}"> {{ article.category.title }}</a>
+  </p>
   <h5 class="mb-0"><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h5>
   <p class="text-lightbrown">{{ article.pub_date.date }}</p> 
 </div>
