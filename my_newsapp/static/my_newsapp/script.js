@@ -1,4 +1,4 @@
-// removes dropdown-item background color bug when dragging it
+// removes dropdown-item background color bug when dragging it - STILL WORKS ONLY ON DROPDOWN SUBMENU (listing articles)
 $("a.dropdown-item")
     .on('dragend', function(){
         $("ul.navbar-nav li.nav-item.dropdown").removeClass('show');

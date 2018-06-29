@@ -97,14 +97,16 @@ class LatestArticlesView(NavigationContextMixin, generic.ListView):
     model = Article
     paginate_by = 5
 
-
 class CategoryView(NavigationContextMixin, generic.ListView):
     template_name = 'my_newsapp/category.html'
-    context_object_name = 'category'
-    
-    # gett-a Category instancu na temelju slug-a u url-u
+    context_object_name = 'articles'
+
     def get_queryset(self):
-        return Category.objects.get(slug=self.kwargs['slug']) 
+        # gett-a Category instancu na temelju slug-a u url-u i vraća QuerySet artikala iz te kategorije
+        category = Category.objects.get(slug=self.kwargs['slug'])
+        return category.articles.all()
+
+    paginate_by = 2
 
 class ArticleDetailView(NavigationContextMixin, generic.DetailView):
     template_name = 'my_newsapp/detail.html'
