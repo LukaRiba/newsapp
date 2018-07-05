@@ -1,8 +1,12 @@
-from django.views import generic
-from django.core.paginator import Paginator
- 
-from .models import  Article, Category
+from django.views.generic import TemplateView, ListView, DetailView, CreateView
+from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from .models import Article, Category
 from .utils import get_random_status_none_categories_ids
+from .forms import CreateArticleForm 
 
 # defines context used by navigation which has to be shared between views
 class NavigationContextMixin:
@@ -59,12 +63,8 @@ class HomeViewMixin:
             context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids).order_by('?')
         return context
 
-class HomeView(NavigationContextMixin, HomeViewMixin, generic.ListView):
+class HomeView(NavigationContextMixin, HomeViewMixin, TemplateView):
     template_name = 'my_newsapp/home.html'
-    context_object_name = 'rand_articles'
-
-    def get_queryset(self):
-        return Article.objects.filter(category__status=None).order_by('?')
 
 #comment
     # Rješenje za korištenje 2 queriset-a u ListView-u: 
@@ -90,24 +90,48 @@ class HomeView(NavigationContextMixin, HomeViewMixin, generic.ListView):
     #               context['articles'] = self.get_queryset()
     #               return context
     #endcomment
-class LatestArticlesView(NavigationContextMixin, generic.ListView):
+class LatestArticlesView(NavigationContextMixin, ListView):
 
     template_name = 'my_newsapp/latest_articles.html'
     context_object_name = 'articles'
     model = Article
     paginate_by = 5
 
-class CategoryView(NavigationContextMixin, generic.ListView):
+class CategoryView(NavigationContextMixin, ListView):
     template_name = 'my_newsapp/category.html'
     context_object_name = 'articles'
+    paginate_by = 2
 
     def get_queryset(self):
         # gett-a Category instancu na temelju slug-a u url-u i vraća QuerySet artikala iz te kategorije
         category = Category.objects.get(slug=self.kwargs['slug'])
         return category.articles.all()
 
-    paginate_by = 2
-
-class ArticleDetailView(NavigationContextMixin, generic.DetailView):
+class ArticleDetailView(NavigationContextMixin, DetailView):
     template_name = 'my_newsapp/detail.html'
     model = Article
+
+class CreateArticleView(NavigationContextMixin, LoginRequiredMixin, CreateView):
+    template_name = 'my_newsapp/create_article.html'
+    form_class = CreateArticleForm
+    success_url = reverse_lazy('my_newsapp:create-article') # - atribut success_url umjesto get_success_url() metode
+    success_msg = 'You created a new Article'
+
+    #comment
+    #OVO JE VEOMA BITNO - 
+    # Kako bi trenutnog User-a koristili za popunjavanje author fielda Article objekta kojeg kreiramo formom,
+    # moramo override-ati form_valid() metodu. Kada je forma validna, submittanjem se post request šalje form_valid() metodi.
+    # Sada,prvo sa form.save(commit=False) kažemo da se pristigli podaci spreme, ali da se još ne spreme u bazu (da se još ne kreira instanca modela).
+    # Onda sa  form.instance.author = self.request.user kažemo da instanca forme (budući Article objekt) koristi request.user (User objekt) 
+    # za popunjavanje author fielda, što i treba obzirom da je auth field u Article modelu definiran kao ForeignKey za User object.
+    # Nakon toga, opet pozivamo form.save() metodu, ovaj put bez argumenata, te se sada Instanca Article modela koju smo kreirali putem forme
+    # sprema u bazu podataka
+    #endcomment
+    def form_valid(self, form):
+        form.save(commit=False)
+        form.instance.author = self.request.user
+        form.save()
+        messages.info(self.request, self.success_msg)
+        return super(CreateArticleView, self).form_valid(form)
+
+    

@@ -17,6 +17,20 @@
 {% endblock jumbo %}
 
 {% block content %}
+
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <div class="container">
+          <li id="message_{{ forloop.counter }}"
+          {% if message.tags %} class="{{ message.tags }}"
+            {% endif %}>
+          {{ message }}
+          </li>
+        </div>
+      {% endfor %}
+    </ul>
+  {% endif %}
   
   {% comment %}
     django documentation -> Built-in filter reference -> linebreaks:
@@ -27,12 +41,12 @@
   <div class="article">
     <h2>{{ article.title }}</h2>
     <pre class="padding-bottom-20">In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
-    {% if article.image1 %}
-      <img class="image-fit padding-bottom-20" src="{{ article.image1.url }}">  
+    {% if article.first_image %}
+      <img class="image-fit padding-bottom-20" src="{{ article.first_image.url }}">  
     {% endif %}
       <p>{{ article.first_part | linebreaks }}</p> 
-    {% if article.image2 %}
-      <img class="image-fit padding-bottom-20" src="{{ article.image2.url }}">  
+    {% if article.second_image %}
+      <img class="image-fit padding-bottom-20" src="{{ article.second_image.url }}">  
     {% endif %}
     {% if article.second_part %}
       <p>{{ article.second_part | linebreaks }}</p>

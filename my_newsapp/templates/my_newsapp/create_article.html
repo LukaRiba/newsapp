@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% load staticfiles thumbnail crispy_forms_tags %}
+
+{% block title %}Write Article{% endblock title %}
+
+{% block style %}
+  {{ block.super }}
+{% endblock style %}
+
+{% block jumbo %}
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">Welcome to Newsapp </h1>
+      <p class="lead">Everything you need to share your knowledge...</p>
+    </div>
+  </div>
+{% endblock jumbo %}
+
+
+{% block content %}
+
+{% comment %} VAŽNO !!!
+    1.   {% csrf_token %} ne treba navesti jer ga crispy-forms navodi automatski 
+    2.   atribut enctype="multipart/form-data" moramo obavezno navesti kako bi mogli uploadati slike, odnosno file-ove putem forme !!!
+  {% endcomment %}
+<div class="container mb-5 mt-5">
+  <form action="{% url 'my_newsapp:create-article' %}" method="POST" enctype="multipart/form-data"> {% csrf_token %}
+    {% crispy form %}
+  </form>
+</div>
+
+{% endblock content %}
+
+{% block script %}
+  {{ block.super }}
+{% endblock script %}
