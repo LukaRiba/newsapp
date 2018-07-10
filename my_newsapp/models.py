@@ -34,12 +34,8 @@ class Category(models.Model):
 class Article(models.Model):
     title = models.CharField(max_length=100, unique=True)
     slug = AutoSlugField(null=True, default=None, unique=True, populate_from='title')
-    first_part = models.TextField()
-    second_part = models.TextField(blank=True, null=True)
+    text = models.TextField()
     short_description = models.TextField(max_length=300)
-    thumbnail_image = models.ImageField()
-    first_image = models.ImageField(blank=True, null=True)
-    second_image = models.ImageField(blank=True, null=True)
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, related_name='articles', on_delete=models.DO_NOTHING)
     category = models.ForeignKey(Category, related_name='articles', on_delete=models.CASCADE)
@@ -57,3 +53,10 @@ class Article(models.Model):
     #endcomment
     class Meta:
         ordering = ['-pub_date']
+
+class Image(models.Model):
+    image = models.ImageField(blank=True, null=True)
+    description = models.CharField(max_length=300, default='')
+    article = models.ForeignKey(Article, related_name='images', on_delete=models.CASCADE)
+
+

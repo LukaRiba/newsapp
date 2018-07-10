@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Article, Category
 from .utils import get_random_status_none_categories_ids
-from .forms import CreateArticleForm 
+from .forms import ArticleForm, ImageFormSet
 
 # defines context used by navigation which has to be shared between views
 class NavigationContextMixin:
@@ -113,9 +113,19 @@ class ArticleDetailView(NavigationContextMixin, DetailView):
 
 class CreateArticleView(NavigationContextMixin, LoginRequiredMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'
-    form_class = CreateArticleForm
+    form_class = ArticleForm
     success_url = reverse_lazy('my_newsapp:create-article') # - atribut success_url umjesto get_success_url() metode
     success_msg = 'You created a new Article'
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateArticleView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['image_formset'] = ImageFormSet(self.request.POST, instance=self.object)
+        else:
+            context['image_formset'] = ImageFormSet(instance=self.object)
+        return context
+
+    
 
     #comment
     #OVO JE VEOMA BITNO - 

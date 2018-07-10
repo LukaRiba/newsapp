@@ -141,7 +141,38 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   left:0;                           /* added */
 }
 
-/* Bootstrap override */
+.inline-block {
+  display: inline-block;
+}
+
+/* ----------------------- Create Article Form Styling ----------------------- */
+
+/* Hides ugly html input type="file" element, but keeps it visible for browser.
+   Label with for="<id_of_the_file_input_element>" is used instead */
+input[type='file'] {
+  width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.position-bottom {
+    position: absolute;
+    bottom:0;
+}
+
+.overflow-hidden {
+  max-width: 200px;
+  max-height: 24px; /* line height */
+  display: inline-block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  word-wrap: nowrap;
+}
+
+/* ---------------------- Bootstrap override ---------------------- */
 
 .navbar-nav > li{
   margin-left:30px;

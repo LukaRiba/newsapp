@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'easy_thumbnails',
     'crispy_forms',
+    'betterforms',
     'my_newsapp',
 ]
 

@@ -1,31 +1,33 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, ImageField, ClearableFileInput
+from django.forms.models import inlineformset_factory
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field, Fieldset, ButtonHolder, Submit, HTML
-
-from .models import Article
+from crispy_forms.layout import Layout, Field, Fieldset, ButtonHolder, Submit, HTML, Div
 
 
-class CreateArticleForm(ModelForm):
+
+from .models import Article, Image
+
+class ArticleForm(ModelForm):
     def __init__(self, *args, **kwargs):
-        super(CreateArticleForm, self).__init__(*args, **kwargs)
+        super(ArticleForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Field('title', autocomplete='off'),
-            Field('short_description', style="max-height: 100px;"),
-            Field('first_part'),
-            Field('second_part'),
-            Field('category'),
-            Fieldset("Choose images for your article",
-                Field('thumbnail_image'),
-                Field('first_image'),
-                Field('second_image'),
-            )
-        )
-        self.helper.field_class = 'mb-3'
-        self.helper.add_input(Submit('submit', 'Publish'))
+        self.helper.form_tag = False #ne kreira <form> i </form> tagove, već se moraju ručno napisati u template-u
 
     class Meta:
         model = Article
-        # fields = '__all__'
-        fields = ('title', 'short_description', 'first_part', 'second_part', 'category', 'thumbnail_image', 'first_image', 'second_image')
+        fields = ('title', 'short_description', 'text', 'category')
+
+class ImageForm(ModelForm):
+    
+
+    class Meta:
+        model = Image
+        fields = ('image', 'description')
+
+ImageFormSet = inlineformset_factory(Article, Image, form=ImageForm, extra=1,  can_delete=True)
+
+
+
+
+

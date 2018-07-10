@@ -25,8 +25,69 @@
     2.   atribut enctype="multipart/form-data" moramo obavezno navesti kako bi mogli uploadati slike, odnosno file-ove putem forme !!!
   {% endcomment %}
 <div class="container mb-5 mt-5">
-  <form action="{% url 'my_newsapp:create-article' %}" method="POST" enctype="multipart/form-data"> {% csrf_token %}
+  <form action="{% url 'my_newsapp:create-article' %}" method="POST">
+
     {% crispy form %}
+
+
+
+    <h3 class="mt-5">Add images for your article</h3>
+
+    <div class="row">
+      <div class="col-md-4">
+        <p>Images:</p>
+      </div>
+      <div class="col-md-6">
+        <p>Description:</p>
+      </div>
+    </div>
+    
+    {% comment %} {% for image_form in image_formset %}
+      <div class="image-formset row pb-3">
+
+        <div class="col-md-4 ">
+          {{ image_form.image }}
+          <div class="position-bottom">
+            <label class="image-label btn btn-secondary btn-sm mb-0 mr-3" for="id_images-0-image">Choose image</label>
+            {% comment %} Span is an inline element. It has no width or height.
+            Turn it into a block-level element, then it will accept dimension directives. 
+            <span class="align-bottom overflow-hidden">No image choosen</span>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          {{ image_form.description }}
+        </div>
+
+      </div>
+    {% endfor %} {% endcomment %}
+
+    {% for image_form in image_formset %}
+      <div class="row image-formset mb-3">
+
+        <div class="col-md-4">
+          {% comment %} {% if image_form.instance.pk %}{{ image_form.DELETE }}{% endif %} {% endcomment %}
+          {{ image_form.image }}
+          <div class="position-bottom">
+            {% comment %} for="id_images-{{ forloop.counter0 }}-image" je rješenje da label-ovom for atributu dodijelim id
+            file inputa !!!{% endcomment %}
+            <label class="image-label btn btn-secondary mb-0 mr-3" for="id_images-{{ forloop.counter0 }}-image">Choose image</label>
+            {% comment %} Span is an inline element. It has no width or height.
+            Turn it into a block-level element, then it will accept dimension directives. {% endcomment %} 
+            <span class="align-bottom overflow-hidden">No image choosen</span>
+          </div>
+        </div>
+
+        <div class="col-md-7">
+            {{ image_form.description }}
+        </div>
+
+      </div>
+    {% endfor %}
+    {{ image_formset.management_form }}
+
+      <hr>
+    <input type="submit" name="submit" value="Publish" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
   </form>
 </div>
 
@@ -34,4 +95,32 @@
 
 {% block script %}
   {{ block.super }}
+  <script src="{% static 'js/jquery.formset.js' %}"></script>
+  <script type="text/javascript">
+
+    $(function() {
+      $('.image-formset').formset({
+          prefix: '{{ image_formset.prefix }}',
+          addText: 'Add image',
+          deleteText: 'Remove'
+      });
+    });
+
+    $('.image-formset input[type="text"]').addClass( 'textinput textInput form-control' );
+    
+    // The <a> tag is an inline element and therefore cannot have a top or bottom margin. 
+    // But you can solve this by applying display: inline-block; to it.
+    $('.add-row').addClass('inline-block mt-1'); 
+    //$('.delete-row').addClass('');
+
+    //Adds event listener on file input elements (image input) - existing ones and dinamically created ones,
+    //for displaying choosen filename in image-form span (next to Choose image label/button)
+    $('input[type="file"]').on('change', function(e){
+      var fileName = '';
+      fileName = e.target.value.split( '\\' ).pop(); // gets filename from the path
+      if( fileName )
+          $(this).next('div').children('span').html(fileName) //Selects span next to Choose image label and sets fileName as text (html)
+    });
+</script>
 {% endblock script %}
+
