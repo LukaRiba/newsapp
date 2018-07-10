@@ -120,12 +120,10 @@ class CreateArticleView(NavigationContextMixin, LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(CreateArticleView, self).get_context_data(**kwargs)
         if self.request.POST:
-            context['image_formset'] = ImageFormSet(self.request.POST, instance=self.object)
+            context['image_formset'] = ImageFormSet(self.request.POST)
         else:
-            context['image_formset'] = ImageFormSet(instance=self.object)
+            context['image_formset'] = ImageFormSet()
         return context
-
-    
 
     #comment
     #OVO JE VEOMA BITNO - 
@@ -138,10 +136,22 @@ class CreateArticleView(NavigationContextMixin, LoginRequiredMixin, CreateView):
     # sprema u bazu podataka
     #endcomment
     def form_valid(self, form):
+        # Set current user as article author
         form.save(commit=False)
         form.instance.author = self.request.user
-        form.save()
+        created_instance = form.save() # Saves instance to db and stores it to created_instance variable
+
+        # Save images from image_formset to database
+        context = self.get_context_data()
+        image_formset = context['image_formset']
+        
+        if image_formset.is_valid():
+            image_formset.instance = created_instance # binds formset to created article instance (created with form.save())
+            image_formset.save()
+            
+        # Show success message
         messages.info(self.request, self.success_msg)
+
         return super(CreateArticleView, self).form_valid(form)
 
     
