@@ -85,12 +85,22 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   color: rgb(125, 20, 20);
 }
 
-.image-fit {
-  width: 60%;
-  height: auto;
-  object-fit: contain;
+/* for fitting and cropping image in carousel in article detail page */
+.image-fit  {
+  width: auto;
+  height: 100%;
+  /* object-fit: contain; */
   display: block;
-  margin: 0 auto;
+  margin: 0 auto !important;
+}
+
+/* Here we set overflow hidden, but override bootstrap carousel-inner class setting overflow visible.
+   Now, description which overflows carousel-inner to bottom (view overriden carousal-item class)
+   is visible - and for hiding horizontal overflow, aside adding this class to article, we must set
+   left and right margin in .article class, as then horizontal overflow is hidden, while if we set
+   padding instead margin, it is still visible */
+.carousel-wrap {
+  overflow: hidden !important;
 }
 
 /* Limitira paragraf na određeni broj linija
@@ -248,4 +258,23 @@ a:not([href]):not([tabindex]){
   /* And disable the pointer events */
   pointer-events: none;
 }
+
+.carousel-inner {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
+.carousel-caption {
+  position: relative;
+  right: 15%;
+  bottom: 20px;
+  left: 15%;
+  z-index: 10;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  color: rgb(141, 38, 38);
+  text-align: center;
+}
+
 

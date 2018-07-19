@@ -71,18 +71,3 @@ for (let i = 0; i < articlePreviews.length; i++) {
     let lineHeight = lineHeightToNumber(computedLineHeight);
     shortDescriptions[i].style.height = String(Math.floor(availableHeight / lineHeight) * lineHeight) + 'px';
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
