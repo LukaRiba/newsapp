@@ -6,6 +6,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -13,21 +14,21 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='galery',
-            name='article',
-        ),
-        migrations.RemoveField(
-            model_name='image',
-            name='galery',
-        ),
+        # migrations.RemoveField(
+        #     model_name='galery',
+        #     name='article',
+        # ),
+        # migrations.RemoveField(
+        #     model_name='image',
+        #     name='galery',
+        # ),
         migrations.AddField(
             model_name='image',
             name='article',
             field=models.ForeignKey(default='', on_delete=django.db.models.deletion.CASCADE, related_name='images', to='my_newsapp.Article'),
             preserve_default=False,
         ),
-        migrations.DeleteModel(
-            name='Galery',
-        ),
+        # migrations.DeleteModel(
+        #     name='Galery',
+        # ),
     ]

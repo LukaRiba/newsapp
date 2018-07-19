@@ -25,13 +25,20 @@
     2.   atribut enctype="multipart/form-data" moramo obavezno navesti kako bi mogli uploadati slike, odnosno file-ove putem forme !!!
   {% endcomment %}
 <div class="container mb-5 mt-5">
-  <form action="{% url 'my_newsapp:create-article' %}" method="POST">
+  <form action="{% url 'my_newsapp:create-article' %}" method="POST" enctype="multipart/form-data">
 
     {% crispy form %}
 
 
 
-    <h3 class="mt-5">Add images for your article</h3>
+    <h3 class="mt-5 mb-0">Add images for your article</h3>
+    <p style="color:lightslategray;">*First image is used for a thumbnail image</p>
+
+    {% if image_formset.non_form_errors %}
+      <div style="color:brown">
+      {{ image_formset.non_form_errors }}
+      </div>
+    {% endif %}
 
     <div class="row">
       <div class="col-md-4">
@@ -41,52 +48,33 @@
         <p>Description:</p>
       </div>
     </div>
-    
-    {% comment %} {% for image_form in image_formset %}
-      <div class="image-formset row pb-3">
 
-        <div class="col-md-4 ">
-          {{ image_form.image }}
-          <div class="position-bottom">
-            <label class="image-label btn btn-secondary btn-sm mb-0 mr-3" for="id_images-0-image">Choose image</label>
-            {% comment %} Span is an inline element. It has no width or height.
-            Turn it into a block-level element, then it will accept dimension directives. 
-            <span class="align-bottom overflow-hidden">No image choosen</span>
+      {{ image_formset.management_form }}
+
+      {% for image_form in image_formset %}
+        <div class="row image-formset mb-3">
+
+          <div class="col-md-4">
+            {% comment %} {% if image_form.instance.pk %}{{ image_form.DELETE }}{% endif %} {% endcomment %}
+            {{ image_form.image }}
+            <div class="position-bottom">
+              {% comment %} for="id_images-{{ forloop.counter0 }}-image" je rješenje da label-ovom for atributu dodijelim id
+              file inputa !!!{% endcomment %}
+              <label class="image-label btn btn-secondary mb-0 mr-3" for="id_images-{{ forloop.counter0 }}-image">Choose image</label>
+              {% comment %} Span is an inline element. It has no width or height.
+              Turn it into a block-level element, then it will accept dimension directives. {% endcomment %} 
+              <span class="align-bottom overflow-hidden">No image choosen</span>
+            </div>
           </div>
-        </div>
 
-        <div class="col-md-6">
-          {{ image_form.description }}
-        </div>
-
-      </div>
-    {% endfor %} {% endcomment %}
-
-    {% for image_form in image_formset %}
-      <div class="row image-formset mb-3">
-
-        <div class="col-md-4">
-          {% comment %} {% if image_form.instance.pk %}{{ image_form.DELETE }}{% endif %} {% endcomment %}
-          {{ image_form.image }}
-          <div class="position-bottom">
-            {% comment %} for="id_images-{{ forloop.counter0 }}-image" je rješenje da label-ovom for atributu dodijelim id
-            file inputa !!!{% endcomment %}
-            <label class="image-label btn btn-secondary mb-0 mr-3" for="id_images-{{ forloop.counter0 }}-image">Choose image</label>
-            {% comment %} Span is an inline element. It has no width or height.
-            Turn it into a block-level element, then it will accept dimension directives. {% endcomment %} 
-            <span class="align-bottom overflow-hidden">No image choosen</span>
+          <div class="col-md-7">
+              {{ image_form.description }}
           </div>
+
         </div>
+      {% endfor %}
 
-        <div class="col-md-7">
-            {{ image_form.description }}
-        </div>
-
-      </div>
-    {% endfor %}
-    {{ image_formset.management_form }}
-
-      <hr>
+      <hr class="mt-5">
     <input type="submit" name="submit" value="Publish" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
   </form>
 </div>

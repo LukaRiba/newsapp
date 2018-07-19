@@ -1,6 +1,7 @@
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
-from django.urls import reverse_lazy, reverse
-from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -114,44 +115,37 @@ class ArticleDetailView(NavigationContextMixin, DetailView):
 class CreateArticleView(NavigationContextMixin, LoginRequiredMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'
     form_class = ArticleForm
-    success_url = reverse_lazy('my_newsapp:create-article') # - atribut success_url umjesto get_success_url() metode
     success_msg = 'You created a new Article'
 
-    def get_context_data(self, **kwargs):
-        context = super(CreateArticleView, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['image_formset'] = ImageFormSet(self.request.POST)
-        else:
-            context['image_formset'] = ImageFormSet()
-        return context
-
     #comment
-    #OVO JE VEOMA BITNO - 
-    # Kako bi trenutnog User-a koristili za popunjavanje author fielda Article objekta kojeg kreiramo formom,
-    # moramo override-ati form_valid() metodu. Kada je forma validna, submittanjem se post request šalje form_valid() metodi.
-    # Sada,prvo sa form.save(commit=False) kažemo da se pristigli podaci spreme, ali da se još ne spreme u bazu (da se još ne kreira instanca modela).
-    # Onda sa  form.instance.author = self.request.user kažemo da instanca forme (budući Article objekt) koristi request.user (User objekt) 
-    # za popunjavanje author fielda, što i treba obzirom da je auth field u Article modelu definiran kao ForeignKey za User object.
-    # Nakon toga, opet pozivamo form.save() metodu, ovaj put bez argumenata, te se sada Instanca Article modela koju smo kreirali putem forme
-    # sprema u bazu podataka
+        # <<<  When you upload a file it's passed through request.FILES, so you must also pass it to you FormSet  >>>
+        # VEOMA VAŽNO - Kada forma koju koristimo u formset-u ima FileField/ImageField, moramo u slučaju POST
+        # request-a prilikom inicijaliziranja FormSet objekta:
+        #   ImageFormSet(self.request.POST, files=self.request.FILES)
+        # uz self.request.POST moramo dodati i drugi argument, files=self.request.FILES, jer se inače slike neće
+        # spremiti u memoriju, odnosno neće biti dostupne u form.cleaned_data dictionary-u (kao da input[type=file]
+        # ne postoji), tj. cleaned_data će biti prazan, i shodno tome neće se spremiti u bazu.
     #endcomment
-    def form_valid(self, form):
-        # Set current user as article author
-        form.save(commit=False)
-        form.instance.author = self.request.user
-        created_instance = form.save() # Saves instance to db and stores it to created_instance variable
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        formset = ImageFormSet()
+        return render(request, self.template_name, {'form': form, 'image_formset': formset})
 
-        # Save images from image_formset to database
-        context = self.get_context_data()
-        image_formset = context['image_formset']
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(data=request.POST)
+        formset = ImageFormSet(data=request.POST, files=request.FILES)
         
-        if image_formset.is_valid():
-            image_formset.instance = created_instance # binds formset to created article instance (created with form.save())
-            image_formset.save()
-            
-        # Show success message
-        messages.info(self.request, self.success_msg)
+        if  form.is_valid and formset.is_valid():
+            # Set current user as article author
+            form.save(commit=False)
+            form.instance.author = self.request.user
+            # Save created Article instance to db and bind formset to it
+            formset.instance = form.save()
+            # Save Image instances (created through formset) to db
+            formset.save()    
+            # Show success message on created article detail view
+            messages.info(self.request, self.success_msg)
+            # redirect to detail view of created article
+            return HttpResponseRedirect(form.instance.get_absolute_url())
 
-        return super(CreateArticleView, self).form_valid(form)
-
-    
+        return render(request, self.template_name, {'form': form, 'image_formset': formset})

@@ -31,7 +31,7 @@
                   <div class="row padding-top-20 padding-bottom-20 padding-right-20">
 
                         <div class="col-md-3 pl-0 pt-1">
-                          <img src="{% thumbnail article.thumbnail_image 150x150 crop %}">
+                          <img src="{% thumbnail article.images.first.image 150x150 crop %}">
                         </div>
 
                         <div class="col-md-9 article-preview" style="max-height: 160px;">

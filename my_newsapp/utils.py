@@ -9,6 +9,3 @@ def get_random_status_none_categories_ids():
         list.append(category.id)
     shuffle(list)
     return list
-
-
-

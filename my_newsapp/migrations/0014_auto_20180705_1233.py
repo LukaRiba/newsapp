@@ -13,20 +13,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='Galery',
-            fields=[
-                ('article', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='my_newsapp.Article')),
-                ('thumbnail_image', models.ImageField(upload_to='')),
-            ],
-        ),
+        # migrations.CreateModel(
+        #     name='Galery',
+        #     fields=[
+        #         ('article', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='my_newsapp.Article')),
+        #         ('thumbnail_image', models.ImageField(upload_to='')),
+        #     ],
+        # ),
         migrations.CreateModel(
             name='Image',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('image', models.ImageField(blank=True, null=True, upload_to='')),
                 ('description', models.CharField(max_length=300)),
-                ('galery', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='my_newsapp.Galery')),
+                # ('galery', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='my_newsapp.Galery')),
             ],
         ),
         migrations.RemoveField(

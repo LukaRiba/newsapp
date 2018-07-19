@@ -40,8 +40,8 @@ class Migration(migrations.Migration):
             field=autoslug.fields.AutoSlugField(null=True, default=None, editable=False, populate_from='title', unique=True),
             preserve_default=False,
         ),
-        migrations.RunPython(
-            migrate_data_forward,
-            migrate_data_backward,
-        ),
+        # migrations.RunPython(
+        #     migrate_data_forward,
+        #     migrate_data_backward,
+        # ),
     ]

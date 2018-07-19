@@ -41,16 +41,10 @@
   <div class="article">
     <h2>{{ article.title }}</h2>
     <pre class="padding-bottom-20">In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
-    {% if article.first_image %}
-      <img class="image-fit padding-bottom-20" src="{{ article.first_image.url }}">  
+    {% if article.images.first.image %}
+      <img class="image-fit padding-bottom-20" src="{{ article.images.first.image.url }}">  
     {% endif %}
-      <p>{{ article.first_part | linebreaks }}</p> 
-    {% if article.second_image %}
-      <img class="image-fit padding-bottom-20" src="{{ article.second_image.url }}">  
-    {% endif %}
-    {% if article.second_part %}
-      <p>{{ article.second_part | linebreaks }}</p>
-    {% endif %}
+      <p>{{ article.text | linebreaks }}</p> 
   </div>
   
 {% endblock content %}

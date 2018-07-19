@@ -56,7 +56,10 @@ class Article(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(blank=True, null=True)
-    description = models.CharField(max_length=300, default='')
+    description = models.CharField(max_length=300, blank=True, null=True)
     article = models.ForeignKey(Article, related_name='images', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '%s' % self.image
 
 
