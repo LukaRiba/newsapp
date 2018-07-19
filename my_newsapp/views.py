@@ -1,12 +1,11 @@
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
-from django.urls import reverse_lazy
-from django.shortcuts import render
+# from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Article, Category
-from .utils import get_random_status_none_categories_ids
+from .utils import get_status_none_categories_random_ids
 from .forms import ArticleForm, ImageFormSet
 
 # defines context used by navigation which has to be shared between views
@@ -17,14 +16,13 @@ class NavigationContextMixin:
         return context
 
 #comment
-    # Komentar se odnosi na prijašnju implementaciju - pobledati prijašnje commit-e
+    # Ovaj komentar se odnosi na prijašnju implementaciju - pobledati prijašnje commit-e
     # Zanimljivo je da kada sam isto ovo definirao unutar get_context_data() metode
     # HomeView-a, prymary_category i secondary_category objekti nisu mogli biti učitani unutar template-a -
     # kod if statement-a   {% if primary_category %} , iako je postojao Category instanca sa statusom 'P',
     # if bi uvijek vraćao false ?? Čak i ako bi koristio filter() umjesto get() i onda u templateu
-    # {% if prymary_category.exists() %} ili {% if primary_category.all %}, uvijek false ??? Nakon što sam istu stvar definirao u 
+    # {% if prymary_category.exists %} ili {% if primary_category.all %}, uvijek false ??? Nakon što sam istu stvar definirao u 
     # get_context_data() metodi u Mixin-u, kojeg sam onda proslijedio HomeView-u, {% if primary_category %} u templateu RADI ??!!
-#endcomment
 #comment
     # get_context_data() prvo sprema id-e Category instanci čiji je status = None u listu - redosljed je
     # svaki put randomiziran (unutar get_random_status_none_categories_ids() funkciju iz utils.py).
@@ -42,26 +40,24 @@ class NavigationContextMixin:
     # NAPOMENA : metodu get_random_status_none_categories_ids() sam prvo definirao u HomePageMixin-u i get_context_data() nije radio.
     # kada bi get_random_status_none_categories_ids() pozvao unutar get_context_data dobivao bih iznimke kod npr. id=rand_ids.pop() 
     # 'nonetype object has no attribute pop()' ili za category__pk__in=rand_ids 'nonetype object is not iterable' ili sl. Zašto? Neznam točno
-#endcomment
 class HomeViewMixin:
-
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        rand_ids = get_random_status_none_categories_ids()
+        rand_ids = get_status_none_categories_random_ids()
+        categories = Category.objects.all()
 
-        if Category.objects.filter(status='P').exists():
-            if Category.objects.filter(status='S').exists():
-                context['primary_category'] = Category.objects.get(status='P')
+        if categories.contain_instance_with_status_primary():
+            context['primary_category'] = Category.objects.get(status='P')
+            if categories.contain_instance_with_status_secondary():
                 context['secondary_category'] = Category.objects.get(status='S')
-                context['other_articles'] =  Article.objects.filter(category__status=None).order_by('?')
+                context['other_articles'] =  Article.objects.filter(category__status=None)[:5]
             else:
-                context['primary_category'] = Category.objects.get(status='P')
                 context['secondary_category'] = Category.objects.get(id=rand_ids.pop())
-                context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids).order_by('?')
+                context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids)[:5]
         else:
             context['primary_category'] = Category.objects.get(id=rand_ids.pop())
             context['secondary_category'] = Category.objects.get(id=rand_ids.pop())
-            context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids).order_by('?')
+            context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids)[:5]
         return context
 
 class HomeView(NavigationContextMixin, HomeViewMixin, TemplateView):
@@ -103,16 +99,18 @@ class CategoryView(NavigationContextMixin, ListView):
     context_object_name = 'articles'
     paginate_by = 2
 
+    # gett-a Category instancu na temelju slug-a u url-u
+    def get_category(self):
+        return Category.objects.get(slug=self.kwargs['slug'])
+
     def get_queryset(self):
-        # gett-a Category instancu na temelju slug-a u url-u i vraća QuerySet artikala iz te kategorije
-        category = Category.objects.get(slug=self.kwargs['slug'])
-        return category.articles.all()
+        return self.get_category().articles.all()
 
 class ArticleDetailView(NavigationContextMixin, DetailView):
     template_name = 'my_newsapp/detail.html'
     model = Article
 
-class CreateArticleView(NavigationContextMixin, LoginRequiredMixin, CreateView):
+class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'
     form_class = ArticleForm
     success_msg = 'You created a new Article'
@@ -125,16 +123,29 @@ class CreateArticleView(NavigationContextMixin, LoginRequiredMixin, CreateView):
         # uz self.request.POST moramo dodati i drugi argument, files=self.request.FILES, jer se inače slike neće
         # spremiti u memoriju, odnosno neće biti dostupne u form.cleaned_data dictionary-u (kao da input[type=file]
         # ne postoji), tj. cleaned_data će biti prazan, i shodno tome neće se spremiti u bazu.
-    #endcomment
-    def get(self, request, *args, **kwargs):
-        form = self.form_class()
-        formset = ImageFormSet()
-        return render(request, self.template_name, {'form': form, 'image_formset': formset})
+
+        #'image_formset' sam definirao u get_context_data() na ovaj način, jer get() metoda superklase
+        # poziva get_context_data(), i taj context koristi u template-u. Ukoliko ovo ne napravim, create_article.html
+        # template nezna za formset. Mogao bih (što je i bilo prethodno rješenje), override-ati i get() metodu,
+        # i returnati render(request, self.template_name, {'form': form, 'image_formset': formset}), s time da prethodno
+        # definiram form = self.form_class i formset = ImageFormSet(), i isto to returnam u slučaju da ne prođe
+        # uvijet u post() metodi (tj. returnam override-anu get() metodu). Problem kod ovog rješenja je to što se sada
+        # iz context-a gubi 'categories' definiran u NavigationContextMixin-u, i Categories dropdown je prazan !!
+        # Dakle, ovim rješenjem dodajemo 'image_context' u context tako što overrideam-o get_context_data(), i onda se
+        # renderira i 'categories' i 'image_formset' (iz get_context_data()) i 'form' što je po defaultu iz
+        # form_class = ArticleForm. 
+        #endcomment
+    def get_context_data(self, **kwargs):
+        context = super(CreateArticleView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES)
+        else:
+            context['image_formset'] = ImageFormSet()
+        return context
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(data=request.POST)
-        formset = ImageFormSet(data=request.POST, files=request.FILES)
-        
+        form = self.form_class(request.POST)
+        formset = ImageFormSet(request.POST, request.FILES)
         if  form.is_valid and formset.is_valid():
             # Set current user as article author
             form.save(commit=False)
@@ -147,5 +158,5 @@ class CreateArticleView(NavigationContextMixin, LoginRequiredMixin, CreateView):
             messages.info(self.request, self.success_msg)
             # redirect to detail view of created article
             return HttpResponseRedirect(form.instance.get_absolute_url())
-
-        return render(request, self.template_name, {'form': form, 'image_formset': formset})
+        # Ako uvijet ne prođe, vrati get() metodu superklase
+        return super(CreateArticleView, self).get(request, *args, **kwargs)

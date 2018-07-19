@@ -38,7 +38,7 @@
     newline becomes an HTML line break (<br>) and a new line followed 
     by a blank line becomes a paragraph break (</p>).
   {% endcomment %}
-  <div class="article">
+  <div class="article carousel-wrap">
     <h2>{{ article.title }}</h2>
     <pre class="padding-bottom-20">In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
 
@@ -46,14 +46,14 @@
     <div style="height: 350px">
       <img class="image-fit" src="{{ article.images.first.image.url }}"> 
     </div>
-    {% elif %} {% comment %} Show carousel of images {% endcomment %}
+    {% else %} {% comment %} Show carousel of images {% endcomment %}
       <div id="gallery" class="carousel slide" data-ride="carousel">
         {% comment %} carousel indicators of images ->  - - - - {% endcomment %}
         <ol class="carousel-indicators">
           {% for i in article.images.all  %}
             {% if forloop.counter0 == 0 %}
               <li data-target="#gallery" data-slide-to="0" class="active"></li>            
-            {% elif %}
+            {% else %}
               <li data-target="#gallery" data-slide-to="{{ forloop.counter0 }}"></li>
             {% endif %}
           {% endfor %}
@@ -64,16 +64,20 @@
             {% if forloop.counter == 1 %}
               <div id="image-{{ forloop.counter0 }}" class="carousel-item active" style="height: 350px">
                 <img class="image-fit" src="{{ image.image.url }}">
-                <div class="carousel-caption ">
-                  <p>{{ image.description }}</p>
-                </div>
+                {% if image.description %}
+                  <div class="carousel-caption">
+                    <p>{{ image.description }}</p>
+                  </div>
+                {% endif %}                
               </div>
-            {% elif %}
+            {% else %}
               <div id="image-{{ forloop.counter0 }}" class="carousel-item" style="height: 350px">
                 <img class="image-fit" src="{{ image.image.url }}">
-                <div class="carousel-caption ">
-                  <p>{{ image.description }}</p>
-                </div> {% endcomment %}
+                {% if image.description %}
+                  <div class="carousel-caption">
+                    <p>{{ image.description }}</p>
+                  </div>
+                {% endif %}
               </div>
             {% endif %}
           {% endfor %}
@@ -89,7 +93,7 @@
         </a>
       </div> 
     {% endif %}
-    <p class="pt-4">{{ article.text | linebreaks }}</p> 
+    <p class="padding-top-40" style="z-index: 1000">{{ article.text | linebreaks }}</p> 
   </div>
 
   
@@ -100,40 +104,5 @@
   <script>
     //On detail page, always scroll to the top of article
     window.scrollTo(0, 250);
-
-let images = document.querySelectorAll('.carousel-item');
-let descriptions = document.querySelectorAll('.description');
-let previous = document.querySelector('.carousel-control-prev')
-let next = document.getElementsByClassName('carousel-control-next')
-
-previous[0].addEventListener('onclick', function() {
-  setTimeout(changeDescription, 200);
-})
-
-next[0].addEventListener('onclick', function() {
-  setTimeout(changeDescription, 200);
-})
-
-function changeDescription(){
-    for (let i = 0; i < images.length; i++) {
-        if (images[i].classList.contains('active')) {
-            descriptions[i].style.display = 'block';
-        } else descriptions[i].style.display = 'none'; 
-    } 
-    // setTimeout(changeDescription, 5001); 
-}
-
-
-
-changeDescription();
-
-
-
-
-
-
-    
-    
-
 </script>
 {% endblock script %}
