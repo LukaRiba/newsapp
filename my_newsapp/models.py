@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.contrib.contenttypes.fields import GenericRelation
 
 from autoslug import AutoSlugField
+
+from comments.models import Comment
 
 CATEGORY_RELEVANCE_CHOICES = (
     ('P', 'Primary'),
@@ -48,6 +51,7 @@ class Article(models.Model):
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, related_name='articles', on_delete=models.DO_NOTHING)
     category = models.ForeignKey(Category, related_name='articles', on_delete=models.CASCADE)
+    comments = GenericRelation(Comment)
 
     #comment
         # Ovime osiguravamo da su Articles u querysetu uvijek poredani tako da je prvi u setu onaj najrecentniji
