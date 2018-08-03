@@ -23,6 +23,7 @@
 {% comment %} VAŽNO !!!
     1.   {% csrf_token %} ne treba navesti jer ga crispy-forms navodi automatski 
     2.   atribut enctype="multipart/form-data" moramo obavezno navesti kako bi mogli uploadati slike, odnosno file-ove putem forme !!!
+    3.   Since your form is submitting to the same url, you can simply use action="". If you prefer, you can use action="{% url 'my_newsapp:create-article' %}"
   {% endcomment %}
 <div class="container mb-5 mt-5">
   <form action="{% url 'my_newsapp:create-article' %}" method="POST" enctype="multipart/form-data">

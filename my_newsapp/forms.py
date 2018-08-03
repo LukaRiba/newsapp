@@ -3,14 +3,14 @@ from django.forms.models import inlineformset_factory
 
 from crispy_forms.helper import FormHelper
 
-from my_newsapp.models import Article, Image
+from .models import Article, Image
 
 class ArticleForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ArticleForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False #ne kreira <form> i </form> tagove, već se moraju ručno napisati u template-u
-
+                                     #zato jer želim i inline_formset obuhvatiti skupa sa article formom u jednu formu   
     class Meta:
         model = Article
         fields = ('title', 'short_description', 'text', 'category')

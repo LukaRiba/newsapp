@@ -1,0 +1,39 @@
+{% load crispy_forms_tags %}
+
+{% load crispy_forms_tags %}
+
+<div class="comments-body">
+  <h5 class="title">Comments</h5>
+
+  <form action="" method="POST" id="comment-form">
+    {% crispy comment_form %}
+  </form>
+  <div class="margin-bottom-30"></div>
+
+  {% if comments %}
+    {% for comment in comments %}
+      <div class="comment">
+        <p class="margin-bottom-0"><strong>{{ comment.author }}</strong></p>
+        <p class="pub-date margin-bottom-5">{{ comment.pub_date }}</p>
+        <p class="margin-bottom-0">{{ comment.text }}</p>
+        
+        <button class="reply-button">Reply</button>
+
+        <form class="reply reply-form" action="" method="POST" id="reply-form-{{ forloop.counter }}" style="display: none">
+          {% crispy reply_form %}
+        </form>
+        <div class="margin-bottom-30"></div>
+
+        {% for reply in comment.replies.all  %}
+          <div class="reply">
+            <p class="margin-bottom-0"><strong>{{ comment.author }}</strong></p>
+            <p class="pub-date margin-bottom-5">{{ comment.pub_date }}</p>
+            <p class="margin-bottom-0">{{ comment.text }}</p>
+          </div>
+        {% endfor %}  
+      </div>
+    {% endfor %}  
+  {% else %}
+    <p>No comments for this Article yet.</p>
+  {% endif %}
+</div>

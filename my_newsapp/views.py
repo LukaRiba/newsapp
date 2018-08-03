@@ -8,6 +8,12 @@ from .models import Article, Category
 from .utils import get_status_none_categories_random_ids
 from .forms import ArticleForm, ImageFormSet
 
+from comments.forms import CommentForm
+from comments.views import CommentContextMixin
+
+from django.contrib.contenttypes.models import ContentType
+
+
 # defines context used by navigation which has to be shared between views
 class NavigationContextMixin:
     def get_context_data(self, **kwargs):
@@ -106,9 +112,29 @@ class CategoryView(NavigationContextMixin, ListView):
     def get_queryset(self):
         return self.get_category().articles.all()
 
-class ArticleDetailView(NavigationContextMixin, DetailView):
+class ArticleDetailView(NavigationContextMixin, CommentContextMixin, DetailView):
     template_name = 'my_newsapp/detail.html'
     model = Article
+    form_class = CommentForm
+
+    def get_context_data(self, **kwargs):
+        return super(ArticleDetailView, self).get_context_data(model_name=self.model.__name__, 
+                                                               object_id=self.kwargs['id'], **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            form.save(commit=False)
+            form.instance.author = self.request.user
+            form.instance.content_type_id = self.get_content_type().id
+            form.instance.object_id = self.kwargs['id']
+            form.parent = None
+            form.save()
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER')) #same url
+        return super(ArticleDetailView, self).get(request, *args, **kwargs)
+
+    def get_content_type(self):
+        return ContentType.objects.get(model=self.model.__name__)
 
 class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'

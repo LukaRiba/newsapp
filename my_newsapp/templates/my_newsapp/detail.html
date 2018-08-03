@@ -6,6 +6,7 @@
 
 {% block style %}
   {{ block.super }}
+  <link rel="stylesheet" href="{% static 'comments/comments.css' %}">
 {% endblock style %}
 
 {% block jumbo %}
@@ -97,15 +98,16 @@
   </div>
 
   <div class="comments">
-
+    {% include 'comments/comments.html' %}
   </div>
   
 {% endblock content %}
 
 {% block script %}
   {{ block.super }}
+  {% comment %} <script src="{% static 'comments/comments.js' %}"></script> {% endcomment %}
   <script>
     //On detail page, always scroll to the top of article
-    window.scrollTo(0, 250);
+   // window.scrollTo(0, 250);
 </script>
 {% endblock script %}

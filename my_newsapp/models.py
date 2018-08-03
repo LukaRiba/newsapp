@@ -53,18 +53,18 @@ class Article(models.Model):
     category = models.ForeignKey(Category, related_name='articles', on_delete=models.CASCADE)
     comments = GenericRelation(Comment)
 
+    def get_absolute_url(self):
+        return reverse('my_newsapp:article-detail', kwargs={'category': self.category.slug,'id':self.id, 'slug': self.slug})
+
+    def __str__(self):
+        return self.title
+
     #comment
         # Ovime osiguravamo da su Articles u querysetu uvijek poredani tako da je prvi u setu onaj najrecentniji
         # Sada ne moramo to raditi prilikom gettanja queryseta, npr. Article.objects.all().order_by('-pub_date') i
         # ovakav poredak će biti default za sve Article querysetove
     class Meta:
         ordering = ['-pub_date']
-
-    def get_absolute_url(self):
-        return reverse('my_newsapp:article-detail', kwargs={'category': self.category.slug, 'slug': self.slug})
-
-    def __str__(self):
-        return self.title
 
 class Image(models.Model):
     image = models.ImageField(blank=True, null=True)

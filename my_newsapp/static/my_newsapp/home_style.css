@@ -129,6 +129,11 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   
 }
 
+.comments {
+  margin-right: 300px;
+  margin-left: 300px;
+}
+
 .article pre, .article a {
   color: rgb(144, 77, 25);
   font-weight: 600;

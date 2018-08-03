@@ -58,7 +58,7 @@ ROOT_URLCONF = 'my_news.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates', 'my_newsapp/templates'],
+        'DIRS': ['templates', 'my_newsapp/templates', 'comments/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -126,7 +126,8 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static/'),
-    os.path.join(BASE_DIR, 'my_newsapp/static/')
+    os.path.join(BASE_DIR, 'my_newsapp/static/'),
+    os.path.join(BASE_DIR, 'comments/static/'),
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
