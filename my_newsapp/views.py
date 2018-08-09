@@ -11,7 +11,12 @@ from .forms import ArticleForm, ImageFormSet
 from comments.forms import CommentForm
 from comments.views import CommentContextMixin
 
+from comments.models import Comment
+
 from django.contrib.contenttypes.models import ContentType
+
+from django.http import JsonResponse
+
 
 
 # defines context used by navigation which has to be shared between views
@@ -120,21 +125,46 @@ class ArticleDetailView(NavigationContextMixin, CommentContextMixin, DetailView)
     def get_context_data(self, **kwargs):
         return super(ArticleDetailView, self).get_context_data(model_name=self.model.__name__, 
                                                                object_id=self.kwargs['id'], **kwargs)
-
+    
+    #umijesto 'if request.is_ajax():' unutar metode napisati dekorator!!!
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
-        if form.is_valid():
+        
+        if form.is_valid() and request.is_ajax():
+            
+            response_data = {}
+
+            parent_id = request.POST.get('parent_id')
+            
+            print('request.post from is_ajax:', request.POST)
             form.save(commit=False)
             form.instance.author = self.request.user
-            form.instance.content_type_id = self.get_content_type().id
+            form.instance.content_type_id = self.get_content_type(model_name='comment').id
+            form.instance.object_id = parent_id
+            form.instance.parent_id = parent_id
+            form.parent = Comment.objects.get(id=parent_id)
+            form.save()
+
+            response_data['author'] = form.instance.author.username
+            response_data['pub_date'] = form.instance.pub_date
+            response_data['text'] = form.instance.text
+            response_data['reply_id'] = str(parent_id) + '-' + str(form.instance.id) # stvara id reply div-a, kako bi ga mogao selektirati i dodati FadeIn efekt - vidi comment.js
+            return JsonResponse(response_data)
+        else:
+            form.save(commit=False)
+            form.instance.author = self.request.user
+            form.instance.content_type_id = self.get_content_type(self.model.__name__).id
             form.instance.object_id = self.kwargs['id']
             form.parent = None
             form.save()
             return HttpResponseRedirect(request.META.get('HTTP_REFERER')) #same url
         return super(ArticleDetailView, self).get(request, *args, **kwargs)
 
-    def get_content_type(self):
-        return ContentType.objects.get(model=self.model.__name__)
+    # def check_for_parent_id(self):
+    #     pass 
+
+    def get_content_type(self, model_name):
+        return ContentType.objects.get(model=model_name)
 
 class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'

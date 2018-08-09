@@ -23,9 +23,7 @@ li {
 	font-size: 11px !important;
 }
 
-.comments-body .comment {
-	padding: 15px 15px;
-}
+
 
 .comments-body p {
 	font-size: 14px;
@@ -51,6 +49,10 @@ li {
 	padding-left: 50px;
 }
 
+.reply-form {
+	padding-left: 50px;
+}
+
 /* --- utils --- */
 .margin-bottom-0 {
 	margin-bottom: 0px;
@@ -58,6 +60,10 @@ li {
 
 .margin-bottom-5 {
 	margin-bottom: 5px;
+}
+
+.margin-bottom-20 {
+	margin-bottom: 20px;
 }
 
 .margin-bottom-30 {

@@ -3,7 +3,6 @@ from django.forms import ModelForm, Textarea
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, ButtonHolder, Submit
 
-
 from .models import Comment
 
 class CommentForm(ModelForm):
@@ -13,15 +12,11 @@ class CommentForm(ModelForm):
         self.helper.form_tag = False
         self.helper.form_show_labels = False
         self.helper.layout = Layout(
-            Field('text', placeholder='Your comment...', id='comment-text', required=True),
+            Field('text', placeholder='Your comment...', name='comment-text', required=True),
             ButtonHolder(
                 Submit('submit', 'Comment', css_class='button white btn-sm')
             )
         )
-
-    
-
-    
 
     class Meta:
         model = Comment
