@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
-# from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -16,6 +16,8 @@ from comments.models import Comment
 from django.contrib.contenttypes.models import ContentType
 
 from django.http import JsonResponse
+
+from django.template.loader import render_to_string
 
 
 
@@ -121,6 +123,7 @@ class ArticleDetailView(NavigationContextMixin, CommentContextMixin, DetailView)
     template_name = 'my_newsapp/detail.html'
     model = Article
     form_class = CommentForm
+    comments_template = 'comments/comments.html'
 
     def get_context_data(self, **kwargs):
         return super(ArticleDetailView, self).get_context_data(model_name=self.model.__name__, 
@@ -128,36 +131,48 @@ class ArticleDetailView(NavigationContextMixin, CommentContextMixin, DetailView)
     
     #umijesto 'if request.is_ajax():' unutar metode napisati dekorator!!!
     def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
         form = self.form_class(request.POST)
         
         if form.is_valid() and request.is_ajax():
             
             response_data = {}
 
-            parent_id = request.POST.get('parent_id')
-            
-            print('request.post from is_ajax:', request.POST)
-            form.save(commit=False)
-            form.instance.author = self.request.user
-            form.instance.content_type_id = self.get_content_type(model_name='comment').id
-            form.instance.object_id = parent_id
-            form.instance.parent_id = parent_id
-            form.parent = Comment.objects.get(id=parent_id)
-            form.save()
+            if 'parent_id' in request.POST:
+                parent_id = request.POST.get('parent_id')
+                
+                form.save(commit=False)
+                form.instance.author = self.request.user
+                form.instance.content_type_id = self.get_content_type(model_name='comment').id
+                form.instance.object_id = parent_id
+                form.instance.parent_id = parent_id
+                form.parent = Comment.objects.get(id=parent_id)
+                form.save()
 
-            response_data['author'] = form.instance.author.username
-            response_data['pub_date'] = form.instance.pub_date
-            response_data['text'] = form.instance.text
-            response_data['reply_id'] = str(parent_id) + '-' + str(form.instance.id) # stvara id reply div-a, kako bi ga mogao selektirati i dodati FadeIn efekt - vidi comment.js
-            return JsonResponse(response_data)
-        else:
-            form.save(commit=False)
-            form.instance.author = self.request.user
-            form.instance.content_type_id = self.get_content_type(self.model.__name__).id
-            form.instance.object_id = self.kwargs['id']
-            form.parent = None
-            form.save()
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER')) #same url
+                response_data['author'] = form.instance.author.username
+                response_data['pub_date'] = form.instance.pub_date
+                response_data['text'] = form.instance.text
+                response_data['reply_id'] = str(parent_id) + '-' + str(form.instance.id) # stvara id reply div-a, kako bi ga mogao selektirati i dodati FadeIn efekt - vidi comment.js
+
+                return JsonResponse(response_data)
+            else:
+                form.save(commit=False)
+                form.instance.author = self.request.user
+                form.instance.content_type_id = self.get_content_type(self.model.__name__).id
+                form.instance.object_id = self.kwargs['id']
+                form.save()
+
+                response_data['author'] = form.instance.author.username
+                response_data['pub_date'] = form.instance.pub_date
+                response_data['text'] = form.instance.text
+                response_data['comment_id'] = str(form.instance.id) # stvara id reply div-a, kako bi ga mogao selektirati i dodati FadeIn efekt - vidi comment.js
+                html = render_to_string(self.comments_template, context=self.get_context_data())
+
+                
+
+
+                return HttpResponse(html)
+                
         return super(ArticleDetailView, self).get(request, *args, **kwargs)
 
     # def check_for_parent_id(self):

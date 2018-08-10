@@ -1,0 +1,26 @@
+{% load staticfiles %}
+
+<link rel="stylesheet" href="{% static 'css/bootstrap-4.0.0.css' %}">
+<link rel="stylesheet" href="{% static 'comments/comments.css' %}">
+
+
+
+<div class="comments-body">
+  <h5 class="title">Comments</h5>
+
+  {% include "comments/comment_form.html" %}
+  <div class="margin-bottom-30"></div>
+
+  <div id="comments">
+    {% if comments %}
+      {% include "comments/comments.html" %}
+    {% else %}
+      <p id="no-comments-yet-message">No comments for this Article yet.</p>
+    {% endif %}
+  </div>
+  
+</div>
+
+<script src="{% static 'js/jquery-3.3.1.js' %}"></script>
+<script src="{% static 'js/bootstrap-4.0.0.js' %}"></script>
+<script src="{% static 'comments/comments_new.js' %}"></script>

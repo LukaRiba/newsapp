@@ -12,7 +12,7 @@ class CommentForm(ModelForm):
         self.helper.form_tag = False
         self.helper.form_show_labels = False
         self.helper.layout = Layout(
-            Field('text', placeholder='Your comment...', name='comment-text', required=True),
+            Field('text', placeholder='Your comment...', required=True),
             ButtonHolder(
                 Submit('submit', 'Comment', css_class='button white btn-sm')
             )

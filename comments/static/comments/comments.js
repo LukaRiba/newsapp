@@ -1,5 +1,8 @@
 $(function() {
 
+
+    // reply radi savršeno, ali na taj način ne mogu prikazati comment, jer kako ću i reply formu prikazati -
+    // - kako prikazati {{ crispy comment_form }}
     
     $('#comment-form').on('submit', function(){
         event.preventDefault();
@@ -11,45 +14,53 @@ $(function() {
     function createComment(textarea){
         $.ajax({
             url : URL, // the endpoint - URL variable is defined in main html (inside script tag), in this case detail.html
-            type : "POST", // http method
+            type : "POST",
             data : { 
                 text: textarea.val()
-            }, // data sent with the post request
+            }, 
 
             // handle a successful response
             success : function(json) {
                 textarea.val(''); // remove the value from the input
                 console.log(json); // log the returned json to the console
-                showComment(json);
+                // showComment(json);
+                $('.comments-body').replaceWith(json); 
+
             },
 
             // handle a non-successful response
             error : function(xhr,errmsg) {
-                $('##error-log').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+                $('#error-log').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
                     " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
                 console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
             }
         });
     }
 
-    $('.reply-button').each(function(i){
-        $(this).on('click', function(){
+    // function showComment(json){
+        
+    //     $('.comments-body').replaceWith(json); 
+        
+    // }
+
+    $('.comment').each(function(i){
+        $(this).on('click', '.reply-button', function(){
             $('#reply-form-' + (i+1)).toggle(); // i+1 because i starts with 0, but first id is reply-form-1. 
         });
-    })
+    });
  
     $('.reply-form').each(function(){
-        let parentId = $(this).parent().children().first().text() // comment model instance id (owner of replies, their ForeignKey)
-        let parentDOMId = $(this).parent().attr('id').split('-').pop() // id of div element with class .comment (reply-form and replies are his DOM children)
+        let parentId = $(this).parent().attr('id') // comment model instance id (owner of replies, their ForeignKey) AND id of DOM comment div element
+        //let parentDOMId = $(this).parent().attr('id').split('-').pop() // id of div element with class .comment (reply-form and replies are his DOM children)
         $(this).on('submit', function(event){
             event.preventDefault();
             let textarea = $(this).find('textarea'); // text of the reply
-            createReply(parentId, parentDOMId, textarea);
+            createReply(parentId, textarea);
         });
     });
 
     // AJAX for reply
-    function createReply(parentId, parentDOMId, textarea){
+    function createReply(parentId, textarea){
         console.log("create reply is working!") // sanity check
         $.ajax({
             url : URL, // the endpoint - URL variable is defined in main html (inside script tag), in this case detail.html
@@ -63,7 +74,7 @@ $(function() {
             success : function(json) {
                 textarea.val(''); // remove the value from the input
                 console.log(json); // log the returned json to the console
-                showReply(json, parentDOMId);
+                showReply(json, parentId);
             },
 
             // handle a non-successful response - dodati u comments.html div sa #error-log
@@ -76,12 +87,12 @@ $(function() {
     };
 
     // adds new reply to the top of .replies div.
-    function showReply(json, parentDOMId){
+    function showReply(json, parentId){
         let author = '<p class="margin-bottom-0"><strong>' + json.author + '</strong></p>';
         let pubDate = '<p class="pub-date margin-bottom-5">' + json.pub_date + '</p>';
         let text = ' <p class="margin-bottom-20">' + json.text + '</p>';
         let newReply = '<div id="' + json.reply_id + '" class="reply">' + author + pubDate + text + '</div>';
-        $('#replies-' + parentDOMId).prepend(newReply); // Add new reply div to the DOM
+        $('#replies-' + parentId).prepend(newReply); // Add new reply div to the DOM
         $('#' + json.reply_id).hide().fadeIn(1000); // Select added reply through id, then hide it and immediately fadeIn - for FadeIn effect
     }
 
@@ -138,3 +149,9 @@ $(function() {
     });
 
 });
+
+
+
+
+
+

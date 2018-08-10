@@ -1,0 +1,9 @@
+<div id="replies-{{ parent_id }}">
+  {% for reply in replies %}
+    <div class="reply" id="{{ parent_id }}-{{ reply.id }}">
+      <p class="margin-bottom-0"><strong>{{ reply.author }}</strong></p>
+      <p class="pub-date margin-bottom-5">{{ reply.pub_date }}</p>
+      <p class="margin-bottom-20">{{ reply.text }}</p>
+    </div>
+  {% endfor %}
+</div>

@@ -20,7 +20,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^', include('my_newsapp.urls')),
+    url(r'^news/', include('my_newsapp.urls')),
+    url(r'^comments/', include('comments.urls')),
 ]
 
 #comment
@@ -28,6 +29,5 @@ urlpatterns = [
     # https://docs.djangoproject.com/en/2.0/howto/static-files/#serving-files-uploaded-by-a-user-during-development
     # https://stackoverflow.com/questions/49096239/django-imagefield-not-uploading-the-image?rq=1
     # dobro objašnjeno: https://overiq.com/django/1.10/handling-media-files-in-django/
-#endcomment
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
