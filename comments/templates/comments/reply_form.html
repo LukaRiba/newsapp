@@ -1,5 +1,5 @@
 {% load crispy_forms_tags %}
 
-<form class="reply-form" action="" method="POST" id="reply-form-{{ forloop.counter }}" style="display: none">
+<form class="reply-form" action="" method="POST" id="reply-form-{{ comment.id }}" style="display: none">
     {% crispy reply_form %}
 </form>

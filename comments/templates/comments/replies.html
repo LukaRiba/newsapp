@@ -1,9 +1,16 @@
-<div id="replies-{{ parent_id }}">
-  {% for reply in replies %}
-    <div class="reply" id="{{ parent_id }}-{{ reply.id }}">
+  {% load comments_tags %}
+  {% if create_reply %}
+    <div class="reply" id="{{ reply.parent_id }}-{{ reply.id }}">
       <p class="margin-bottom-0"><strong>{{ reply.author }}</strong></p>
       <p class="pub-date margin-bottom-5">{{ reply.pub_date }}</p>
       <p class="margin-bottom-20">{{ reply.text }}</p>
     </div>
-  {% endfor %}
-</div>
+  {% else %}
+    {% for reply in comment.replies.all %} 
+      <div class="reply" id="{{ reply.parent_id }}-{{ reply.id }}">
+        <p class="margin-bottom-0"><strong>{{ reply.author }}</strong></p>
+        <p class="pub-date margin-bottom-5">{{ reply.pub_date }}</p>
+        <p class="margin-bottom-20">{{ reply.text }}</p>
+      </div>
+    {% endfor %}
+  {% endif %}

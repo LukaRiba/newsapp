@@ -1,9 +1,11 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from django.db.models import F
 from django.contrib.contenttypes.models import ContentType
 
 from .models import Comment
 from .forms import CommentForm, ReplyForm
+from .decorators import require_ajax
 from my_newsapp.models import Article
 
 class CommentContextMixin:
@@ -20,31 +22,37 @@ class CommentContextMixin:
         return context
 
 def comments(request):
-    context = {}
-    context['comments'] = Comment.objects.all()
-    if request.POST:
-        context['comment_form'] = CommentForm(request.POST)
-        context['reply_form'] = ReplyForm(request.POST)
-    else:
-        context['comment_form'] = CommentForm()
-        context['reply_form'] = ReplyForm()
-    return render(request, 'comments/comments_base.html', context)
+    context = {
+        'comments': Comment.objects.filter(parent_id=None),
+        'replies': Comment.objects.filter(parent_id__exact=F('object_id')),
+        'comment_form': CommentForm(),
+        'reply_form': ReplyForm()
+    }
+    return render(request, 'comments/base.html', context)
 
-# dodati dekoratore za if request.method == POST, if request.is_ajax()
-def add_comment(request):
-    if request.method == 'POST':
-        print('POST data: ', request.POST)
-        form = CommentForm(request.POST)
-        if form.is_valid() and request.is_ajax():
-            form.save(commit=False)
-            form.instance.author = request.user
-            form.instance.content_type_id = ContentType.objects.get(model='article').id
-            form.instance.object_id = Article.objects.get(id=1).id
-            form.save()
-            return render(request, 'comments/comments.html', {'comments': Comment.objects.all()[0:1]})
+@require_POST
+@require_ajax
+def add_comment(request):    
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        form.save(commit=False)
+        form.instance.author = request.user
+        form.instance.content_type_id = ContentType.objects.get(model='article').id
+        form.instance.object_id = Article.objects.get(id=1).id
+        form.save()
+        context = {'comments': Comment.objects.all()[0:1], 'reply_form': ReplyForm()}
+        return render(request, 'comments/comments.html', context)
         
-
-
-
+@require_POST
+@require_ajax
 def add_reply(request):
-    pass
+    form = ReplyForm(request.POST)
+    parent_id = request.POST.get('parentId')
+    if form.is_valid():
+        form.save(commit=False)
+        form.instance.author = request.user
+        form.instance.content_type_id = ContentType.objects.get(model='comment').id
+        form.instance.object_id = form.instance.parent_id = parent_id
+        form.save()
+        context = {'reply': Comment.objects.latest('pub_date'), 'create_reply': True} # bool just for check in template
+        return render(request, 'comments/replies.html', context)

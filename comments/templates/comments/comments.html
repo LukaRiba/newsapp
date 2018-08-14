@@ -3,11 +3,16 @@
     <p class="margin-bottom-0"><strong>{{ comment.author }}</strong></p>
     <p class="pub-date margin-bottom-5">{{ comment.pub_date }}</p>
     <p class="margin-bottom-0">{{ comment.text }}</p>
-    <button class="reply-button">Reply</button>
+    <button class="reply-button" id="reply-button-{{ comment.id }}">Reply</button>
+
+    {% include "comments/reply_form.html" %}
   
     {% comment %} {% include "comments/reply_form.html" %} {% endcomment %}
     <div class="margin-bottom-30"></div>
 
-    {% include "comments/replies.html" %}
+    <div id="replies-{{ comment.id }}">
+      {% include "comments/replies.html" %}
+    </div>
+    
   </div>  
 {% endfor %}  

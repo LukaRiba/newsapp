@@ -1,9 +1,9 @@
 {% load staticfiles %}
 
 <link rel="stylesheet" href="{% static 'css/bootstrap-4.0.0.css' %}">
-<link rel="stylesheet" href="{% static 'comments/comments.css' %}">
+<link rel="stylesheet" href="{% static 'comments/css/comments.css' %}">
 
-
+<div id="error-log"></div>
 
 <div class="comments-body">
   <h5 class="title">Comments</h5>
@@ -23,4 +23,5 @@
 
 <script src="{% static 'js/jquery-3.3.1.js' %}"></script>
 <script src="{% static 'js/bootstrap-4.0.0.js' %}"></script>
-<script src="{% static 'comments/comments_new.js' %}"></script>
+<!-- veoma bitno: type="module"  -> inače import u main.js-u ne radi ! -->
+<script type="module" src="{% static 'comments/js/main.js' %}"></script>
