@@ -3,14 +3,20 @@
     <p class="margin-bottom-0"><strong>{{ comment.author }}</strong></p>
     <p class="pub-date margin-bottom-5">{{ comment.pub_date }}</p>
     <p class="margin-bottom-0">{{ comment.text }}</p>
+    {% if comment.replies.all %}
+      <button class="show-replies" id="show-replies-{{ comment.id }}" style="white-space:pre">Show replies</button>
+    {% else %}
+      <span class="no-replies-message" id="no-replies-message-{{ comment.id }}">No replies yet</span>
+    {% endif %}
+    <span style="white-space:pre"> </span>
     <button class="reply-button" id="reply-button-{{ comment.id }}">Reply</button>
-
+    
     {% include "comments/reply_form.html" %}
   
     {% comment %} {% include "comments/reply_form.html" %} {% endcomment %}
     <div class="margin-bottom-30"></div>
 
-    <div id="replies-{{ comment.id }}">
+    <div id="replies-{{ comment.id }}" style="display:none">
       {% include "comments/replies.html" %}
     </div>
     

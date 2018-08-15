@@ -1,15 +1,15 @@
 import './csrf.js'; // Import an entire module for side effects only, without importing anything. This runs the module's global code, but doesn't actually import any values.
-import createComment from './post_comment.js';
+import {createComment} from './post_comment.js';
 import createReply from './post_reply.js';
 
 $(function() {
     addCommentFormSubmitListener();
 
     $('.reply-form').each(function(){
-        addReplyFormSubmitListener(this);
+        addReplyFormSubmitListener($(this));
     });
 
-    addListenersToReplyButtons();
+    addCommentButtonListeners();
 });
 
 function addCommentFormSubmitListener() {
@@ -20,8 +20,8 @@ function addCommentFormSubmitListener() {
     });
 }
 
-function addReplyFormSubmitListener($selector) {
-    $($selector).on('submit', function(event){
+function addReplyFormSubmitListener(replyForm) {
+    $(replyForm).on('submit', function(event){
         event.preventDefault();
         let parentId = $(this).parent().attr('id') // comment model instance id (owner of replies, their ForeignKey) AND id of DOM comment div element
         let textarea = $(this).find('textarea'); 
@@ -29,20 +29,58 @@ function addReplyFormSubmitListener($selector) {
     });
 }
 
-function addListenersToReplyButtons() {
+function addCommentButtonListeners() {
     $('.comment').each(function(){
         let commentId = $(this).attr('id');
-        $('#reply-button-' + commentId).click(function(){
-            toggleReplyForm(commentId);
-        });
+        addShowRepliesButtonListener(commentId);
+        addReplyButtonListener(commentId);
     });
 }
 
-function toggleReplyForm(id){
-    $('#reply-form-' + id ).toggle(); 
+function addShowRepliesButtonListener(id) {
+    getShowRepliesButton(id).click(function() {
+        toggleReplies(id);
+    });
 }
 
-export {addReplyFormSubmitListener, toggleReplyForm};
+function getShowRepliesButton(id) {
+    return $('#show-replies-' + id);
+}
+
+function toggleReplies(id){
+    $('#replies-' + id ).animate({ height: 'toggle', opacity: 'toggle' }, 'fast'); 
+    toggleShowRepliesButtonText(id);
+}
+
+function toggleShowRepliesButtonText(id) {
+    let button = getShowRepliesButton(id);
+    if (button.text() === 'Show replies') {
+        button.text('Hide replies'  + ' ');
+    } else button.text('Show replies'); 
+}
+
+function addReplyButtonListener(id) {
+    getReplyButton(id).click(function() {
+        toggleReplyForm(id);
+    });
+}
+
+function getReplyButton(id) {
+    return $('#reply-button-' + id);
+}
+
+function toggleReplyForm(id){
+    $('#reply-form-' + id ).animate({ height: 'toggle', opacity: 'toggle' }, 'fast')
+}
+
+export {
+    addReplyFormSubmitListener, 
+    toggleReplyForm,
+    toggleReplies,
+    addShowRepliesButtonListener,
+    addReplyButtonListener,
+    getShowRepliesButton
+};
 
 
 

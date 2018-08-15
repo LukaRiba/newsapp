@@ -1,4 +1,4 @@
-import {addReplyFormSubmitListener, toggleReplyForm} from './main.js';
+import {addReplyFormSubmitListener, addReplyButtonListener, toggleReplyForm} from './main.js';
 
 // ajax for comments
 function createComment(textarea){
@@ -9,30 +9,18 @@ function createComment(textarea){
             text: textarea.val()
         }, 
         success : function(newComment) {
-            textarea.val(''); // remove the value from the input
-            if ($('#no-comments-yet-message')) $('#no-comments-yet-message').remove()
             addComment(newComment);
+            resetCommentForm(textarea);
             fadeIn();
         },
-        error : function(xhr,errmsg) {
-            $('#error-log').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
-                " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
-            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
-        }
+        error : function() { reportError(); }
     });
 }
 
 function addComment(comment){
     $('#comments').prepend(comment); 
-    addReplyButtonListener();
+    addReplyButtonListener(newCommentId());
     addReplyFormSubmitListener('#reply-form-' + newCommentId());
-}
-
-function addReplyButtonListener(){
-    let commentId = newCommentId();
-    $('#reply-button-' + commentId).click(function(){
-        toggleReplyForm(commentId); 
-    });
 }
 
 function newCommentId() {
@@ -40,8 +28,30 @@ function newCommentId() {
     return newComment.attr('id');
 }
 
+function resetCommentForm(textarea) {
+    textarea.val(''); // remove the value from the input
+    if (isFirstComment()) removeNoCommentsMessage();
+}
+
+function isFirstComment() {
+    return $('.comment').length === 1;
+}
+
+function removeNoCommentsMessage() {
+    $('#no-comments-yet-message').remove();
+}
+
 function fadeIn(){
     $('.comment').first().hide().fadeIn(1000)
 }
 
-export default createComment;
+function reportError(xhr,errmsg) {
+    $('#error-log').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+        " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+}
+
+export {
+    createComment,
+    reportError
+};

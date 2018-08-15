@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
-from django.db.models import F
 from django.contrib.contenttypes.models import ContentType
 
 from .models import Comment
@@ -8,8 +7,7 @@ from .forms import CommentForm, ReplyForm
 from .decorators import require_ajax
 from my_newsapp.models import Article
 
-class CommentContextMixin:
-
+class CommentsContextMixin:
     def get_context_data(self, model_name, object_id, **kwargs):
         context = super().get_context_data(**kwargs)
         context['comments'] = Comment.objects.filter(content_type_id__model=model_name, object_id=object_id)
@@ -21,10 +19,10 @@ class CommentContextMixin:
             context['reply_form'] = ReplyForm()
         return context
 
+# view eliminirati (pošto će komentare prikazivati ArticleDetail view) i 
 def comments(request):
     context = {
         'comments': Comment.objects.filter(parent_id=None),
-        'replies': Comment.objects.filter(parent_id__exact=F('object_id')),
         'comment_form': CommentForm(),
         'reply_form': ReplyForm()
     }
