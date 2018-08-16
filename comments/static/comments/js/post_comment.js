@@ -13,7 +13,7 @@ function createComment(textarea){
             resetCommentForm(textarea);
             fadeIn();
         },
-        error : function() { reportError(); }
+        error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
 }
 

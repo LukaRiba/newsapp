@@ -5,12 +5,11 @@
 {% block title %}{{ article.title }}{% endblock title %}
 
 {% block head_scripts %}
-<script>var URL = "{% url 'my_newsapp:article-detail' category=article.category.title id=article.id slug=article.slug %}";</script> 
 {% endblock head_scripts %}
 
 {% block style %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'comments/comments.css' %}">
+  <link rel="stylesheet" href="{% static 'comments/css/comments.css' %}">
 {% endblock style %}
 
 {% block jumbo %}
@@ -102,14 +101,14 @@
   </div>
 
   <div class="comments">
-    {% include 'comments/comments.html' %}
+    {% include 'comments/base.html' %}
   </div>
   
 {% endblock content %}
 
 {% block script %}
   {{ block.super }}
-  <script src="{% static 'comments/comments.js' %}"></script>
+  <script type="module" src="{% static 'comments/js/main.js' %}"></script>
   <script>    
     //On detail page, always scroll to the top of article
    // window.scrollTo(0, 250);

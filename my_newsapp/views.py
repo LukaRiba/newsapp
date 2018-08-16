@@ -1,25 +1,13 @@
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
-from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
 
 from .models import Article, Category
 from .utils import get_status_none_categories_random_ids
 from .forms import ArticleForm, ImageFormSet
 
-from comments.forms import CommentForm
-from comments.views import CommentContextMixin
-
-from comments.models import Comment
-
-from django.contrib.contenttypes.models import ContentType
-
-from django.http import JsonResponse
-
-from django.template.loader import render_to_string
-
-
+from comments.views import CommentsContextMixin
 
 # defines context used by navigation which has to be shared between views
 class NavigationContextMixin:
@@ -101,7 +89,6 @@ class HomeView(NavigationContextMixin, HomeViewMixin, TemplateView):
     #               return context
     #endcomment
 class LatestArticlesView(NavigationContextMixin, ListView):
-
     template_name = 'my_newsapp/latest_articles.html'
     context_object_name = 'articles'
     model = Article
@@ -110,7 +97,7 @@ class LatestArticlesView(NavigationContextMixin, ListView):
 class CategoryView(NavigationContextMixin, ListView):
     template_name = 'my_newsapp/category.html'
     context_object_name = 'articles'
-    paginate_by = 2
+    paginate_by = 5
 
     # gett-a Category instancu na temelju slug-a u url-u
     def get_category(self):
@@ -119,67 +106,15 @@ class CategoryView(NavigationContextMixin, ListView):
     def get_queryset(self):
         return self.get_category().articles.all()
 
-class ArticleDetailView(NavigationContextMixin, CommentContextMixin, DetailView):
+class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView):
     template_name = 'my_newsapp/detail.html'
     model = Article
-    form_class = CommentForm
-    comments_template = 'comments/comments.html'
-
-    def get_context_data(self, **kwargs):
-        return super(ArticleDetailView, self).get_context_data(model_name=self.model.__name__, 
-                                                               object_id=self.kwargs['id'], **kwargs)
     
-    #umijesto 'if request.is_ajax():' unutar metode napisati dekorator!!!
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = self.form_class(request.POST)
-        
-        if form.is_valid() and request.is_ajax():
-            
-            response_data = {}
-
-            if 'parent_id' in request.POST:
-                parent_id = request.POST.get('parent_id')
-                
-                form.save(commit=False)
-                form.instance.author = self.request.user
-                form.instance.content_type_id = self.get_content_type(model_name='comment').id
-                form.instance.object_id = parent_id
-                form.instance.parent_id = parent_id
-                form.parent = Comment.objects.get(id=parent_id)
-                form.save()
-
-                response_data['author'] = form.instance.author.username
-                response_data['pub_date'] = form.instance.pub_date
-                response_data['text'] = form.instance.text
-                response_data['reply_id'] = str(parent_id) + '-' + str(form.instance.id) # stvara id reply div-a, kako bi ga mogao selektirati i dodati FadeIn efekt - vidi comment.js
-
-                return JsonResponse(response_data)
-            else:
-                form.save(commit=False)
-                form.instance.author = self.request.user
-                form.instance.content_type_id = self.get_content_type(self.model.__name__).id
-                form.instance.object_id = self.kwargs['id']
-                form.save()
-
-                response_data['author'] = form.instance.author.username
-                response_data['pub_date'] = form.instance.pub_date
-                response_data['text'] = form.instance.text
-                response_data['comment_id'] = str(form.instance.id) # stvara id reply div-a, kako bi ga mogao selektirati i dodati FadeIn efekt - vidi comment.js
-                html = render_to_string(self.comments_template, context=self.get_context_data())
-
-                
-
-
-                return HttpResponse(html)
-                
+    # Override to add these variables to request.session for configuring comments
+    def get(self, request, *args, **kwargs):
+        self.request.session['comments_owner_model_name'] = self.model.__name__
+        self.request.session['comments_owner_id'] = self.kwargs['id']
         return super(ArticleDetailView, self).get(request, *args, **kwargs)
-
-    # def check_for_parent_id(self):
-    #     pass 
-
-    def get_content_type(self, model_name):
-        return ContentType.objects.get(model=model_name)
 
 class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'

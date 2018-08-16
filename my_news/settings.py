@@ -136,3 +136,5 @@ MEDIA_URL = '/media/'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+

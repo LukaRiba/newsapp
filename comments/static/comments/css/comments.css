@@ -1,16 +1,18 @@
+/* koristiti sass da mogu neste-ati sve selektore unutar .comments-body selektora, a ne ovako*/
+
 .comments-body {
 	margin-bottom: 40px;
 }
 
-ul {
+.comments-body ul {
 	list-style: none;
 }
 
-li {
+.comments-body li {
 	float: left;
 }
 
-.title {
+.comments-body .title {
 	margin-top: 30px;
 	padding-top: 15px;
 	padding-bottom: 15px;
@@ -18,7 +20,7 @@ li {
 	color: rgb(97, 59, 59);
 }
 
-.pub-date {
+.comments-body .pub-date {
 	color: grey;
 	font-size: 11px !important;
 }
@@ -29,14 +31,14 @@ li {
 	font-size: 14px;
 }
 
-.no-replies-message {
+.comments-body .no-replies-message {
 	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 	font-weight: 600;
 	font-size: 12px;
 	color: rgb(75, 75, 75);
 }
 
-.reply-button, .show-replies {
+.comments-body .reply-button, .show-replies {
 	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 	font-weight: 600;
 	font-size: 12px;
@@ -48,42 +50,42 @@ li {
 	cursor: pointer;
 }
 
-.reply-button:focus, .show-replies:focus {
+.comments-body .reply-button:focus, .show-replies:focus {
 	outline:none !important;
 }
 
-.reply {
+.comments-body .reply {
 	padding-left: 50px;
 }
 
-.reply-form {
+.comments-body .reply-form {
 	padding-left: 50px;
 }
 
 /* --- utils --- */
-.margin-bottom-0 {
+.comments-body .margin-bottom-0 {
 	margin-bottom: 0px;
 }
 
-.margin-bottom-5 {
+.comments-body .margin-bottom-5 {
 	margin-bottom: 5px;
 }
 
-.margin-bottom-20 {
+.comments-body .margin-bottom-20 {
 	margin-bottom: 20px;
 }
 
-.margin-bottom-30 {
+.comments-body .margin-bottom-30 {
 	margin-bottom: 30px;
 }
 
 /* --- Bootstrap override --- */
 
-.form-control {
+.comments-body .form-control {
 	font-size: 14px;
 }
 
-.form-group {
+.comments-body .form-group {
 	margin-bottom: 0.5rem;
 }
 
