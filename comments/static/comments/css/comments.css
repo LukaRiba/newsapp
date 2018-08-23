@@ -25,10 +25,12 @@
 	font-size: 11px !important;
 }
 
-
-
 .comments-body p {
 	font-size: 14px;
+}
+
+.comments-body span {
+	white-space: pre;
 }
 
 .comments-body .no-replies-message {
@@ -38,7 +40,7 @@
 	color: rgb(75, 75, 75);
 }
 
-.comments-body .reply-button, .show-replies {
+.comments-body .reply-button, .show-replies, .delete-button {
 	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 	font-weight: 600;
 	font-size: 12px;
@@ -50,7 +52,7 @@
 	cursor: pointer;
 }
 
-.comments-body .reply-button:focus, .show-replies:focus {
+.comments-body .reply-button:focus, .show-replies:focus, .delete-button:focus {
 	outline:none !important;
 }
 

@@ -3,7 +3,7 @@ import {addReplyFormSubmitListener, addReplyButtonListener, toggleReplyForm} fro
 // ajax for comments
 function createComment(textarea){
     $.ajax({
-        url : '/comments/add_comment/',
+        url : 'comments/add_comment/',
         type : "POST",
         data : { 
             text: textarea.val()

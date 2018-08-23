@@ -8,7 +8,12 @@
 <div class="comments-body">
   <h5 class="title">Comments</h5>
 
-  {% include "comments/comment_form.html" %}
+  {% if request.user.is_authenticated %}
+    {% include "comments/comment_form.html" %}
+  {% else %}
+    <h5><a href="">Login</a> to comment.</h5>
+  {% endif %}
+  
   <div class="margin-bottom-30"></div>
 
   <div id="comments">

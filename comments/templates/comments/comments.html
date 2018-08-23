@@ -8,12 +8,22 @@
     {% else %}
       <span class="no-replies-message" id="no-replies-message-{{ comment.id }}">No replies yet</span>
     {% endif %}
-    <span style="white-space:pre"> </span>
-    <button class="reply-button" id="reply-button-{{ comment.id }}">Reply</button>
     
-    {% include "comments/reply_form.html" %}
-  
-    {% comment %} {% include "comments/reply_form.html" %} {% endcomment %}
+    {% if request.user.is_authenticated %}
+      <span> </span>
+      <button class="reply-button" id="reply-button-{{ comment.id }}">Reply</button>
+      {% if request.user == comment.author %}
+        <span> </span>
+        <!-- Button trigger modal -->
+        <button class="delete-button" id="delete-button-{{ comment.id }}" data-toggle="modal" data-target="#DeleteModalCenter-{{ comment.id }}">
+          Delete
+        </button>
+        <!-- Modal -->
+        {% include "comments/delete_comment_modal.html" %}
+      {% endif %}
+      {% include "comments/reply_form.html" %}
+    {% endif %}
+
     <div class="margin-bottom-30"></div>
 
     <div id="replies-{{ comment.id }}" style="display:none">

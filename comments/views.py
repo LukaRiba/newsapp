@@ -1,6 +1,10 @@
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import get_object_or_404
+
+from django.http import HttpResponse
+
 
 from .models import Comment
 from .forms import CommentForm, ReplyForm
@@ -51,3 +55,14 @@ def add_reply(request):
              'create_reply': True  # bool just for check in template
              } 
         return render(request, 'comments/replies.html', context)
+
+@require_POST
+@require_ajax
+def delete_comment_or_reply(request, id):
+    print('inside delete view')
+    target = get_object_or_404(Comment, pk=id)
+    target.delete()
+    print('comment is deleted')
+    return HttpResponse('comment deleted')
+
+    

@@ -1,5 +1,4 @@
 from django.forms import ModelForm, Textarea
-from django.contrib.contenttypes.models import ContentType
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, ButtonHolder, Submit

@@ -1,10 +1,10 @@
 import {addShowRepliesButtonListener, getShowRepliesButton} from './main.js';
-import {reportError} from './post_comment.js';
+import {reportError} from './create_comment.js';
 
 // ajax for replies
 function createReply(textarea, parentId){
     $.ajax({
-        url : '/comments/add_reply/',
+        url : 'comments/add_reply/',
         type : "POST",
         data : { 
             text: textarea.val(),
@@ -15,7 +15,7 @@ function createReply(textarea, parentId){
             addReply(newReply, parentId);
             fadeIn(parentId);
         },
-        error : function() { reportError() }
+        error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
 }
 

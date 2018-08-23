@@ -1,6 +1,7 @@
 import './csrf.js'; // Import an entire module for side effects only, without importing anything. This runs the module's global code, but doesn't actually import any values.
-import {createComment} from './post_comment.js';
-import createReply from './post_reply.js';
+import {createComment} from './create_comment.js';
+import createReply from './create_reply.js';
+import deleteCommentOrReply from './delete.js';
 
 $(function() {
     addCommentFormSubmitListener();
@@ -10,6 +11,10 @@ $(function() {
     });
 
     addCommentButtonListeners();
+
+    $('.delete-form').each(function(){
+        addDeleteFormSubmitListener($(this));
+    });
 });
 
 function addCommentFormSubmitListener() {
@@ -20,8 +25,8 @@ function addCommentFormSubmitListener() {
     });
 }
 
-function addReplyFormSubmitListener(replyForm) {
-    $(replyForm).on('submit', function(event){
+function addReplyFormSubmitListener(form) {
+    $(form).on('submit', function(event){
         event.preventDefault();
         let parentId = $(this).parent().attr('id') // comment model instance id (owner of replies, their ForeignKey) AND id of DOM comment div element
         let textarea = $(this).find('textarea'); 
@@ -71,6 +76,13 @@ function getReplyButton(id) {
 
 function toggleReplyForm(id){
     $('#reply-form-' + id ).animate({ height: 'toggle', opacity: 'toggle' }, 'fast')
+}
+
+function addDeleteFormSubmitListener(form) {
+    $(form).on('submit', function(event){
+        event.preventDefault();
+        deleteCommentOrReply();
+    });
 }
 
 export {
