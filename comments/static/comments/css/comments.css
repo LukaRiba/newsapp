@@ -56,8 +56,10 @@
 	outline:none !important;
 }
 
-.comments-body .reply {
-	padding-left: 50px;
+.comments-body .replies {
+	border-left: 0.5px rgba(203, 200, 200, 0.631) solid; 
+	padding-left: 20px;
+	margin-left: 30px;
 }
 
 .comments-body .reply-form {
@@ -90,6 +92,5 @@
 .comments-body .form-group {
 	margin-bottom: 0.5rem;
 }
-
 
 

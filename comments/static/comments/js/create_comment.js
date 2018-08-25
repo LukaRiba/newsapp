@@ -1,9 +1,9 @@
-import {addReplyFormSubmitListener, addReplyButtonListener, toggleReplyForm} from './main.js';
+import {addReplyFormSubmitListener, addReplyButtonListener, addDeleteFormSubmitListener} from './main.js';
 
 // ajax for comments
 function createComment(textarea){
     $.ajax({
-        url : 'comments/add_comment/',
+        url : '/comments/add_comment/',
         type : "POST",
         data : { 
             text: textarea.val()
@@ -11,16 +11,21 @@ function createComment(textarea){
         success : function(newComment) {
             addComment(newComment);
             resetCommentForm(textarea);
-            fadeIn();
         },
         error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
 }
 
 function addComment(comment){
-    $('#comments').prepend(comment); 
+    $('#comments').prepend(comment);
+    fadeIn(); 
     addReplyButtonListener(newCommentId());
     addReplyFormSubmitListener('#reply-form-' + newCommentId());
+    addDeleteFormSubmitListener('#delete-form-' + newCommentId())
+}
+
+function fadeIn(){
+    $('.comment').first().hide().fadeIn(1000)
 }
 
 function newCommentId() {
@@ -39,10 +44,6 @@ function isFirstComment() {
 
 function removeNoCommentsMessage() {
     $('#no-comments-yet-message').remove();
-}
-
-function fadeIn(){
-    $('.comment').first().hide().fadeIn(1000)
 }
 
 function reportError(xhr,errmsg) {

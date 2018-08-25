@@ -48,46 +48,22 @@ class HomeViewMixin:
         categories = Category.objects.all()
 
         if categories.contain_instance_with_status_primary():
-            context['primary_category'] = Category.objects.get(status='P')
+            context['primary_category'] = categories.get(status='P')
             if categories.contain_instance_with_status_secondary():
-                context['secondary_category'] = Category.objects.get(status='S')
+                context['secondary_category'] = categories.get(status='S')
                 context['other_articles'] =  Article.objects.filter(category__status=None)[:5]
             else:
-                context['secondary_category'] = Category.objects.get(id=rand_ids.pop())
+                context['secondary_category'] = categories.get(id=rand_ids.pop())
                 context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids)[:5]
         else:
-            context['primary_category'] = Category.objects.get(id=rand_ids.pop())
-            context['secondary_category'] = Category.objects.get(id=rand_ids.pop())
+            context['primary_category'] = categories.get(id=rand_ids.pop())
+            context['secondary_category'] = categories.get(id=rand_ids.pop())
             context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids)[:5]
         return context
 
 class HomeView(NavigationContextMixin, HomeViewMixin, TemplateView):
     template_name = 'my_newsapp/home.html'
 
-#comment
-    # Rješenje za korištenje 2 queriset-a u ListView-u: 
-    # !!! U MEĐUVREMENU SAM PRIMJENIO GORE DEFINIRANI MIXIN ZA RJEŠENJE TOG PROBLEMA, POGLEDAJ NA KRAJU KOMENTARA
-    # KAKO JE OVAJ VIEW (PRIJE SE ZVAO HOMEVIEW) IZGLEDAO - KORISTIO JE 2 QUERYSETA BEZ EXTENDANJA MIXIN-A !!!
-    #    ListView MORA imati svoj queryset - definiramo get_queryset() metodu koja će vratiti
-    #    taj glavni queryset, bez kojeg ListView ne radi.
-    #    Sada, overrideamo get_context_data(), gdje u dictionary context dodamo što god želimo, u ovom slučaju 
-    #    queryset Category modela, i dodamo naš glavni queryset pozivom get_queryset() metode.
-    #    Sada u template-u jednostavno pristupamo queryset-ovima: {% for category in categories %} , tj. 
-    #    {% for article in articles %}. 'categories' i 'articles' su key-evi context dictionary-a koje smo definirali
-    #    u get_context_data
-    #           
-    #           class HomeView(generic.ListView):
-    #           template_name = 'my_newsapp/home.html'
-    #
-    #           def get_queryset(self):
-    #               return Article.objects.all()
-    #
-    #           def get_context_data(self, *args, **kwargs):
-    #               context = super(HomeView, self).get_context_data(*args, **kwargs)
-    #               context['categories'] = Category.objects.all()
-    #               context['articles'] = self.get_queryset()
-    #               return context
-    #endcomment
 class LatestArticlesView(NavigationContextMixin, ListView):
     template_name = 'my_newsapp/latest_articles.html'
     context_object_name = 'articles'
@@ -110,7 +86,7 @@ class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView
     template_name = 'my_newsapp/detail.html'
     model = Article
     
-    # Override to add these variables to request.session for configuring comments
+    # Override to add these variables to request.session, required for comments app
     def get(self, request, *args, **kwargs):
         self.request.session['comments_owner_model_name'] = self.model.__name__
         self.request.session['comments_owner_id'] = self.kwargs['id']
@@ -153,7 +129,6 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
         form = self.form_class(request.POST)
         formset = ImageFormSet(request.POST, request.FILES)
         if  form.is_valid and formset.is_valid():
-            # Set current user as article author
             form.save(commit=False)
             form.instance.author = self.request.user
             # Save created Article instance to db and bind formset to it
@@ -164,5 +139,4 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
             messages.info(self.request, self.success_msg)
             # redirect to detail view of created article
             return HttpResponseRedirect(form.instance.get_absolute_url())
-        # Ako uvijet ne prođe, vrati get() metodu superklase
         return super(CreateArticleView, self).get(request, *args, **kwargs)

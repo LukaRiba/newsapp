@@ -11,6 +11,6 @@ register = template.Library()
     # "replies comment objekta čiji je id jednak comment_id-u". Važno je 'replies|for_comment:comment_id' napisati
     # bez razmaka jer django to onda interpretira kao jednu cijelinu, što je potrebno. Na kraju ovaj template filter
     # nisam koristio.
-# @register.filter
-# def for_comment(replies, comment_id):
-#     return replies.filter(parent_id=comment_id)
+@register.filter
+def for_comment(replies, comment_id):
+    return replies.filter(parent_id=comment_id)

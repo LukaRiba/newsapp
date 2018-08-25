@@ -15,6 +15,7 @@ $(function() {
     $('.delete-form').each(function(){
         addDeleteFormSubmitListener($(this));
     });
+
 });
 
 function addCommentFormSubmitListener() {
@@ -81,7 +82,9 @@ function toggleReplyForm(id){
 function addDeleteFormSubmitListener(form) {
     $(form).on('submit', function(event){
         event.preventDefault();
-        deleteCommentOrReply();
+        let url = $(this).attr('action');
+        let id = url.split('/')[2];
+        deleteCommentOrReply(url, id);
     });
 }
 
@@ -91,7 +94,8 @@ export {
     toggleReplies,
     addShowRepliesButtonListener,
     addReplyButtonListener,
-    getShowRepliesButton
+    getShowRepliesButton,
+    addDeleteFormSubmitListener
 };
 
 

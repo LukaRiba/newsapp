@@ -13,7 +13,6 @@ CATEGORY_RELEVANCE_CHOICES = (
 )
 
 class CategoriesQuerySet(models.QuerySet):
-
     def contain_instance_with_status_primary(self):
         return self.filter(status='P').exists()
 

@@ -1,3 +1,5 @@
+// from https://realpython.com/django-and-ajax-form-submissions/
+
 // This function gets cookie with a given name
 function getCookie(name) {
     let cookieValue = null;

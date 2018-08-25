@@ -1,10 +1,10 @@
-import {addShowRepliesButtonListener, getShowRepliesButton} from './main.js';
+import {addShowRepliesButtonListener, getShowRepliesButton, addDeleteFormSubmitListener} from './main.js';
 import {reportError} from './create_comment.js';
 
 // ajax for replies
 function createReply(textarea, parentId){
     $.ajax({
-        url : 'comments/add_reply/',
+        url : '/comments/add_reply/',
         type : "POST",
         data : { 
             text: textarea.val(),
@@ -28,6 +28,7 @@ function hideReplyForm(textarea, parentId) {
 function addReply(reply, parentId){
     $('#replies-' + parentId).prepend(reply).show();
     addShowRepliesButtonOrChangeItsText(parentId);
+    addDeleteFormSubmitListener('#delete-form-' + newReplyId(parentId))
 }
 
 // if ($('#no-replies-message-' + id)) always returns True, because it always return object, even if it's empty. But, length
@@ -48,6 +49,11 @@ function addShowRepliesButton(parentId) {
     let showRepliesbutton = $('<button class="show-replies" id="show-replies-' + 
         parentId + '" style="white-space:pre">Hide replies </button>')
     $('#no-replies-message-' + parentId).after(showRepliesbutton).remove() 
+}
+
+function newReplyId(parentId) {
+    let newReply =  $('#replies-' + parentId).children().first();
+    return newReply.attr('id');
 }
 
 // Fades in first .reply element (just created) from parent #replies div

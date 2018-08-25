@@ -4,12 +4,12 @@ $("a.dropdown-item")
         $("ul.navbar-nav li.nav-item.dropdown").removeClass('show');
         $("li.nav-item.dropdown a.nav-link").attr('aria-expanded', "false" );
         $("li.nav-item.dropdown div").removeClass('show');
-        }
-    )
+    }
+);
 
-// Zadržavanje scroll pozicije prilikom učitavanja stranica
 //#region comment
 /*
+Zadržavanje scroll pozicije prilikom učitavanja stranica :
 Storage objects are simple key-value stores, similar to objects, but they stay intact through page loads. 
 The keys and the values are always strings (note that integer keys will be automatically converted to strings, 
 just like what objects do). You can access these values like an object, or with the Storage.getItem() and Storage.setItem() methods. 
@@ -37,24 +37,37 @@ will return a different Storage object. Both of these can be manipulated in the 
 */
 //#endregion
 window.addEventListener('scroll',function() {
-    //When scroll change, it is saved on localStorage.
+    //When scroll changes, it is saved on localStorage.
     localStorage.setItem('scrollPosition',window.scrollY);
 },false);
 
-if(localStorage.getItem('scrollPosition') !== null) {
-    window.scrollTo(0, localStorage.getItem('scrollPosition'));
+if(isDetailPage()) {
+    window.scrollTo(0, 250);
+} else scrollToSavedPosition();
+
+function isDetailPage(){
+    return document.getElementById('DetailPage');
 }
 
-// Scroll to top when accessing category pages from home page and latest-articles page, through links in
-// article previews (a elements with "scroll-to-top" class) - if accessing through navigation links, scroll position is mantained
-// Event listeners are added to these links, and when clicked, in localStorage is stored 'scrollToTop: true' key-value pair.
-// So, when category page loads, it checks for scrollToTop in localStorage, and if it exists, page is scrolled to top, and
-// imediatelly after, scrollToTop is removed from localStorage
+function scrollToSavedPosition(){
+    if(localStorage.getItem('scrollPosition') !== null) {
+        window.scrollTo(0, localStorage.getItem('scrollPosition'));
+    } 
+}
+
+//#region comment
+/*
+Scroll to top when accessing category pages from home page and latest-articles page, through links in
+article previews (a elements with "scroll-to-top" class) - if accessing through navigation links, scroll position is mantained
+Event listeners are added to these links, and when clicked, in localStorage is stored 'scrollToTop: true' key-value pair.
+So, when category page loads, it checks for scrollToTop in localStorage, and if it exists, page is scrolled to top, and
+imediatelly after, scrollToTop is removed from localStorage
+*/
+//#endregion
 let scrollToTopLinks = document.querySelectorAll('.scroll-to-top');
 
 scrollToTopLinks.forEach(element => {
     element.addEventListener('click', () => {
         localStorage.setItem('scrollToTop', true);
-        console.log('scrollToTop added to local storage');
     })
 });

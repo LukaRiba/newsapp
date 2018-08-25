@@ -4,9 +4,6 @@
 
 {% block title %}{{ article.title }}{% endblock title %}
 
-{% block head_scripts %}
-{% endblock head_scripts %}
-
 {% block style %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'comments/css/comments.css' %}">
@@ -21,7 +18,8 @@
 {% endblock jumbo %}
 
 {% block content %}
-
+  <span id="DetailPage" style="display: none;"></span>
+  
   {% if messages %}
     <ul class="messages">
       {% for message in messages %}
@@ -109,8 +107,4 @@
 {% block script %}
   {{ block.super }}
   <script type="module" src="{% static 'comments/js/main.js' %}"></script>
-  <script>    
-    //On detail page, always scroll to the top of article
-   // window.scrollTo(0, 250);
-</script>
 {% endblock script %}

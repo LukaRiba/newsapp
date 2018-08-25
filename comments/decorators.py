@@ -6,6 +6,6 @@ def require_ajax(view):
             return view(request, *args, **kwargs)
         else:
             raise PermissionDenied
-    # wrapper.__doc__ = view.__doc__
+    wrapper.__doc__ = view.__doc__
     wrapper.__name__ = view.__name__
     return wrapper

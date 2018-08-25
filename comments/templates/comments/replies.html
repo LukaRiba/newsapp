@@ -1,32 +1,8 @@
-  {% load comments_tags %}
-  {% if create_reply %}
-    <div class="reply margin-bottom-20" id="{{ reply.parent_id }}-{{ reply.id }}">
-      <p class="margin-bottom-0"><strong>{{ reply.author }}</strong></p>
-      <p class="pub-date margin-bottom-5">{{ reply.pub_date }}</p>
-      <p class="margin-bottom-0">{{ reply.text }}</p>
-      {% if request.user == reply.author %}
-        <!-- Button trigger modal -->
-        <button type="button" class="delete-button" id="delete-button-{{ reply.id }}" data-toggle="modal" data-target="#DeleteModalCenter">
-          Delete
-        </button>
-        <!-- Modal -->
-        {% include "comments/delete_comment_modal.html" %}
-      {% endif %}
-    </div>
-  {% else %}
-    {% for reply in comment.replies.all %} 
-      <div class="reply margin-bottom-20" id="{{ reply.parent_id }}-{{ reply.id }}">
-        <p class="margin-bottom-0"><strong>{{ reply.author }}</strong></p>
-        <p class="pub-date margin-bottom-5">{{ reply.pub_date }}</p>
-        <p class="margin-bottom-0">{{ reply.text }}</p>
-        {% if request.user == reply.author %}
-          <!-- Button trigger modal -->
-          <button type="button" class="delete-button" id="delete-button-{{ reply.id }}" data-toggle="modal" data-target="#DeleteModalCenter">
-            Delete
-          </button>
-          <!-- Modal -->
-          {% include "comments/delete_comment_modal.html" %}
-        {% endif %}
-      </div>
-    {% endfor %}
-  {% endif %}
+{% load comments_tags %}
+{% if create_reply %}
+  {% include "comments/reply_snippet.html" %}
+{% else %}
+  {% for reply in comment.replies.all %} 
+    {% include "comments/reply_snippet.html" %}    
+  {% endfor %}
+{% endif %}
