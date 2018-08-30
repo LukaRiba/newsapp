@@ -13,11 +13,17 @@ CATEGORY_RELEVANCE_CHOICES = (
 )
 
 class CategoriesQuerySet(models.QuerySet):
-    def contain_instance_with_status_primary(self):
+    def has_primary(self):
         return self.filter(status='P').exists()
 
-    def contain_instance_with_status_secondary(self):
+    def get_primary(self):
+        return self.get(status='P')
+
+    def has_secondary(self):
         return self.filter(status='S').exists()
+    
+    def get_secondary(self):
+        return self.get(status='S')
 
 class Category(models.Model):
     title = models.CharField(max_length=100, unique=True)

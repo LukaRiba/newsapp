@@ -30,8 +30,9 @@ function removeCommentOrReply(id) {
     $(getTarget(id)).fadeTo(2000, 0.00, function(){ 
         $(this).slideUp(500, function() { 
             removeShowRepliesButtonIfLastReply($(this));
-            displayNoCommentsYetMessageIfLastComment();
-            $(this).remove(); 
+            $(this).remove();
+            displayNoCommentsYetMessageIfLastCommentDeleted();
+             
         });
     });
 }
@@ -40,12 +41,6 @@ function removeShowRepliesButtonIfLastReply(reply){
     if( isLastReply(reply) ){
         let parent = getParent(reply);
         displayNoRepliesYetMessage(parent);
-    }
-}
-
-function displayNoCommentsYetMessageIfLastComment(){
-    if( isLastComment() ){
-        $('#comments').prepend('<p id="no-comments-yet-message">No comments yet.</p>')
     }
 }
 
@@ -64,8 +59,14 @@ function displayNoRepliesYetMessage(comment){
     comment.find('.text').after(message)
 }
 
-function isLastComment(){
-    return $('.comment').length === 1;
+function displayNoCommentsYetMessageIfLastCommentDeleted(){
+    if( LastCommentDeleted() ){
+        $('#comments').prepend('<p id="no-comments-yet-message">No comments yet.</p>')
+    }
+}
+
+function LastCommentDeleted(){
+    return $('.comment').length === 0;
 }
 
 export default deleteCommentOrReply;

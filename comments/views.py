@@ -33,7 +33,8 @@ def add_comment(request):
         form.instance.object_id = request.session['comments_owner_id']
         form.save()
         context = {
-            # returns created comment in an QuerySet (itterable object is required because template uses forloop tag)
+            # returns created comment in an QuerySet (itterable object is required because template uses forloop tag).
+            # First comment in QuerySet is just created one, because of ordering = ['-pub_date'].
             'comments': Comment.objects.all()[0:1],
             'reply_form': ReplyForm()
             }

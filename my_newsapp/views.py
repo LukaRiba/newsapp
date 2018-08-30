@@ -42,25 +42,32 @@ class NavigationContextMixin:
     # kada bi get_random_status_none_categories_ids() pozvao unutar get_context_data dobivao bih iznimke kod npr. id=rand_ids.pop() 
     # 'nonetype object has no attribute pop()' ili za category__pk__in=rand_ids 'nonetype object is not iterable' ili sl. Zašto? Neznam točno
 class HomeViewMixin:
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        rand_ids = get_status_none_categories_random_ids()
-        categories = Category.objects.all()
+    categories = Category.objects.all()
 
-        if categories.contain_instance_with_status_primary():
-            context['primary_category'] = categories.get(status='P')
-            if categories.contain_instance_with_status_secondary():
-                context['secondary_category'] = categories.get(status='S')
-                context['other_articles'] =  Article.objects.filter(category__status=None)[:5]
-            else:
-                context['secondary_category'] = categories.get(id=rand_ids.pop())
-                context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids)[:5]
-        else:
-            context['primary_category'] = categories.get(id=rand_ids.pop())
-            context['secondary_category'] = categories.get(id=rand_ids.pop())
-            context['other_articles'] =  Article.objects.filter(category__pk__in=rand_ids)[:5]
+    def get_context_data(self, *args, **kwargs):
+        rand_ids = get_status_none_categories_random_ids()
+        context = super().get_context_data(*args, **kwargs)
+        home_context = {
+            'primary_category': self.get_primary_category(rand_ids),
+            'secondary_category': self.get_secondary_category(rand_ids),
+            'other_articles': self.get_other_articles(rand_ids)
+        }
+        context.update(home_context)
         return context
 
+    def get_primary_category(self, rand_ids):
+        if self.categories.has_primary():
+            return self.categories.get_primary()
+        return self.categories.get(id=rand_ids.pop())
+
+    def get_secondary_category(self, rand_ids):
+        if self.categories.has_primary() and self.categories.has_secondary():
+            return self.categories.get_secondary()
+        return self.categories.get(id=rand_ids.pop())
+
+    def get_other_articles(self, rand_ids):
+        return Article.objects.filter(category__pk__in=rand_ids)[:5]
+        
 class HomeView(NavigationContextMixin, HomeViewMixin, TemplateView):
     template_name = 'my_newsapp/home.html'
 
