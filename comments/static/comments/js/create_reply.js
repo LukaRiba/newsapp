@@ -31,8 +31,6 @@ function addReply(reply, parentId){
     addDeleteFormSubmitListener('#delete-form-' + newReplyId(parentId))
 }
 
-// if ($('#no-replies-message-' + id)) always returns True, because it always return object, even if it's empty. But, length
-// attribute is 0 for empty $ object, so now it is false if there is no '#no-replies-message-' + id'. Otherwise returns 1 (true).
 function addShowRepliesButtonOrChangeItsText(id) {
     if (isFirstReply(id)) {
         addShowRepliesButton(id); 
@@ -44,7 +42,6 @@ function isFirstReply(id) {
     return $('#replies-' + id + ' > .reply').length === 1;
 }
 
-// Line '$('#no-replies-message-...': dodaje showRepliesbutton nakon no-replies-message i zatim briše no-replies-message 
 function addShowRepliesButton(parentId) {
     let showRepliesbutton = $('<button class="show-replies" id="show-replies-' + 
         parentId + '" style="white-space:pre">Hide replies </button>')
@@ -56,7 +53,6 @@ function newReplyId(parentId) {
     return newReply.attr('id');
 }
 
-// Fades in first .reply element (just created) from parent #replies div
 function fadeIn(parentId){
     $('#replies-' + parentId + ' .reply').first().hide().fadeIn(1000)
 }

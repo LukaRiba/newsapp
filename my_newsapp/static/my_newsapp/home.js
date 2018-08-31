@@ -1,7 +1,3 @@
-// Kod je privremen i brzinski napisan - treba prepraviti i napisati bolje i ljepše funkcije
-// za ovo !!!
-
-
 // *****************************************************************************
 // Sakrivanje otherArticles-a koji prelaze veličinu stupca:
 

@@ -11,8 +11,8 @@ class ArticleForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ArticleForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_tag = False #ne kreira <form> i </form> tagove, već se moraju ručno napisati u template-u
-                                     #zato jer želim i inline_formset obuhvatiti skupa sa article formom u jednu formu   
+        self.helper.form_tag = False
+           
     class Meta:
         model = Article
         fields = ('title', 'short_description', 'text', 'category')
@@ -31,14 +31,6 @@ class ImageForm(ModelForm):
             'description': TextInput(attrs={'autocomplete': 'off'}),
         }
 
-#comment
-    # After image = form.cleaned_data['image'], image is InMemoryUploadedFile type 
-    # (<class 'django.core.files.uploadedfile.InMemoryUploadedFile'>). Zbog toga, ako bi u image listu appendali
-    # image, provjera 'if image in images:' bi vratila False iako bi uploadali iste slike (duplikate) - očito 
-    # InMemoryUploadedFile instance različite iako sadrže isti uploadani file. Zato gettamo file name:
-    #    image.name -> type(image.name) == str , i sada, pošto provjeravamo da li se određeni string nalazi u 
-    # images listi, provjera 'if image.name in images:' radi ispravno i vraća True ako uploadamo dva file-a
-    # istog naziva.
 class ImageInlineFormSet(BaseInlineFormSet):
 
     def clean(self):

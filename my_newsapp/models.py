@@ -36,12 +36,6 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = 'categories'
 
-    #comment
-        # metoda za dohvaćanje url-a. U urls.py smo url pattern-u argument 'name' definirali kao 'category': 
-        #   url(r'^(?P<slug>[-\w]+)/$', views.CategoryView.as_view(), name='category'),
-        # Sada, metoda reverse iz tog pattern-a generira url, te u kwargs dict sprema slug, koji je jednak slug-u iz url patterna -
-        # dakle slug-u instance kategorije: biology, history itd. Sada, u CategoryView-u pristupamo tom slug-u sa self.kwargs['slug'], 
-        # pomoću kojeg gettamo tu Category instancu:  Category.objects.get(slug=self.kwargs['slug'])
     def get_absolute_url(self):
         return reverse('my_newsapp:category', kwargs={'slug': self.slug})   
 
@@ -64,10 +58,6 @@ class Article(models.Model):
     def __str__(self):
         return self.title
 
-    #comment
-        # Ovime osiguravamo da su Articles u querysetu uvijek poredani tako da je prvi u setu onaj najrecentniji
-        # Sada ne moramo to raditi prilikom gettanja queryseta, npr. Article.objects.all().order_by('-pub_date') i
-        # ovakav poredak će biti default za sve Article querysetove
     class Meta:
         ordering = ['-pub_date']
 

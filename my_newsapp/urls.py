@@ -1,11 +1,9 @@
 from django.conf.urls import url
-#from django.contrib.auth import views as auth_views
 
 from . import views
 
 app_name = 'my_newsapp'
 
-# Tablica regex-a : https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Generic_views
 urlpatterns = [
     url(r'^login/$', views.MyNewsLoginView.as_view(), name='login'),
     url(r'^logout/$', views.MyNewsLogoutView.as_view(), name='logout'),
