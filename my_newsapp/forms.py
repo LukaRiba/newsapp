@@ -1,7 +1,9 @@
 from django.forms import ModelForm, BaseInlineFormSet, TextInput, ValidationError, Textarea
 from django.forms.models import inlineformset_factory
+from django.contrib.auth.forms import AuthenticationForm
 
 from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Field
 
 from .models import Article, Image
 
@@ -68,3 +70,14 @@ class ImageInlineFormSet(BaseInlineFormSet):
         
 ImageFormSet = inlineformset_factory(Article, Image, form=ImageForm, formset=ImageInlineFormSet, 
                                      extra=1, max_num=20,  can_delete=True)
+
+class LoginForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super(LoginForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Field('username'),
+            Field('password'),    
+            )
+        

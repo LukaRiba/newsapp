@@ -161,6 +161,26 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   display: inline-block;
 }
 
+.login-form {
+  width: 500px;
+  margin: auto;
+  justify-content: center;
+}
+
+.login-form a {
+  color: white;
+}
+
+.login-form a:hover {
+  text-decoration: none;
+}
+
+
+
+.login-buttons {
+  text-align: right;
+}
+
 /* ----------------------- Create Article Form Styling ----------------------- */
 
 /* Hides ugly html input type="file" element, but keeps it visible for browser.

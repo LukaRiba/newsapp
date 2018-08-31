@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% load staticfiles crispy_forms_tags %}
+
+{% block title %}NewsApp Login{% endblock title %}
+
+{% block style %}
+  {{ block.super }}
+{% endblock style %}
+
+{% block jumbo %}
+  <div class="jumbotron jumbotron-fluid" style="text-align: center;"> 
+    <h1 class="display-4">
+        Welcome to Newsapp
+    </h1>
+    <p class="lead">...please login or continue as guest</p>
+  </div>
+{% endblock jumbo %}
+
+{% block content %}
+  <div class="login-form mt-3">
+    <form method="post" action="{% url 'my_newsapp:login' %}">
+      {% crispy form %}
+      <div class="login-buttons">     
+        <button type="button" class="btn btn-secondary">
+          <a href="{% if next %}
+                        {% if next == '/news/create-article/' %}
+                          {% url 'my_newsapp:home' %}
+                        {% else %}
+                          {{ next }}
+                        {% endif %}
+                    {% else %}
+                        {% url 'my_newsapp:home' %}
+                    {% endif %}">
+            Continue as guest
+          </a>
+        </button>
+        <input class="btn btn-success ml-3" type="submit" value="Login"/>
+        <input type="hidden" name="next" value="{{ next }}"/>
+      </div>      
+    </form>
+  </div>
+{% endblock content %}
+
+
+
+  

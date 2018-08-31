@@ -31,8 +31,7 @@ function removeCommentOrReply(id) {
         $(this).slideUp(500, function() { 
             removeShowRepliesButtonIfLastReply($(this));
             $(this).remove();
-            displayNoCommentsYetMessageIfLastCommentDeleted();
-             
+            displayNoCommentsYetMessageIfLastCommentDeleted(); 
         });
     });
 }

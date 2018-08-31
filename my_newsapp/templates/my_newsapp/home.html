@@ -2,7 +2,7 @@
 
 {% load staticfiles thumbnail %}
 
-{% block title %}Latest Articles{% endblock title %}
+{% block title %}News Home{% endblock title %}
 
 {% block style %}
   {{ block.super }}
@@ -11,12 +11,21 @@
 {% block jumbo %}
 <div class="jumbotron jumbotron-fluid">
     <div class="container">
-      <h1 class="display-4">Welcome to Newsapp </h1>
+      <h1 class="display-4">
+        {% if user.is_authenticated %}
+          Welcome to Newsapp {{ request.user }}
+        {% else %}
+          Welcome to Newsapp guest
+        {% endif %}
+      </h1>
       <p class="lead">Everything you need to share your knowledge...</p>
     </div>
   </div>
 {% endblock jumbo %}
 
+{% block navigation %}
+  {% include "my_newsapp/snippets/navigation.html" %}
+{% endblock navigation %}
 
 {% block content %}
   <div class="container home mt-60px mb-80px">

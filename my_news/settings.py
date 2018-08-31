@@ -138,3 +138,5 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
+LOGIN_REDIRECT_URL = '/news/home'
+

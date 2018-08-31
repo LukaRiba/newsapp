@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
-
 from django.http import HttpResponse
 
 from .models import Comment
@@ -10,13 +9,16 @@ from .forms import CommentForm, ReplyForm
 from .decorators import require_ajax
 
 class CommentsContextMixin:
+    login_url = None
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         comments = Comment.objects.filter(object_id=self.request.session['comments_owner_id'])
         data = {
             'comments': comments,
             'comment_form': CommentForm(),
-            'reply_form': ReplyForm()
+            'reply_form': ReplyForm(),
+            'login_url': self.login_url
             }
         context.update(data)
         return context

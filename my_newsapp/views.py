@@ -2,10 +2,11 @@ from django.views.generic import TemplateView, ListView, DetailView, CreateView
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
+from django.contrib.auth import views as auth_views
 
 from .models import Article, Category
 from .utils import get_status_none_categories_random_ids
-from .forms import ArticleForm, ImageFormSet
+from .forms import ArticleForm, ImageFormSet, LoginForm
 
 from comments.views import CommentsContextMixin
 
@@ -93,6 +94,9 @@ class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView
     template_name = 'my_newsapp/detail.html'
     model = Article
     
+    # Set href attribute of 'Login' anchor tag which is displayed instead comments if user is not logged in
+    # This attribute is defined in comments.views.CommentsContextMixin
+    login_url = '/news/login'
     # Override to add these variables to request.session, required for comments app
     def get(self, request, *args, **kwargs):
         self.request.session['comments_owner_model_name'] = self.model.__name__
@@ -103,6 +107,7 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'
     form_class = ArticleForm
     success_msg = 'You created a new Article'
+    login_url = 'my_newsapp:login'
 
     #comment
         # <<<  When you upload a file it's passed through request.FILES, so you must also pass it to you FormSet  >>>
@@ -147,3 +152,15 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
             # redirect to detail view of created article
             return HttpResponseRedirect(form.instance.get_absolute_url())
         return super(CreateArticleView, self).get(request, *args, **kwargs)
+
+class MyNewsLoginView(auth_views.LoginView):
+    form_class = LoginForm
+    template_name = 'my_newsapp/login.html'
+    
+    #redirects authenticated user to settings.LOGIN_REDIRECT_URL if he tries to access login page
+    redirect_authenticated_user = True 
+
+
+class MyNewsLogoutView(auth_views.LogoutView):
+    next_page = 'my_newsapp:login'
+
