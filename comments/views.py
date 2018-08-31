@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
@@ -23,6 +24,7 @@ class CommentsContextMixin:
         context.update(data)
         return context
 
+@login_required
 @require_POST
 @require_ajax
 def add_comment(request):    
@@ -42,6 +44,7 @@ def add_comment(request):
             }
         return render(request, 'comments/comments.html', context)
 
+@login_required
 @require_POST
 @require_ajax
 def add_reply(request):
@@ -59,6 +62,7 @@ def add_reply(request):
             } 
         return render(request, 'comments/replies.html', context)
 
+@login_required
 @require_POST
 @require_ajax
 def delete_comment_or_reply(request, pk):
