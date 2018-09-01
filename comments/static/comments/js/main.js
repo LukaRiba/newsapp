@@ -1,7 +1,7 @@
 import './csrf.js'; // Import an entire module for side effects only, without importing anything. This runs the module's global code, but doesn't actually import any values.
 import {createComment} from './create_comment.js';
 import createReply from './create_reply.js';
-//import {editCommentOrReply, showEditForm} from './edit.js';
+import updateCommentOrReply from './edit.js';
 import deleteCommentOrReply from './delete.js';
 
 
@@ -15,12 +15,10 @@ $(function() {
 
     addCommentButtonListeners();
 
-    $('.cancel-button').each(function(){
-        $(this).click(function(){
-            toggleEditForm($(this).parents('.comment').attr('id'));
-        }); 
+    $('.edit-form').each(function(){
+        addEditFormListeners($(this));
     });
-
+    
     $('.delete-form').each(function(){
         addDeleteFormSubmitListener($(this));
     });
@@ -50,7 +48,6 @@ function addCommentButtonListeners() {
         addReplyButtonListener(commentId);
         addEditButtonListener(commentId);
         // Delete button works with Bootstrap Modal component
-
     });
 }
 
@@ -108,6 +105,27 @@ function toggleEditForm(id){
     $('#edit-form-' + id ).toggle().find('textarea').val(currentTextElement.text());
 }
 
+function addEditFormListeners(form){
+    addEditFormSubmitListener(form);
+    addEditFormCancelButtonListener($(form).find('.cancel-button'))
+}
+
+function addEditFormSubmitListener(form){
+    $(form).on('submit', function(event){
+        event.preventDefault();
+        let url = $(this).attr('action');
+        let textarea = $(this).find('textarea'); 
+        let id = url.split('/')[2];
+        updateCommentOrReply(url, textarea, id);
+    });
+}
+
+function addEditFormCancelButtonListener(button){
+    $(button).click(function(){
+        toggleEditForm($(button).parents('.comment').attr('id'));
+    }); 
+}
+
 function addDeleteFormSubmitListener(form) {
     $(form).on('submit', function(event){
         event.preventDefault();
@@ -124,7 +142,10 @@ export {
     addShowRepliesButtonListener,
     addReplyButtonListener,
     getShowRepliesButton,
-    addDeleteFormSubmitListener
+    addDeleteFormSubmitListener,
+    addEditButtonListener,
+    toggleEditForm,
+    addEditFormListeners
 };
 
 

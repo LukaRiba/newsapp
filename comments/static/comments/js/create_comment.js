@@ -1,4 +1,9 @@
-import {addReplyFormSubmitListener, addReplyButtonListener, addDeleteFormSubmitListener} from './main.js';
+import {addReplyButtonListener,
+        addReplyFormSubmitListener, 
+        addEditButtonListener,
+        addEditFormListeners,
+        addDeleteFormSubmitListener
+        } from './main.js';
 
 // ajax for comments
 function createComment(textarea){
@@ -20,8 +25,10 @@ function addComment(comment){
     $('#comments').prepend(comment);
     fadeIn(); 
     addReplyButtonListener(newCommentId());
+    addEditButtonListener(newCommentId());
+    addEditFormListeners('#edit-form-' + newCommentId());
     addReplyFormSubmitListener('#reply-form-' + newCommentId());
-    addDeleteFormSubmitListener('#delete-form-' + newCommentId())
+    addDeleteFormSubmitListener('#delete-form-' + newCommentId());
 }
 
 function fadeIn(){

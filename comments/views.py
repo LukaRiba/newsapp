@@ -41,7 +41,8 @@ def add_comment(request):
             # returns created comment in an QuerySet (itterable object is required because template uses forloop tag).
             # First comment in QuerySet is just created one, because of ordering = ['-pub_date'].
             'comments': Comment.objects.all()[0:1],
-            'reply_form': ReplyForm()
+            'reply_form': ReplyForm(),
+            'edit_form': EditForm()
             }
         return render(request, 'comments/comments.html', context)
 
@@ -70,8 +71,9 @@ def edit_comment_or_reply(request, pk):
     target = get_object_or_404(Comment, pk=pk)
     form = EditForm(request.POST)
     if form.is_valid():
-        form.save(commit=False)
-        target.update(text=form.instance.text)
+        target.text = form.cleaned_data['text']
+        target.save()
+        return HttpResponse(target.text)
         
 @login_required
 @require_POST

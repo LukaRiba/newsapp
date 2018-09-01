@@ -37,7 +37,7 @@ class ReplyForm(CommentForm):
         )
 
 class EditForm(Form):
-    current_text = CharField(widget=Textarea(attrs={'rows':2}))
+    text = CharField(widget=Textarea(attrs={'rows':2}))
 
     def __init__(self, *args, **kwargs):
         super(EditForm, self).__init__(*args, **kwargs)
@@ -45,7 +45,7 @@ class EditForm(Form):
         self.helper = FormHelper()
         self.helper.form_show_labels = False
         self.helper.layout = Layout(
-            Field('current_text', required=True),
+            Field('text', required=True),
             ButtonHolder(
                 Button('button', 'Cancel', css_class='button btn-secondary btn-sm cancel-button'),
                 Submit('submit', 'OK', css_class='button white btn-sm')
