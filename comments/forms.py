@@ -1,7 +1,7 @@
-from django.forms import ModelForm, Textarea
+from django.forms import ModelForm, Form, Textarea, CharField
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field, ButtonHolder, Submit
+from crispy_forms.layout import Layout, Field, ButtonHolder, Submit, Button
 
 from .models import Comment
 
@@ -28,9 +28,28 @@ class CommentForm(ModelForm):
 class ReplyForm(CommentForm):
     def __init__(self, *args, **kwargs):
         super(ReplyForm, self).__init__(*args, **kwargs)
+        self.auto_id = False
         self.helper.layout = Layout(
-            Field('text', placeholder='Your reply...', id='reply-text', required=True),
+            Field('text', placeholder='Your reply...', required=True),
             ButtonHolder(
                 Submit('submit', 'Reply', css_class='button white btn-sm')
             )
         )
+
+class EditForm(Form):
+    current_text = CharField(widget=Textarea(attrs={'rows':2}))
+
+    def __init__(self, *args, **kwargs):
+        super(EditForm, self).__init__(*args, **kwargs)
+        self.auto_id = False
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+        self.helper.layout = Layout(
+            Field('current_text', required=True),
+            ButtonHolder(
+                Button('button', 'Cancel', css_class='button btn-secondary btn-sm cancel-button'),
+                Submit('submit', 'OK', css_class='button white btn-sm')
+            )
+        )
+
+    

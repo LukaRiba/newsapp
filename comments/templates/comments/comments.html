@@ -3,17 +3,21 @@
     <p class="margin-bottom-0"><strong>{{ comment.author }}</strong></p>
     <p class="pub-date margin-bottom-5">{{ comment.pub_date }}</p>
     <p class="text margin-bottom-0">{{ comment.text }}</p>
+
+    {% if user.is_authenticated and request.user == comment.author %}
+      {% include "comments/edit_form.html" %}
+    {% endif %}
+
     {% if comment.replies.all %}
       <button class="show-replies" id="show-replies-{{ comment.id }}" style="white-space:pre">Show replies</button>
     {% else %}
       <span class="no-replies-message" id="no-replies-message-{{ comment.id }}">No replies yet</span>
     {% endif %}
     
-    {% if request.user.is_authenticated %}
-      <span> </span>
+    {% if request.user.is_authenticated %}      
       <button class="reply-button" id="reply-button-{{ comment.id }}">Reply</button>
       {% if request.user == comment.author %}
-        <span> </span>
+        <button class="edit-button" id="edit-button-{{ comment.id }}">Edit</button>
         <!-- Button trigger modal -->
         <button class="delete-button" id="delete-button-{{ comment.id }}" data-toggle="modal" data-target="#DeleteModalCenter-{{ comment.id }}">
           Delete

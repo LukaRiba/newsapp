@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 
 from .models import Comment
-from .forms import CommentForm, ReplyForm
+from .forms import CommentForm, ReplyForm, EditForm
 from .decorators import require_ajax
 
 class CommentsContextMixin:
@@ -19,6 +19,7 @@ class CommentsContextMixin:
             'comments': comments,
             'comment_form': CommentForm(),
             'reply_form': ReplyForm(),
+            'edit_form': EditForm(),
             'login_url': self.login_url
             }
         context.update(data)
@@ -62,6 +63,16 @@ def add_reply(request):
             } 
         return render(request, 'comments/replies.html', context)
 
+@login_required
+@require_POST
+@require_ajax
+def edit_comment_or_reply(request, pk):
+    target = get_object_or_404(Comment, pk=pk)
+    form = EditForm(request.POST)
+    if form.is_valid():
+        form.save(commit=False)
+        target.update(text=form.instance.text)
+    
 @login_required
 @require_POST
 @require_ajax

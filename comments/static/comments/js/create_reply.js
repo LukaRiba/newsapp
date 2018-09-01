@@ -35,7 +35,7 @@ function addShowRepliesButtonOrChangeItsText(id) {
     if (isFirstReply(id)) {
         addShowRepliesButton(id); 
         addShowRepliesButtonListener(id);
-    } else getShowRepliesButton(id).text('Hide replies'  + ' '); 
+    } else getShowRepliesButton(id).text('Hide replies'); 
 }
 
 function isFirstReply(id) {
@@ -44,7 +44,7 @@ function isFirstReply(id) {
 
 function addShowRepliesButton(parentId) {
     let showRepliesbutton = $('<button class="show-replies" id="show-replies-' + 
-        parentId + '" style="white-space:pre">Hide replies </button>')
+        parentId + '">Hide replies</button>')
     $('#no-replies-message-' + parentId).after(showRepliesbutton).remove() 
 }
 

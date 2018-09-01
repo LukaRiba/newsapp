@@ -4,7 +4,7 @@
   <p class="text margin-bottom-0">{{ reply.text }}</p>
   {% if request.user == reply.author %}
     <!-- Button trigger modal -->
-    <button type="button" class="delete-button" id="delete-button-{{ reply.id }}" data-toggle="modal" data-target="#DeleteModalCenter-{{ reply.id }}">
+    <button class="delete-button" id="delete-button-{{ reply.id }}" data-toggle="modal" data-target="#DeleteModalCenter-{{ reply.id }}">
       Delete
     </button>
     <!-- Modal -->
