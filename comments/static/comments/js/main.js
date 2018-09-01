@@ -1,7 +1,10 @@
 import './csrf.js'; // Import an entire module for side effects only, without importing anything. This runs the module's global code, but doesn't actually import any values.
 import {createComment} from './create_comment.js';
 import createReply from './create_reply.js';
+//import {editCommentOrReply, showEditForm} from './edit.js';
 import deleteCommentOrReply from './delete.js';
+
+
 
 $(function() {
     addCommentFormSubmitListener();
@@ -12,10 +15,15 @@ $(function() {
 
     addCommentButtonListeners();
 
+    $('.cancel-button').each(function(){
+        $(this).click(function(){
+            toggleEditForm($(this).parents('.comment').attr('id'));
+        }); 
+    });
+
     $('.delete-form').each(function(){
         addDeleteFormSubmitListener($(this));
     });
-
 });
 
 function addCommentFormSubmitListener() {
@@ -40,16 +48,19 @@ function addCommentButtonListeners() {
         let commentId = $(this).attr('id');
         addShowRepliesButtonListener(commentId);
         addReplyButtonListener(commentId);
+        addEditButtonListener(commentId);
+        // Delete button works with Bootstrap Modal component
+
     });
 }
 
-function addShowRepliesButtonListener(id) {
-    getShowRepliesButton(id).click(function() {
+function addShowRepliesButtonListener(id){
+    getShowRepliesButton(id).click(function(){
         toggleReplies(id);
     });
 }
 
-function getShowRepliesButton(id) {
+function getShowRepliesButton(id){
     return $('#show-replies-' + id);
 }
 
@@ -58,25 +69,43 @@ function toggleReplies(id){
     toggleShowRepliesButtonText(id);
 }
 
-function toggleShowRepliesButtonText(id) {
+function toggleShowRepliesButtonText(id){
     let button = getShowRepliesButton(id);
-    if (button.text() === 'Show replies') {
+    if (button.text() === 'Show replies'){
         button.text('Hide replies'  + ' ');
     } else button.text('Show replies'); 
 }
 
-function addReplyButtonListener(id) {
-    getReplyButton(id).click(function() {
+function addReplyButtonListener(id){
+    getReplyButton(id).click(function(){
         toggleReplyForm(id);
     });
 }
 
-function getReplyButton(id) {
+function getReplyButton(id){
     return $('#reply-button-' + id);
 }
 
 function toggleReplyForm(id){
     $('#reply-form-' + id ).animate({ height: 'toggle', opacity: 'toggle' }, 'fast')
+}
+
+function addEditButtonListener(id){
+    getEditButton(id).click(function(){
+        toggleEditForm(id);
+    });
+}
+
+function getEditButton(id){
+    return $('#edit-button-' + id);
+}
+
+function toggleEditForm(id){
+    // select <p> element which holds comment/reply text
+    let currentTextElement = $('#' + id + ' > .text'); 
+    currentTextElement.toggle(); 
+    // toggle edit-form, and set current comment/reply text as form's textarea field initial value
+    $('#edit-form-' + id ).toggle().find('textarea').val(currentTextElement.text());
 }
 
 function addDeleteFormSubmitListener(form) {

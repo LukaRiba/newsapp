@@ -1,0 +1,11 @@
+{% load crispy_forms_tags %}
+
+<form class="edit-form" 
+      action="{% if reply %}
+                {% url 'comments:edit' reply.id %}
+              {% else %}
+                {% url 'comments:edit' comment.id %} 
+              {% endif %}"  
+     method="POST" id="edit-form-{{ comment.id }}" style="display: none">
+     {% crispy edit_form %}
+</form> 
