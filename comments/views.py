@@ -72,7 +72,7 @@ def edit_comment_or_reply(request, pk):
     if form.is_valid():
         form.save(commit=False)
         target.update(text=form.instance.text)
-    
+        
 @login_required
 @require_POST
 @require_ajax
