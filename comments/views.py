@@ -60,6 +60,7 @@ def add_reply(request):
         form.save()
         context = {
             'reply': Comment.objects.latest('pub_date'),
+            'edit_form': EditForm(),
             'create_reply': True  # bool just for check in template
             } 
         return render(request, 'comments/replies.html', context)

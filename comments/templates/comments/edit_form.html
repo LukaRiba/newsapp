@@ -6,6 +6,6 @@
               {% else %}
                 {% url 'comments:edit' comment.id %} 
               {% endif %}"  
-     method="POST" id="edit-form-{{ comment.id }}" style="display: none">
+     method="POST" id="{% if reply %}edit-form-{{ reply.id }}{% else %}edit-form-{{ comment.id }}{% endif %}" style="display: none">
      {% crispy edit_form %}
 </form> 

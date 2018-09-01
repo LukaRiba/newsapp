@@ -19,7 +19,8 @@ function deleteCommentOrReply(url, id){
 function showResponseMessage(id, response) {
     let target = $(getTarget(id));
     target.children().html('');
-    target.children('.text').html(response);
+    // show() because if edit form opened while deleting, .text element, here response, would remain hidden
+    target.children('.text').show().html(response);
 }
 
 function getTarget(id) {

@@ -1,4 +1,8 @@
-import {addShowRepliesButtonListener, getShowRepliesButton, addDeleteFormSubmitListener} from './main.js';
+import {addShowRepliesButtonListener,
+       getShowRepliesButton,
+       addEditButtonListener,
+       addEditFormListeners,
+       addDeleteFormSubmitListener} from './main.js';
 import {reportError} from './create_comment.js';
 
 // ajax for replies
@@ -28,6 +32,9 @@ function hideReplyForm(textarea, parentId) {
 function addReply(reply, parentId){
     $('#replies-' + parentId).prepend(reply).show();
     addShowRepliesButtonOrChangeItsText(parentId);
+    addEditButtonListener(newReplyId(parentId));
+    console.log(newReplyId(parentId));
+    addEditFormListeners('#edit-form-' + newReplyId(parentId));
     addDeleteFormSubmitListener('#delete-form-' + newReplyId(parentId))
 }
 

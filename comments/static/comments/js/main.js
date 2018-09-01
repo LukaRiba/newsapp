@@ -4,16 +4,16 @@ import createReply from './create_reply.js';
 import updateCommentOrReply from './edit.js';
 import deleteCommentOrReply from './delete.js';
 
-
-
-$(function() {
+$(function(){
     addCommentFormSubmitListener();
 
     $('.reply-form').each(function(){
         addReplyFormSubmitListener($(this));
     });
 
-    addCommentButtonListeners();
+    addListenersToCommentsButtons();
+
+    addListenersToRepliesButtons();
 
     $('.edit-form').each(function(){
         addEditFormListeners($(this));
@@ -24,7 +24,7 @@ $(function() {
     });
 });
 
-function addCommentFormSubmitListener() {
+function addCommentFormSubmitListener(){
     $('#comment-form').on('submit', function(event){
         event.preventDefault();
         let textarea = $(this).find('textarea');
@@ -32,7 +32,7 @@ function addCommentFormSubmitListener() {
     });
 }
 
-function addReplyFormSubmitListener(form) {
+function addReplyFormSubmitListener(form){
     $(form).on('submit', function(event){
         event.preventDefault();
         let parentId = $(this).parent().attr('id') // comment model instance id (owner of replies, their ForeignKey) AND id of DOM comment div element
@@ -41,12 +41,20 @@ function addReplyFormSubmitListener(form) {
     });
 }
 
-function addCommentButtonListeners() {
+function addListenersToCommentsButtons(){
     $('.comment').each(function(){
         let commentId = $(this).attr('id');
         addShowRepliesButtonListener(commentId);
         addReplyButtonListener(commentId);
         addEditButtonListener(commentId);
+        // Delete button works with Bootstrap Modal component
+    });
+}
+
+function addListenersToRepliesButtons(){
+    $('.reply').each(function(){
+        let replyId = $(this).attr('id');
+        addEditButtonListener(replyId);
         // Delete button works with Bootstrap Modal component
     });
 }
@@ -98,11 +106,12 @@ function getEditButton(id){
 }
 
 function toggleEditForm(id){
+    let form = $('#edit-form-' + id );
     // select <p> element which holds comment/reply text
-    let currentTextElement = $('#' + id + ' > .text'); 
-    currentTextElement.toggle(); 
-    // toggle edit-form, and set current comment/reply text as form's textarea field initial value
-    $('#edit-form-' + id ).toggle().find('textarea').val(currentTextElement.text());
+    let currentTextElement = form.siblings('.text');
+    currentTextElement.animate({ height: 'toggle', opacity: 'toggle' }, 'fast');
+    form.animate({ height: 'toggle', opacity: 'toggle' }, 'fast');
+    form.find('textarea').val(currentTextElement.text());
 }
 
 function addEditFormListeners(form){
@@ -122,7 +131,10 @@ function addEditFormSubmitListener(form){
 
 function addEditFormCancelButtonListener(button){
     $(button).click(function(){
-        toggleEditForm($(button).parents('.comment').attr('id'));
+        // id of the form which contains the button, returns for example 'edit-form-544'
+        let id = $(this).parents('.edit-form').attr('id');
+        // splits id to get only number contained in it
+        toggleEditForm(id.split('-')[2]);
     }); 
 }
 

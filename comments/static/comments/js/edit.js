@@ -1,5 +1,4 @@
 import {reportError} from './create_comment.js';
-import {toggleEditForm} from './main.js';
 
 function editCommentOrReply(url, textarea, id){
     $.ajax({
@@ -19,8 +18,8 @@ function editCommentOrReply(url, textarea, id){
 function updateCommentOrReply(id, response){
     let target = getTarget(id);
     let updatedText = target.find('.text').text(response);
-    toggleEditForm(id);
-    updatedText.hide().fadeIn(2000); // toggleEditForm() hides form and shows text, so it has to be hidden again before fadeIn()
+    $('#edit-form-' + id).toggle();
+    updatedText.fadeIn(2000);
 }
 
 function getTarget(id) {

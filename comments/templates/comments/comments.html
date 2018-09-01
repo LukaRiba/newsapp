@@ -18,11 +18,11 @@
       <button class="reply-button" id="reply-button-{{ comment.id }}">Reply</button>
       {% if request.user == comment.author %}
         <button class="edit-button" id="edit-button-{{ comment.id }}">Edit</button>
-        <!-- Button trigger modal -->
+        <!-- Button trigger delete modal -->
         <button class="delete-button" id="delete-button-{{ comment.id }}" data-toggle="modal" data-target="#DeleteModalCenter-{{ comment.id }}">
           Delete
         </button>
-        <!-- Modal -->
+        <!-- Delete modal -->
         {% include "comments/delete_comment_modal.html" %}
       {% endif %}
       {% include "comments/reply_form.html" %}

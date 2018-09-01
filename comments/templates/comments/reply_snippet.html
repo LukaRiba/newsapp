@@ -2,12 +2,15 @@
   <p class="margin-bottom-0"><strong>{{ reply.author }}</strong></p>
   <p class="pub-date margin-bottom-5">{{ reply.pub_date }}</p>
   <p class="text margin-bottom-0">{{ reply.text }}</p>
-  {% if request.user == reply.author %}
-    <!-- Button trigger modal -->
+
+  {% if user.is_authenticated and request.user == reply.author %}
+    {% include "comments/edit_form.html" %}
+    <button class="edit-button" id="edit-button-{{ reply.id }}">Edit</button>
+    <!-- Button trigger delete modal -->
     <button class="delete-button" id="delete-button-{{ reply.id }}" data-toggle="modal" data-target="#DeleteModalCenter-{{ reply.id }}">
       Delete
     </button>
-    <!-- Modal -->
+    <!-- Delete modal -->
     {% include "comments/delete_comment_modal.html" %}
   {% endif %}
 </div>
