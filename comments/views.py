@@ -38,8 +38,10 @@ def add_comment(request):
         form.instance.object_id = request.session['comments_owner_id']
         form.save()
         context = {
-            # returns created comment in an QuerySet (itterable object is required because template uses forloop tag).
-            # First comment in QuerySet is just created one, because of ordering = ['-pub_date'].
+            # Returns created comment in an one-element QuerySet (itterable object is required because template 
+            # uses forloop tag). First comment in QuerySet is just created one, because of ordering = ['-pub_date'].
+            # Probably not good solution because it all() on possibly large db table. Maybe is better with filter()
+            # against pub_date - Comment.objects.filter(pub_date__lte=timezone.now() - timezone.timedelta(minutes=1) ?
             'comments': Comment.objects.all()[0:1],
             'reply_form': ReplyForm(),
             'edit_form': EditForm()

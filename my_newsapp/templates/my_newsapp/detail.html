@@ -44,65 +44,68 @@
     newline becomes an HTML line break (<br>) and a new line followed 
     by a blank line becomes a paragraph break (</p>).
   {% endcomment %}
-  <div class="article carousel-wrap">
-    <h2>{{ article.title }}</h2>
-    <pre class="padding-bottom-20">In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
-
-    {% if article.images.count < 2 %} {% comment %} Show just that one image {% endcomment %}
-    <div style="height: 350px">
-      <img class="image-fit" src="{{ article.images.first.image.url }}"> 
-    </div>
-    {% else %} {% comment %} Show carousel of images {% endcomment %}
-      <div id="gallery" class="carousel slide" data-ride="carousel">
-        {% comment %} carousel indicators of images ->  - - - - {% endcomment %}
-        <ol class="carousel-indicators">
-          {% for i in article.images.all  %}
-            {% if forloop.counter0 == 0 %}
-              <li data-target="#gallery" data-slide-to="0" class="active"></li>            
-            {% else %}
-              <li data-target="#gallery" data-slide-to="{{ forloop.counter0 }}"></li>
-            {% endif %}
-          {% endfor %}
-        </ol>
-        {% comment %} carousel {% endcomment %}
-        <div class="carousel-inner" style="background: rgb(10, 10, 10)">
-          {% for image in article.images.all  %}
-            {% if forloop.counter == 1 %}
-              <div id="image-{{ forloop.counter0 }}" class="carousel-item active" style="height: 350px">
-                <img class="image-fit" src="{{ image.image.url }}">
-                {% if image.description %}
-                  <div class="carousel-caption">
-                    <p>{{ image.description }}</p>
+  <div class="container"> <!-- container start -->
+    <div class="article article-wrap"> <!-- article-wrap start -->
+      <h2>{{ article.title }}</h2>
+      <pre class="padding-bottom-20">In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
+      {% if article.images.count < 2 %} {% comment %} Show just that one image {% endcomment %}
+      <div style="height: 350px">
+        <img class="image-fit" src="{{ article.images.first.image.url }}"> 
+      </div>
+      {% else %} {% comment %} Show carousel of images {% endcomment %}
+        <div class="cointainer"> <!-- carousel container start -->
+          <div id="gallery" class="carousel slide" data-ride="carousel"> <!-- carousel gallery start -->
+            {% comment %} carousel indicators of images ->  - - - - {% endcomment %}
+            <ol class="carousel-indicators">
+              {% for i in article.images.all  %}
+                {% if forloop.counter0 == 0 %}
+                  <li data-target="#gallery" data-slide-to="0" class="active"></li>            
+                {% else %}
+                  <li data-target="#gallery" data-slide-to="{{ forloop.counter0 }}"></li>
+                {% endif %}
+              {% endfor %}
+            </ol>
+            {% comment %} carousel {% endcomment %}
+            <div class="carousel-inner" style="background: rgb(10, 10, 10)">
+              {% for image in article.images.all  %}
+                {% if forloop.counter == 1 %}
+                  <div id="image-{{ forloop.counter0 }}" class="carousel-item active" style="height: 350px">
+                    <img class="image-fit" src="{{ image.image.url }}">
+                    {% if image.description %}
+                      <div class="carousel-caption">
+                        <p>{{ image.description }}</p>
+                      </div>
+                    {% endif %}                
                   </div>
-                {% endif %}                
-              </div>
-            {% else %}
-              <div id="image-{{ forloop.counter0 }}" class="carousel-item" style="height: 350px">
-                <img class="image-fit" src="{{ image.image.url }}">
-                {% if image.description %}
-                  <div class="carousel-caption">
-                    <p>{{ image.description }}</p>
+                {% else %}
+                  <div id="image-{{ forloop.counter0 }}" class="carousel-item" style="height: 350px">
+                    <img class="image-fit" src="{{ image.image.url }}">
+                    {% if image.description %}
+                      <div class="carousel-caption">
+                        <p>{{ image.description }}</p>
+                      </div>
+                    {% endif %}
                   </div>
                 {% endif %}
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
-        {% comment %} carousel left/right (< ; >) buttons {% endcomment %}
-        <a class="carousel-control-prev" href="#gallery" role="button" data-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#gallery" role="button" data-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="sr-only">Next</span>
-        </a>
-      </div> 
-    {% endif %}
-    <p class="padding-top-40" style="z-index: 1000">{{ article.text | linebreaks }}</p> 
-  </div>
+              {% endfor %}
+            </div>
+            {% comment %} carousel left/right (< ; >) buttons {% endcomment %}
+            <a class="carousel-control-prev" href="#gallery" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#gallery" role="button" data-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="sr-only">Next</span>
+            </a>
+          </div> <!-- carousel gallery end -->
+        </div> <!-- carousel container end -->
+      {% endif %}
+      <p class="padding-top-40" style="z-index: 1000">{{ article.text | linebreaks }}</p> 
+    </div> <!-- article-wrap end -->
+  </div> <!-- container end -->
 
-  <div class="comments">
+  <div class="container comments">
     {% include 'comments/base.html' %}
   </div>
   
@@ -111,4 +114,6 @@
 {% block script %}
   {{ block.super }}
   <script type="module" src="{% static 'comments/js/main.js' %}"></script>
+  <!-- if modules are not supported in browser, use this script -->
+  <script nomodule src="{% static 'comments/js/no_module/no_module_main.js' %}"></script>
 {% endblock script %}

@@ -5,6 +5,9 @@ import updateCommentOrReply from './edit.js';
 import deleteCommentOrReply from './delete.js';
 
 $(function(){
+    
+    console.log('modules working');
+
     addCommentFormSubmitListener();
 
     $('.reply-form').each(function(){

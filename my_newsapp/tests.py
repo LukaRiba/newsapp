@@ -6,6 +6,8 @@ from .forms import ImageFormSet
 # Popis assert metoda -> https://docs.python.org/2/library/unittest.html#unittest.TestCase.debug
 #                     -> https://docs.djangoproject.com/en/1.11/topics/testing/tools/#assertions
 class CreateArticleFormTests(TestCase):
+    # maybe is better to define image objects here, as class variables, and then use them across
+    # test functions. Fix that!
 
     def test_imageformset_1_form_no_image_uploaded(self):
         data = {

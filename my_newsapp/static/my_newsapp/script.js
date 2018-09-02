@@ -35,10 +35,11 @@ So, when category page loads, it checks for scrollToTop in localStorage, and if 
 imediatelly after, scrollToTop is removed from localStorage
 */
 //#endregion
-let scrollToTopLinks = document.querySelectorAll('.scroll-to-top');
+var scrollToTopLinks = document.querySelectorAll('.scroll-to-top');
 
-scrollToTopLinks.forEach(element => {
-    element.addEventListener('click', () => {
+scrollToTopLinks.forEach(function(element){
+    element.addEventListener('click', function(){
         localStorage.setItem('scrollToTop', true);
     })
 });
+
