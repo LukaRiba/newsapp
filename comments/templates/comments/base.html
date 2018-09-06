@@ -1,7 +1,10 @@
-{% load staticfiles %}
+{% load staticfiles comments_tags %}
 
 <!-- <link rel="stylesheet" href="{% static 'css/bootstrap-4.0.0.css' %}">
 <link rel="stylesheet" href="{% static 'comments/css/comments.css' %}"> -->
+
+<!-- for access total comments number in .js files -->
+<script>var commentsCount = Number("{{ comments.count }}")</script>
 
 <div id="error-log"></div>
 
@@ -13,8 +16,6 @@
     {% else %}
     <p id="comments-counter"><strong>{{ comments.count }} comments</strong></p>
     {% endif %}
-    <!-- for access total comments number in .js files -->
-    <script>var commentsCount = Number("{{ comments.count }}")</script>
   {% endif %}
 
   {% if request.user.is_authenticated %}
@@ -28,6 +29,13 @@
   <div id="comments">
     {% if comments %}
       {% include "comments/comments.html" %}
+      {% if comments.count >= 15 %}
+        <button class="load-more-comments btn-md btn-primary">Load 10 more Comments</button>
+      {% elif comments.count > 6  %}
+        <button class="load-more-comments btn-md btn-primary">Load {{ comments|substract:5 }} more Comments</button>
+      {% elif comments.count == 6 %}
+        <button class="load-more-comments btn-md btn-primary">Load 1 more Comment</button>
+      {% endif %}
     {% else %}
       <p id="no-comments-yet-message">No comments yet.</p>
     {% endif %}

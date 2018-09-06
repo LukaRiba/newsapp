@@ -1,44 +1,12 @@
 {% load comments_tags %}
 
-{% for comment in comments|first_ten %}
-  <div class="comment" id="{{ comment.id }}">
-    <p class="margin-bottom-0"><strong>{{ comment.author }}</strong></p>
-    <p class="pub-date margin-bottom-5">{{ comment.pub_date }}</p>
-    <p class="text margin-bottom-0">{{ comment.text }}</p>
-
-    {% if user.is_authenticated and request.user == comment.author %}
-      {% include "comments/edit_form.html" %}
-    {% endif %}
-
-    {% if comment.replies.all %}
-      {% if comment.replies.all.count == 1 %}
-      <button class="show-replies" id="show-replies-{{ comment.id }}" style="white-space:pre">Show {{ comment.replies.count }} reply</button>
-      {% else %}
-      <button class="show-replies" id="show-replies-{{ comment.id }}" style="white-space:pre">Show {{ comment.replies.count }} replies</button>
-      {% endif %}
-    {% else %}
-      <span class="no-replies-message" id="no-replies-message-{{ comment.id }}">No replies yet</span>
-    {% endif %}
-    
-    {% if request.user.is_authenticated %}      
-      <button class="reply-button" id="reply-button-{{ comment.id }}">Reply</button>
-      {% if request.user == comment.author %}
-        <button class="edit-button" id="edit-button-{{ comment.id }}">Edit</button>
-        <!-- Button trigger delete modal -->
-        <button class="delete-button" id="delete-button-{{ comment.id }}" data-toggle="modal" data-target="#DeleteModalCenter-{{ comment.id }}">
-          Delete
-        </button>
-        <!-- Delete modal -->
-        {% include "comments/delete_comment_modal.html" %}
-      {% endif %}
-      {% include "comments/reply_form.html" %}
-    {% endif %}
-
-    <div class="margin-bottom-30"></div>
-
-    <div id="replies-{{ comment.id }}" class="replies" style="display:none">
-      {% include "comments/replies.html" %}
-    </div>
-    
-  </div>  
-{% endfor %}  
+{% if load_more %}
+  {% for comment in next_comments.all %}
+    {% include "comments/comments_snippet.html" %}
+  {% endfor %}
+{% else %}
+  {% for comment in comments|first_five %}
+    {% include "comments/comments_snippet.html" %}
+  {% endfor %} 
+{% endif %}
+      

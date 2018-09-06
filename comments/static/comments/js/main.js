@@ -3,6 +3,7 @@ import {createComment} from './create_comment.js';
 import createReply from './create_reply.js';
 import updateCommentOrReply from './edit.js';
 import deleteCommentOrReply from './delete.js';
+import {loadMoreComments} from './load_more_comments.js';
 
 $(function(){
     
@@ -23,6 +24,8 @@ $(function(){
     $('.delete-form').each(function(){
         addDeleteFormSubmitListener($(this));
     });
+
+    addLoadMoreCommentsButtonListener();
 });
 
 function addCommentFormSubmitListener(){
@@ -61,7 +64,7 @@ function addListenersToRepliesButtons(){
 }
 
 function addShowRepliesButtonListener(id){
-    getShowRepliesButton(id).click(function(){
+    getShowRepliesButton(id).on('click', function(){
         toggleReplies(id);
     });
 }
@@ -89,13 +92,8 @@ function countReplies(id){
     return $('#replies-' + id ).children('.reply').length;
 }
 
-function pluralSuffix(number){
-    if(number > 1) return 's';
-    return '';
-}
-
 function addReplyButtonListener(id){
-    getReplyButton(id).click(function(){
+    getReplyButton(id).on('click', function(){
         toggleReplyForm(id);
     });
 }
@@ -109,7 +107,7 @@ function toggleReplyForm(id){
 }
 
 function addEditButtonListener(id){
-    getEditButton(id).click(function(){
+    getEditButton(id).on('click', function(){
         toggleEditForm(id);
     });
 }
@@ -146,7 +144,7 @@ function addEditFormSubmitListener(form){
 }
 
 function addEditFormCancelButtonListener(button){
-    $(button).click(function(){
+    $(button).on('click', function(){
         // id of the form which contains the button, returns for example 'edit-form-544'
         let id = $(this).parents('.edit-form').attr('id');
         // splits id to get only number contained in it
@@ -163,7 +161,21 @@ function addDeleteFormSubmitListener(form) {
     });
 }
 
+function addLoadMoreCommentsButtonListener(){
+    $('.load-more-comments').on('click', function(event){
+        event.preventDefault;
+        var lastVisibleCommentId = getLastVisibleCommentId();
+        loadMoreComments(lastVisibleCommentId);
+    })
+}
+
+function getLastVisibleCommentId(){
+    return $('.comment').last().attr('id');
+}
+
 export {
+    addListenersToCommentsButtons,
+    addListenersToRepliesButtons,
     addShowRepliesButtonListener,
     addEditButtonListener,
     addReplyButtonListener,

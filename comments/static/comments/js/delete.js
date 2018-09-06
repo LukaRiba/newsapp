@@ -1,4 +1,5 @@
 import {updateCommentsCounter, reportError} from './create_comment.js';
+import {updateLoadMoreCommentsButtonText} from './load_more_comments.js';
 
 function deleteCommentOrReply(url, id){
     $.ajax({
@@ -36,6 +37,7 @@ function removeCommentOrReply(id) {
             if(isComment(id)){
                 commentsCount--;
                 updateCommentsCounter();
+                //updateLoadMoreCommentsButtonText();
             } 
             $(this).remove();
             if (lastCommentDeleted()){

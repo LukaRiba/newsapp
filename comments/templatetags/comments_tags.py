@@ -15,7 +15,11 @@ register = template.Library()
 def for_comment(replies, comment_id):
     return replies.filter(parent_id=comment_id)
 
-# returns last 10 comments
+# returns 5 newest comments
 @register.filter
-def first_ten(comments):
-    return comments.all()[:10]
+def first_five(comments):
+    return comments.all()[:5]
+
+@register.filter
+def substract(comments, num):
+    return comments.count() - num;

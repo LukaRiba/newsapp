@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.contrib.auth import views as auth_views
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 
 from .models import Article, Category
 from .utils import get_status_none_categories_random_ids
@@ -65,6 +67,27 @@ class CategoryView(NavigationContextMixin, ListView):
     def get_queryset(self):
         return self.get_category().articles.all()
 
+# comment
+    # obavezno dekorirati metodu dispatch sa never_cache -> bez ovoga, browser sprema posjećene ArticleDetail stranice
+    # u cache, te ih učitava iz cache-a ukoliko im pristupimo tako da stisnemo BACK ili FORWARD button na browseru.
+    # To znači da se stranica ne load-a sa servera i samim time ne pokreće se dispatch() metoda, koja poziva get(). 
+    # To znači da se request.session['comments_owner_id'] ne update-a, dakle vratili smo se na stranicu
+    # article-a čiji je id npr 13, a request.session['comments_owner_id'] je ostao 25, od zadnje loadane stranice.
+    # Zbog toga, ako kliknemo 'Load 10 more comments' button, ovaj će poslati ajax request load_more_comments funkciji
+    # iz comments.views, koja će vratiti 10 komentara za article čiji je id 25, ali mi se nalazimo na stranici od
+    # articlea čiji je id 13!! never_cache decorator osigurava da browser  ArticleDetail stranicu nikad ne sprema u 
+    # cache, tako da kada kliknemo na BACK ili FORWARD button u browser-u, i promijenimo ArticleDetail stranicu, 
+    # ona se mora uvijek učitati sa servera, i tako update-ati request.session['comments_owner_id']!.
+    # Isto se moglo riješiti i na drugi način, tako da u urls.py, tako da as_view() metodu wrappamo u dekorator:
+    #       from django.views.decorators.cache import never_cache
+    #
+    #       urlpatterns = [
+    #       ...
+    #       url(r'^(?P<category>[\w-]+)/(?P<id>\d+)/(?P<slug>[\w-]+)/$',
+    #           never_cache(views.ArticleDetailView.as_view()), name='article-detail')
+    #       ...
+    #      ]
+@method_decorator(never_cache, name='dispatch')
 class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView):
     template_name = 'my_newsapp/detail.html'
     model = Article

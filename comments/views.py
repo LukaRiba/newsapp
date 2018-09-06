@@ -63,7 +63,7 @@ def create_reply(request):
         context = {
             'reply': Comment.objects.latest('pub_date'),
             'edit_form': EditForm(),
-            'create_reply': True  # bool just for check in template
+            'create_reply': True  # bool for check in template
             } 
         return render(request, 'comments/replies.html', context)
 
@@ -87,3 +87,28 @@ def delete_comment_or_reply(request, pk):
     if target.is_reply():
         return HttpResponse('<div><br><p style="color: rgb(124, 0, 0)"><strong>Reply deleted</strong></p></div>')
     return HttpResponse('<div><br><p style="color: rgb(124, 0, 0)"><strong>Comment deleted</strong></p></div>')
+
+@login_required
+@require_POST
+@require_ajax
+def load_more_comments(request):
+    last_visible = request.POST.get('lastVisibleCommentId')
+    print(last_visible)
+    comments_owner_id = request.session['comments_owner_id']
+    # print('LAST LOADED', last_loaded)   
+    remaining_comments = Comment.objects.filter(id__lt=last_visible, object_id=comments_owner_id)
+    # print('REMAINING COMMENTS', remaining_comments)
+    if remaining_comments.count() >= 10:
+        next_comments = remaining_comments[:10]
+    else:
+        next_comments = remaining_comments
+    # print('NEXT COMMENTS', next_comments)
+    context = {
+        'load_more': True, # bool for check in template
+        'next_comments': next_comments,
+        'reply_form': ReplyForm(),
+        'edit_form': EditForm()
+        }
+    return render(request, 'comments/comments.html', context)
+    
+    
