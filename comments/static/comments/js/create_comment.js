@@ -8,7 +8,7 @@ import {addReplyButtonListener,
 // ajax for comments
 function createComment(textarea){
     $.ajax({
-        url : '/comments/add_comment/',
+        url : '/comments/create_comment/',
         type : "POST",
         data : { 
             text: textarea.val()
@@ -16,6 +16,7 @@ function createComment(textarea){
         success : function(newComment) {
             addComment(newComment);
             resetCommentForm(textarea);
+            updateCommentsCounter();
         },
         error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
@@ -53,6 +54,30 @@ function removeNoCommentsMessage() {
     $('#no-comments-yet-message').remove();
 }
 
+function updateCommentsCounter(){
+    var text = ' comments';
+    if(countComments() === 1) {
+        text = ' comment';
+        if(getCommentsCounter().length === 0){ // check if comment-counter is in the DOM,
+            addCommentsCounterToDOM(); 
+        }
+    }
+    getCommentsCounter().html('<strong>' + countComments() + text + '</strong>');
+}
+
+function addCommentsCounterToDOM(){
+    var commentCounter = '<p id="comments-counter"><strong>1 comment</strong></p>'
+    $('#title').after(commentCounter);
+}
+
+function getCommentsCounter(){
+    return $('#comments-counter');
+}
+
+function countComments(){
+    return $('.comment').length;
+}
+
 function reportError(xhr,errmsg) {
     $('#error-log').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
         " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
@@ -61,5 +86,8 @@ function reportError(xhr,errmsg) {
 
 export {
     createComment,
+    updateCommentsCounter,
+    getCommentsCounter,
+    countComments,
     reportError
 };

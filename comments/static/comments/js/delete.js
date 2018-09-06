@@ -1,4 +1,4 @@
-import {reportError} from './create_comment.js';
+import {updateCommentsCounter, reportError} from './create_comment.js';
 
 function deleteCommentOrReply(url, id){
     $.ajax({
@@ -8,7 +8,7 @@ function deleteCommentOrReply(url, id){
             id : id,
         },
         success : function(response) {
-            showResponseMessage(id, response)
+            showResponseMessage(id, response);
             removeCommentOrReply(id);
             $(".modal").modal("hide");
         },
@@ -28,20 +28,24 @@ function getTarget(id) {
 }
 
 function removeCommentOrReply(id) {
-    $(getTarget(id)).fadeTo(2000, 0.00, function(){ 
-        $(this).slideUp(500, function() { 
-            removeShowRepliesButtonIfLastReply($(this));
+    $(getTarget(id)).fadeTo(700, 0.00, function(){ 
+        $(this).slideUp(500, function() {
+            if (isLastReply($(this))){
+                removeShowRepliesButton($(this));
+            } 
             $(this).remove();
-            displayNoCommentsYetMessageIfLastCommentDeleted(); 
+            if (lastCommentDeleted()){
+                displayNoCommentsYetMessage();
+                $('#comments-counter').remove();
+            }
+            updateCounter(); 
         });
     });
 }
 
-function removeShowRepliesButtonIfLastReply(reply){
-    if( isLastReply(reply) ){
-        let parent = getParent(reply);
-        displayNoRepliesYetMessage(parent);
-    }
+function removeShowRepliesButton(reply){
+    let parent = getParent(reply);
+    displayNoRepliesYetMessage(parent);
 }
 
 function isLastReply(reply){
@@ -59,14 +63,25 @@ function displayNoRepliesYetMessage(comment){
     comment.find('.text').after(message)
 }
 
-function displayNoCommentsYetMessageIfLastCommentDeleted(){
-    if( LastCommentDeleted() ){
-        $('#comments').prepend('<p id="no-comments-yet-message">No comments yet.</p>')
+function displayNoCommentsYetMessage(){
+    $('#comments').prepend('<p id="no-comments-yet-message">No comments yet.</p>')
+}
+
+function lastCommentDeleted(){
+    return $('.comment').length === 0;
+}
+
+function updateCounter(){
+    if(isReply()){
+        updateRepliesCounter(id);
+    }
+    else{
+        updateCommentsCounter();
     }
 }
 
-function LastCommentDeleted(){
-    return $('.comment').length === 0;
+function isReply(id){
+    return getTarget(id).parents('.comment').length === 1;
 }
 
 export default deleteCommentOrReply;

@@ -6,8 +6,6 @@ import deleteCommentOrReply from './delete.js';
 
 $(function(){
     
-    console.log('modules working');
-
     addCommentFormSubmitListener();
 
     $('.reply-form').each(function(){
@@ -80,7 +78,7 @@ function toggleReplies(id){
 function toggleShowRepliesButtonText(id){
     let button = getShowRepliesButton(id);
     if (button.text() === 'Show replies'){
-        button.text('Hide replies'  + ' ');
+        button.text('Hide replies');
     } else button.text('Show replies'); 
 }
 
@@ -109,12 +107,15 @@ function getEditButton(id){
 }
 
 function toggleEditForm(id){
-    let form = $('#edit-form-' + id );
-    // select <p> element which holds comment/reply text
-    let currentTextElement = form.siblings('.text');
-    currentTextElement.animate({ height: 'toggle', opacity: 'toggle' }, 'fast');
-    form.animate({ height: 'toggle', opacity: 'toggle' }, 'fast');
-    form.find('textarea').val(currentTextElement.text());
+    let editForm = $('#edit-form-' + id );
+    let currentTextElement = editForm.siblings('.text'); // select <p> element which holds comment/reply text
+    currentTextElement.animate({ height: 'toggle', opacity: 'toggle' }, 'fast'); // hides/shows comment/reply text
+    editForm.animate({ height: 'toggle', opacity: 'toggle' }, 'fast'); // shows/hides edit-form
+    setFormTextArealdInitialValue(editForm, currentTextElement.text()) // sets current comment/reply text as edit-form's initial value
+}
+
+function setFormTextArealdInitialValue(form, text){
+    form.find('textarea').val(text);
 }
 
 function addEditFormListeners(form){
@@ -151,17 +152,14 @@ function addDeleteFormSubmitListener(form) {
 }
 
 export {
-    addReplyFormSubmitListener, 
+    addShowRepliesButtonListener,
+    addEditButtonListener,
+    addReplyButtonListener,
+    addReplyFormSubmitListener,
+    addEditFormListeners,
+    addDeleteFormSubmitListener, 
     toggleReplyForm,
     toggleReplies,
-    addShowRepliesButtonListener,
-    addReplyButtonListener,
-    getShowRepliesButton,
-    addDeleteFormSubmitListener,
-    addEditButtonListener,
     toggleEditForm,
-    addEditFormListeners
+    getShowRepliesButton,
 };
-
-
-

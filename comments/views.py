@@ -28,7 +28,7 @@ class CommentsContextMixin:
 @login_required
 @require_POST
 @require_ajax
-def add_comment(request):    
+def create_comment(request):    
     form = CommentForm(request.POST)
     if form.is_valid():
         form.save(commit=False)
@@ -51,7 +51,7 @@ def add_comment(request):
 @login_required
 @require_POST
 @require_ajax
-def add_reply(request):
+def create_reply(request):
     form = ReplyForm(request.POST)
     parent_id = request.POST.get('parentId')
     if form.is_valid():

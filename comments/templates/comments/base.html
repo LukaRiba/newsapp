@@ -6,7 +6,10 @@
 <div id="error-log"></div>
 
 <div class="comments-body">
-  <h5 class="title">Comments</h5>
+  <h4 id="title" class="mb-3">Comments</h4>
+  {% if comments %}
+    <p id="comments-counter"><strong>{{ comments.count }} comments</strong></p>
+  {% endif %}
 
   {% if request.user.is_authenticated %}
     {% include "comments/comment_form.html" %}
@@ -23,7 +26,6 @@
       <p id="no-comments-yet-message">No comments yet.</p>
     {% endif %}
   </div>
-  
 </div>
 
 <!-- <script src="{% static 'js/jquery-3.3.1.js' %}"></script>
