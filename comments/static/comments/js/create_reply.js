@@ -33,7 +33,6 @@ function addReply(reply, parentId){
     $('#replies-' + parentId).prepend(reply).show();
     addShowRepliesButtonOrChangeItsText(parentId);
     addEditButtonListener(newReplyId(parentId));
-    console.log(newReplyId(parentId));
     addEditFormListeners('#edit-form-' + newReplyId(parentId));
     addDeleteFormSubmitListener('#delete-form-' + newReplyId(parentId))
 }

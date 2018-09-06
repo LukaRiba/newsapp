@@ -1,4 +1,6 @@
-{% for comment in comments %}
+{% load comments_tags %}
+
+{% for comment in comments|first_ten %}
   <div class="comment" id="{{ comment.id }}">
     <p class="margin-bottom-0"><strong>{{ comment.author }}</strong></p>
     <p class="pub-date margin-bottom-5">{{ comment.pub_date }}</p>
@@ -9,7 +11,11 @@
     {% endif %}
 
     {% if comment.replies.all %}
-      <button class="show-replies" id="show-replies-{{ comment.id }}" style="white-space:pre">Show replies</button>
+      {% if comment.replies.all.count == 1 %}
+      <button class="show-replies" id="show-replies-{{ comment.id }}" style="white-space:pre">Show {{ comment.replies.count }} reply</button>
+      {% else %}
+      <button class="show-replies" id="show-replies-{{ comment.id }}" style="white-space:pre">Show {{ comment.replies.count }} replies</button>
+      {% endif %}
     {% else %}
       <span class="no-replies-message" id="no-replies-message-{{ comment.id }}">No replies yet</span>
     {% endif %}

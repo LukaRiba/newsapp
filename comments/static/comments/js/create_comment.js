@@ -16,6 +16,7 @@ function createComment(textarea){
         success : function(newComment) {
             addComment(newComment);
             resetCommentForm(textarea);
+            commentsCount++;
             updateCommentsCounter();
         },
         error : function(xhr,errmsg) { reportError(xhr,errmsg); }
@@ -56,13 +57,13 @@ function removeNoCommentsMessage() {
 
 function updateCommentsCounter(){
     var text = ' comments';
-    if(countComments() === 1) {
+    if(commentsCount === 1) { //commentsCount is global variable defined in base.html
         text = ' comment';
         if(getCommentsCounter().length === 0){ // check if comment-counter is in the DOM,
             addCommentsCounterToDOM(); 
         }
     }
-    getCommentsCounter().html('<strong>' + countComments() + text + '</strong>');
+    getCommentsCounter().html('<strong>' + commentsCount + text + '</strong>');
 }
 
 function addCommentsCounterToDOM(){
@@ -74,10 +75,6 @@ function getCommentsCounter(){
     return $('#comments-counter');
 }
 
-function countComments(){
-    return $('.comment').length;
-}
-
 function reportError(xhr,errmsg) {
     $('#error-log').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
         " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
@@ -87,7 +84,5 @@ function reportError(xhr,errmsg) {
 export {
     createComment,
     updateCommentsCounter,
-    getCommentsCounter,
-    countComments,
     reportError
 };

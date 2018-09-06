@@ -32,13 +32,16 @@ function removeCommentOrReply(id) {
         $(this).slideUp(500, function() {
             if (isLastReply($(this))){
                 removeShowRepliesButton($(this));
+            }
+            if(isComment(id)){
+                commentsCount--;
+                updateCommentsCounter();
             } 
             $(this).remove();
             if (lastCommentDeleted()){
                 displayNoCommentsYetMessage();
                 $('#comments-counter').remove();
             }
-            updateCounter(); 
         });
     });
 }
@@ -71,17 +74,8 @@ function lastCommentDeleted(){
     return $('.comment').length === 0;
 }
 
-function updateCounter(){
-    if(isReply()){
-        updateRepliesCounter(id);
-    }
-    else{
-        updateCommentsCounter();
-    }
-}
-
-function isReply(id){
-    return getTarget(id).parents('.comment').length === 1;
+function isComment(id){
+    return getTarget(id).hasClass('comment');
 }
 
 export default deleteCommentOrReply;

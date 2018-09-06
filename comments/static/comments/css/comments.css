@@ -38,7 +38,7 @@
 	font-weight: 600;
 	font-size: 12px;
 	display: inline-block;
-	width: 90px;
+	width: 105px;
 	color: rgb(75, 75, 75);
 }
 
@@ -55,7 +55,7 @@
 }
 
 .comments-body .show-replies{
-	width: 90px;
+	width: 105px;
 	text-align: left;
 }
 

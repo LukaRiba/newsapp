@@ -14,3 +14,8 @@ register = template.Library()
 @register.filter
 def for_comment(replies, comment_id):
     return replies.filter(parent_id=comment_id)
+
+# returns last 10 comments
+@register.filter
+def first_ten(comments):
+    return comments.all()[:10]

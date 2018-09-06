@@ -8,7 +8,13 @@
 <div class="comments-body">
   <h4 id="title" class="mb-3">Comments</h4>
   {% if comments %}
+    {% if comments.count == 1 %}
+    <p id="comments-counter"><strong>{{ comments.count }} comment</strong></p>
+    {% else %}
     <p id="comments-counter"><strong>{{ comments.count }} comments</strong></p>
+    {% endif %}
+    <!-- for access total comments number in .js files -->
+    <script>var commentsCount = Number("{{ comments.count }}")</script>
   {% endif %}
 
   {% if request.user.is_authenticated %}

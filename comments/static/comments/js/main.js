@@ -77,9 +77,21 @@ function toggleReplies(id){
 
 function toggleShowRepliesButtonText(id){
     let button = getShowRepliesButton(id);
-    if (button.text() === 'Show replies'){
+    if (button.text() !== 'Hide replies'){
         button.text('Hide replies');
-    } else button.text('Show replies'); 
+    } else {
+        var text = countReplies(id) === 1 ? ' reply' : ' replies';
+        button.text('Show ' + countReplies(id) + text); 
+    }
+}
+
+function countReplies(id){
+    return $('#replies-' + id ).children('.reply').length;
+}
+
+function pluralSuffix(number){
+    if(number > 1) return 's';
+    return '';
 }
 
 function addReplyButtonListener(id){
