@@ -1,28 +1,40 @@
 import {reportError} from './create_comment.js';
-// import {} from './main.js';
+import {addShowRepliesButtonListener, addEditButtonListener, addReplyButtonListener,
+        addReplyFormSubmitListener, addEditFormListeners, addDeleteFormSubmitListener} from './main.js';
 
 function loadMoreComments(lastVisibleCommentId){
     $.ajax({
         url : '/comments/load_more_comments/',
-        type : "POST",
+        type : "GET",
         data : { 
             lastVisibleCommentId: lastVisibleCommentId,
         }, 
         success : function(nextComments) {
-            console.log('last visible id: ', lastVisibleCommentId);
-
-            showMoreComments(lastVisibleCommentId, nextComments);
-            console.log(getNextCommentsIds(lastVisibleCommentId));
+            loadNextComments(lastVisibleCommentId, nextComments);
+            addListenersToNextComments(lastVisibleCommentId);
             updateLoadMoreCommentsButtonText();
         },
         error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
 }
 
-function showMoreComments(lastVisibleCommentId, nextComments){
+function loadNextComments(lastVisibleCommentId, nextComments){
     $('#' + lastVisibleCommentId).after(nextComments);
 }
 
+function addListenersToNextComments(lastVisibleCommentId){
+    var ids = getNextCommentsIds(lastVisibleCommentId);
+    ids.forEach(function(commentId){
+        addShowRepliesButtonListener(commentId);
+        addEditButtonListener(commentId);
+        addReplyButtonListener(commentId);
+        addReplyFormSubmitListener($('#reply-form-' + commentId));
+        addEditFormListeners($('#edit-form-' + commentId));
+        addDeleteFormSubmitListener($('#delete-form-' + commentId));
+    });
+}
+
+// returns a list of ids of newly loaded comments, which come after last visible one after loading  
 function getNextCommentsIds(lastVisibleCommentId){
     var ids = [];
     var nextComments = $('#' + lastVisibleCommentId).nextAll('.comment'); 
@@ -34,8 +46,8 @@ function getNextCommentsIds(lastVisibleCommentId){
 
 function updateLoadMoreCommentsButtonText(){
     var button = $('.load-more-comments');
-    var loadedComments = $('.comment').length;
-    var remainingComments = commentsCount - loadedComments; 
+    var visibleComments = $('.comment').length;
+    var remainingComments = commentsCount - visibleComments; 
     if (remainingComments === 0) {
         button.remove();
     } else if(remainingComments === 1) {

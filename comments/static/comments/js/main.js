@@ -174,8 +174,6 @@ function getLastVisibleCommentId(){
 }
 
 export {
-    addListenersToCommentsButtons,
-    addListenersToRepliesButtons,
     addShowRepliesButtonListener,
     addEditButtonListener,
     addReplyButtonListener,
