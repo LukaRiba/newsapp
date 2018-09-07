@@ -29,13 +29,15 @@
   <div id="comments">
     {% if comments %}
       {% include "comments/comments.html" %}
-      {% if comments.count >= 15 %}
-        <button class="load-more-comments btn-md btn-primary">Load 10 more Comments</button>
-      {% elif comments.count > 6  %}
-        <button class="load-more-comments btn-md btn-primary">Load {{ comments|substract:5 }} more Comments</button>
-      {% elif comments.count == 6 %}
-        <button class="load-more-comments btn-md btn-primary">Load 1 more Comment</button>
-      {% endif %}
+      <div id="load-more-button-container">
+        {% if comments.count >= 15 %}
+          <button class="load-more-comments btn-md btn-primary">Load 10 more Comments</button>
+        {% elif comments.count > 6  %}
+          <button class="load-more-comments btn-md btn-primary">Load {{ comments|substract:5 }} more Comments</button>
+        {% elif comments.count == 6 %}
+          <button class="load-more-comments btn-md btn-primary">Load 1 more Comment</button>
+        {% endif %}
+      </div>
     {% else %}
       <p id="no-comments-yet-message">No comments yet.</p>
     {% endif %}

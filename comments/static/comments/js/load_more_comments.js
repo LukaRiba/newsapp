@@ -12,7 +12,7 @@ function loadMoreComments(lastVisibleCommentId){
         success : function(nextComments) {
             loadNextComments(lastVisibleCommentId, nextComments);
             addListenersToNextComments(lastVisibleCommentId);
-            updateLoadMoreCommentsButtonText();
+            updateLoadMoreCommentsButton();
         },
         error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
@@ -44,19 +44,22 @@ function getNextCommentsIds(lastVisibleCommentId){
     return ids;
 }
 
-function updateLoadMoreCommentsButtonText(){
+function updateLoadMoreCommentsButton(){
     var button = $('.load-more-comments');
-    var visibleComments = $('.comment').length;
-    var remainingComments = commentsCount - visibleComments; 
+    var remainingComments = commentsCount - visibleCommentsCount(); 
     if (remainingComments === 0) {
         button.remove();
     } else if(remainingComments === 1) {
         button.text('Load 1 more Comment');
     } else if(remainingComments < 10) {        
         button.text('Load ' + remainingComments + ' more Comments');
-    } else if(remainingComments > 10) {
+    } else if(remainingComments >= 10) {
         button.text('Load ' + 10 + ' more Comments');
     }  
 }
 
-export {loadMoreComments, updateLoadMoreCommentsButtonText};
+function visibleCommentsCount(){
+    return $('.comment').length;
+}
+
+export {loadMoreComments, updateLoadMoreCommentsButton, visibleCommentsCount};

@@ -177,11 +177,15 @@ export {
     addShowRepliesButtonListener,
     addEditButtonListener,
     addReplyButtonListener,
+
     addReplyFormSubmitListener,
     addEditFormListeners,
-    addDeleteFormSubmitListener, 
+    addDeleteFormSubmitListener,
+
     toggleReplyForm,
     toggleReplies,
     toggleEditForm,
     getShowRepliesButton,
+
+    addLoadMoreCommentsButtonListener
 };
