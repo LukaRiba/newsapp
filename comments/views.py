@@ -91,10 +91,12 @@ def delete_comment_or_reply(request, pk):
 @require_ajax
 def load_more_comments(request):
     last_visible = request.GET.get('lastVisibleCommentId')
+    num_of_comments_to_load = int(request.GET.get('numOfCommentsToLoad'))
     comments_owner_id = request.session['comments_owner_id']
+    # How much more comments is in database 
     remaining_comments = Comment.objects.filter(id__lt=last_visible, object_id=comments_owner_id)
-    if remaining_comments.count() >= 10:
-        next_comments = remaining_comments[:10]
+    if remaining_comments.count() >= num_of_comments_to_load:
+        next_comments = remaining_comments[:num_of_comments_to_load]
     else:
         next_comments = remaining_comments
     context = {

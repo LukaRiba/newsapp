@@ -3,9 +3,8 @@ import {addReplyButtonListener,
         addEditButtonListener,
         addEditFormListeners,
         addDeleteFormSubmitListener,
-        addLoadMoreCommentsButtonListener
         } from './main.js';
-import {updateLoadMoreCommentsButton, visibleCommentsCount} from './load_more_comments.js';
+import {manageVisibleComments} from './manage_visible_comments.js';
 
 // ajax for comments
 function createComment(textarea){
@@ -20,7 +19,7 @@ function createComment(textarea){
             resetCommentForm(textarea);
             commentsCount++;
             updateCommentsCounter();
-            manageVisibleCommentsCount();
+            manageVisibleComments();
         },
         error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
@@ -59,7 +58,7 @@ function removeNoCommentsMessage() {
 }
 
 function updateCommentsCounter(){
-    var text = ' comments';
+    let text = ' comments';
     if(commentsCount === 1) { //commentsCount is global variable defined in base.html
         text = ' comment';
         if(getCommentsCounter().length === 0){ // check if comment-counter is in the DOM,
@@ -70,62 +69,12 @@ function updateCommentsCounter(){
 }
 
 function addCommentsCounterToDOM(){
-    var commentCounter = '<p id="comments-counter"><strong>1 comment</strong></p>'
+    let commentCounter = '<p id="comments-counter"><strong>1 comment</strong></p>'
     $('#title').after(commentCounter);
 }
 
 function getCommentsCounter(){
     return $('#comments-counter');
-}
-
-// možda bi se moglo modificirati da radi i kod brisanja komentara..i onda sve funkcije prebaciti u manage_visible_comments.js ??
-// refaktorirati funkciju - sigurno se može skratiti
-// čini mi se da radi besprijekorno za sada
-function manageVisibleCommentsCount(){
-    var visibleComments = visibleCommentsCount()
-    var previousBreakPoint = getPreviousBreakpoint(visibleComments);
-
-    if(isBreakPoint(visibleComments)){
-        if(commentsCount === visibleComments){
-            addLoadMoreButtonToDOM();
-        }
-        removeExtraComment(); 
-        updateLoadMoreCommentsButton();
-    } 
-    else if(visibleComments > previousBreakPoint) {
-        while(!(visibleComments === previousBreakPoint  - 1)){ //because we want visible comments to be 5, 15, 25,... ect.
-            removeExtraComment();
-            visibleComments--;
-        }
-        addLoadMoreButtonToDOM();
-        updateLoadMoreCommentsButton();
-    }
-}
-
-// Calculates previous breakpoint number given visible comments number.
-// For exaple, if num of visible comments is 22, it returns 16.
-function getPreviousBreakpoint(visibleCommentsCount){
-    if(visibleCommentsCount > 5){
-        while(!(isBreakPoint(visibleCommentsCount))){
-            visibleCommentsCount--;
-        }
-    }
-    return visibleCommentsCount;
-}
-
-// returns true if there are 6, 16, 26, 36,... visible comments 
-function isBreakPoint(visibleCommentsCount){
-    return (visibleCommentsCount - 6) % 10 === 0;
-}
-
-function addLoadMoreButtonToDOM(){
-    var button = '<button class="load-more-comments btn-md btn-primary">Load 1 more Comment</button>';
-    $('#load-more-button-container').prepend(button);
-    addLoadMoreCommentsButtonListener();
-}
-
-function removeExtraComment(){
-    $('.comment').last().remove();
 }
 
 function reportError(xhr,errmsg) {

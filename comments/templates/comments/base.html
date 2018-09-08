@@ -3,7 +3,8 @@
 <!-- <link rel="stylesheet" href="{% static 'css/bootstrap-4.0.0.css' %}">
 <link rel="stylesheet" href="{% static 'comments/css/comments.css' %}"> -->
 
-<!-- for access total comments number in .js files -->
+<!-- owner object's total comments number at the moment of page loading.
+  used in .js files for managing visible comments and updateing comments-counter element-->
 <script>var commentsCount = Number("{{ comments.count }}")</script>
 
 <div id="error-log"></div>
@@ -30,13 +31,18 @@
     {% if comments %}
       {% include "comments/comments.html" %}
       <div id="load-more-button-container">
-        {% if comments.count >= 15 %}
-          <button class="load-more-comments btn-md btn-primary">Load 10 more Comments</button>
-        {% elif comments.count > 6  %}
-          <button class="load-more-comments btn-md btn-primary">Load {{ comments|substract:5 }} more Comments</button>
-        {% elif comments.count == 6 %}
-          <button class="load-more-comments btn-md btn-primary">Load 1 more Comment</button>
+        {% if comments.count > 5 %}
+          <button class="load-more-comments btn-md btn-primary mr-4">
+            {% if comments.count == 6 %}
+              Load 1 more Comment
+            {% elif comments.count > 6 and comments.count < 15 %}
+              Load {{ comments|substract:5 }} more Comments
+            {% elif comments.count >= 15 %}
+              Load 10 more Comments
+            {% endif %}
+          </button>
         {% endif %}
+        <button class="show-less-comments btn-md btn-secondary" style="display: none;">Show less</button>
       </div>
     {% else %}
       <p id="no-comments-yet-message">No comments yet.</p>

@@ -3,7 +3,8 @@ import {createComment} from './create_comment.js';
 import createReply from './create_reply.js';
 import updateCommentOrReply from './edit.js';
 import deleteCommentOrReply from './delete.js';
-import {loadMoreComments} from './load_more_comments.js';
+import {addLoadMoreCommentsButtonListener, visibleCommentsCount, updateLoadMoreCommentsButton} from './load_comments.js';
+import {getPreviousBreakpoint, removeExtraComments, hideShowLessButton, showLoadMoreCommentsButton} from './manage_visible_comments.js';
 
 $(function(){
     
@@ -26,6 +27,8 @@ $(function(){
     });
 
     addLoadMoreCommentsButtonListener();
+
+    addShowLessCommentsButtonListener();
 });
 
 function addCommentFormSubmitListener(){
@@ -83,7 +86,7 @@ function toggleShowRepliesButtonText(id){
     if (button.text() !== 'Hide replies'){
         button.text('Hide replies');
     } else {
-        var text = countReplies(id) === 1 ? ' reply' : ' replies';
+        let text = countReplies(id) === 1 ? ' reply' : ' replies';
         button.text('Show ' + countReplies(id) + text); 
     }
 }
@@ -161,16 +164,26 @@ function addDeleteFormSubmitListener(form) {
     });
 }
 
-function addLoadMoreCommentsButtonListener(){
-    $('.load-more-comments').on('click', function(event){
-        event.preventDefault;
-        var lastVisibleCommentId = getLastVisibleCommentId();
-        loadMoreComments(lastVisibleCommentId);
-    })
-}
-
-function getLastVisibleCommentId(){
-    return $('.comment').last().attr('id');
+function addShowLessCommentsButtonListener(){
+    $('.show-less-comments').click(function(event){
+        event.preventDefault();
+        let visibleComments = visibleCommentsCount(); // visible comments before removing
+        // visibleComments - 1 instead of visibleComments, forces to remove more comments, till next previousBreakpoint after every click.
+        // That's because removeExtraComments() has configured not to remove anything if when called, visible comments equal breakpoint number
+        // (only while visible comments num is greater than breakpoint number).
+        // Thats because, if for example we have 11 visible comments and delete one, removeExtraComments() is called via manageVisibleComments,
+        // and because now visible comments equal breakpoint number (10), 10 comments stay visible. When clicking on this button, if there are for example
+        // 18 visible comments, and we pass visibleComments as argument to getPreviousBreakpoint(), getPreviousBreakpoint() will return 15,
+        // so 3 comments would be removed. Thats what we want! But, on second click, there are 15 visible comments, and getPreviousBreakpoint()
+        // again returns 15, so removeExtraComments does nothing -> thats the reason we pass visibleComments - 1 to getPreviousBreakpoint().
+        // Now it returns next previous breakpoint (because visibleComments - 1 is 14, so it calculates previous breakpoint which is 10), 
+        // and removeExtraComments() removes 5 more comments.
+        removeExtraComments(visibleComments, getPreviousBreakpoint(visibleComments - 1));
+        // After removing extra comments, num of visible comments has changed, so we call again visibleCommentsCount().
+        if(visibleCommentsCount() < 6) { $(this).hide() }
+        showLoadMoreCommentsButton();
+        updateLoadMoreCommentsButton();
+    });
 }
 
 export {
@@ -187,5 +200,5 @@ export {
     toggleEditForm,
     getShowRepliesButton,
 
-    addLoadMoreCommentsButtonListener
+    addLoadMoreCommentsButtonListener,
 };

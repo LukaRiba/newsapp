@@ -1,7 +1,7 @@
 /* koristiti sass da mogu neste-ati sve selektore unutar .comments-body selektora, a ne ovako*/
 
 .comments-body {
-	margin-bottom: 40px;
+	margin-bottom: 100px;
 }
 
 .comments-body ul {
@@ -59,8 +59,11 @@
 	text-align: left;
 }
 
-.comments-body .reply-button:focus, .show-replies:focus, .edit-button:focus, .delete-button:focus {
+.comments-body .reply-button:focus, .show-replies:focus, .edit-button:focus, .delete-button:focus,
+.load-more-comments:focus, .show-less-comments:focus {
 	outline:none !important;
+	box-shadow:none !important;
+
 }
 
 .comments-body .replies {

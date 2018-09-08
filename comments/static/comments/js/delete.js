@@ -1,5 +1,5 @@
 import {updateCommentsCounter, reportError} from './create_comment.js';
-import {updateLoadMoreCommentsButton} from './load_more_comments.js';
+import {manageVisibleComments} from './manage_visible_comments.js';
 
 function deleteCommentOrReply(url, id){
     $.ajax({
@@ -34,12 +34,18 @@ function removeCommentOrReply(id) {
             if (isLastReply($(this))){
                 removeShowRepliesButton($(this));
             }
+            
             if(isComment(id)){
                 commentsCount--;
                 updateCommentsCounter();
-                //updateLoadMoreCommentsButton();
-            } 
-            $(this).remove();
+                // Deletes comment. It's important to call it here because manageVisibleComments(); has to be called after comment removal.
+                // This is because then visibleCommentsCount() returns exact num of visible comments remained after deletion.
+                $(this).remove(); // comment is removed.
+                // Calls loadMoreComments() from 'else if' block (visibleComments < previousBreakPoint) which sends ajax request.
+                // Ajax is send from ajax.
+                manageVisibleComments(); 
+            } else $(this).remove(); // reply is removed.
+    
             if (lastCommentDeleted()){
                 displayNoCommentsYetMessage();
                 $('#comments-counter').remove();
