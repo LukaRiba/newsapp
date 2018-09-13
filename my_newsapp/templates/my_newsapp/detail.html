@@ -109,8 +109,8 @@
       <div class="file-attachments mt-3"> <!-- attachments start -->
         <h5>Attachments:</h5>
         {% for file in article.files.all  %}
-          <a href="">{{ file }}</a>
-          <p>{{ file.get_file_url }}</p>
+          <a href="{{ file.get_absolute_url }}">{{ file }}</a>
+          
         {% endfor %}
       </div> <!-- attachments end -->
     {% endif %}

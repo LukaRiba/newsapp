@@ -30,4 +30,10 @@ urlpatterns = [
     # https://stackoverflow.com/questions/49096239/django-imagefield-not-uploading-the-image?rq=1
     # dobro objašnjeno: https://overiq.com/django/1.10/handling-media-files-in-django/
 if settings.DEBUG:
+    import debug_toolbar
+    # because url() instances must be in one list
+    urlpatterns = [url(r'^__debug__/', include(debug_toolbar.urls))] + urlpatterns
+    # we add static after list
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    print(urlpatterns)
+

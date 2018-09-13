@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import FileExtensionValidator
-from django.conf import settings
 
 from autoslug import AutoSlugField
 
@@ -78,9 +77,8 @@ class File(models.Model):
                             blank=True, null=True)
     article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
 
-    # def get_file_url(self):
-    #     print(settings.MEDIA_ROOT, self.file)
-    #     return str(settings.MEDIA_ROOT + self.file)
+    def get_absolute_url(self):
+        return reverse('my_newsapp:file-download', kwargs={'id': self.id, 'name': self.__str__()})
 
     def __str__(self):
         return str(self.file).split('/')[-1]

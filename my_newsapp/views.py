@@ -5,8 +5,11 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import views as auth_views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+from fileprovider.utils import sendfile 
 
-from .models import Article, Category
+from .models import Article, Category, File
 from .utils import get_status_none_categories_random_ids
 from .forms import ArticleForm, ImageFormSet, FileFormSet, LoginForm
 
@@ -100,6 +103,12 @@ class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView
         self.request.session['comments_owner_model_name'] = self.model.__name__
         self.request.session['comments_owner_id'] = self.kwargs['id']
         return super(ArticleDetailView, self).get(request, *args, **kwargs)
+
+def file_download(request, pk):
+    target = get_object_or_404(File, pk)
+    path = settings.MEDIA_ROOT + str(target.file)
+    print(path)
+    return sendfile(path)
 
 class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'

@@ -36,9 +36,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
     'easy_thumbnails',
     'crispy_forms',
     'betterforms',
+    'fileprovider',
     'my_newsapp',
     'comments',
 ]
@@ -51,6 +53,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'fileprovider.middleware.FileProviderMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'my_news.urls'
@@ -139,4 +143,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 LOGIN_REDIRECT_URL = '/news/home'
+
+FILEPROVIDER_NAME = 'python'
+
+INTERNAL_IPS = '127.0.0.1'
 

@@ -1,7 +1,6 @@
 from django.forms import ModelForm, BaseInlineFormSet, TextInput, FileInput, ValidationError, Textarea
 from django.forms.models import inlineformset_factory
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.validators import get_available_image_extensions
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field
