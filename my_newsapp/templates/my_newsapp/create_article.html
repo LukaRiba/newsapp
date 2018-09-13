@@ -36,14 +36,17 @@
     <!-- ArticleForm end -->
     
     <div class="image-formset"> <!-- ImageInlineFormSet start -->
-      <h3 class="mt-5 mb-0">Add images for your article</h3>
+      <h3 class="mt-5 mb-0">Add images</h3>
       <p style="color:lightslategray;">*First image is used for a thumbnail image</p>
 
-      {% if image_formset.non_form_errors %}
-        <div style="color:brown">
-        {{ image_formset.non_form_errors }}
-        </div>
-      {% endif %}
+      <div class="errors">
+        {% if image_formset.non_form_errors %}
+          <div style="color:brown">
+            {{ image_formset.non_form_errors }}
+          </div>
+        {% endif %}
+      </div>
+      
 
       <div class="row">
         <div class="col-md-4">
@@ -80,15 +83,18 @@
     <div class="file-formset"> <!-- FileInlineFormSet start -->
       <h3 class="mt-5 mb-3">Add files</h3>
 
+      <div class="errors">
+        {% if file_formset.non_form_errors %}
+          <div style="color:brown">
+            {{ file_formset.non_form_errors }}
+          </div>
+        {% endif %}
+      </div>
+      
+
       <p>Files:</p>
       
       {{ file_formset.management_form }}
-
-      {% if file_formset.non_form_errors %}
-        <div style="color:brown">
-        {{ file_formset.non_form_errors }}
-        </div>
-      {% endif %}
 
       {% for file_form in file_formset %}
         <div class="row file-form mb-3">
@@ -133,14 +139,33 @@
         deleteText: 'Remove'
       });
 
-      // for displaying names of choosen images and files
-      $('.image-formset, .file-formset').on('change', 'input[type="file"]', function(e){
-        var fileName = '';
-        fileName = e.target.value.split( '\\' ).pop(); // gets filename from the path
-        if( fileName )
-            $(this).next('div').children('span').html(fileName) //Selects span next to Choose image label and sets fileName as text (html)
-      });
+      displayFileName('.image-formset', 'image', ['bmp', 'gif', 'png', 'jpg', 'jpeg']);
+      displayFileName('.file-formset', 'file', ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip']);
     });
+
+    // for displaying names of choosen images and files
+    function displayFileName(selector, type, allowedExtensions){
+      $(selector).on('change', 'input[type="file"]', function(e){
+        var fileName = e.target.value.split( '\\' ).pop(); // gets filename from the path
+        var fileExtension = fileName.split('.').pop() // gets file extension
+        $(this).next('div').children('span').html(fileName) //Selects span next to Choose image label and sets fileName as text (html)
+        
+        // Check if not allowed files choosen
+        if ( !(allowedExtensions.indexOf(fileExtension) > -1) ){
+          // display warning message
+          $(selector).children('.errors').prepend(
+            '<ul><li style="color: brown">Files with extension .' + fileExtension + ' are not allowed</li></ul>'); 
+          // clear file input
+          $(this).val('');
+          // remove file name
+          $(this).next('div').children('span').html('No ' + type + ' choosen');
+        }
+        else{
+          if( $(selector).find('.errors ul').length > 0 )
+           $(selector).find('.errors ul').remove();
+        }    
+      });  
+    }
 </script>
 {% endblock script %}
 

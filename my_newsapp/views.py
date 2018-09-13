@@ -107,15 +107,17 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
     success_msg = 'You created a new Article'
     login_url = 'my_newsapp:login'
 
+    # Without context sefined in 'if self.request.POST:' block, error messages won't be
+    # displayed on page in case of invalid formset, when post() method returns get() method.
     def get_context_data(self, **kwargs):
         context = super(CreateArticleView, self).get_context_data(**kwargs)
-        # if self.request.POST:
-        #     context['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES)
-        # else:
-        # context['image_formset'] = ImageFormSet()
-        context.update({
-            'image_formset': ImageFormSet(), 'file_formset': FileFormSet()
-            })
+        if self.request.POST:
+            context['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES)
+            context['file_formset'] = FileFormSet(self.request.POST, self.request.FILES)
+        else:
+            context.update({
+                'image_formset': ImageFormSet(), 'file_formset': FileFormSet()
+                })
         return context
 
     def post(self, request, *args, **kwargs):
@@ -130,8 +132,6 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
             file_formset.save()    
             messages.info(self.request, self.success_msg)
             return HttpResponseRedirect(form.instance.get_absolute_url())
-        print('image formset non form errors', image_formset.non_form_errors())
-        print('file formset non form errors', file_formset.non_form_errors())
         return super(CreateArticleView, self).get(request, *args, **kwargs)
 
 class MyNewsLoginView(auth_views.LoginView):

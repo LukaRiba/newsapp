@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import FileExtensionValidator
+from django.conf import settings
 
 from autoslug import AutoSlugField
 
@@ -63,7 +64,8 @@ class Article(models.Model):
         ordering = ['-pub_date']
 
 class Image(models.Model):
-    image = models.ImageField(blank=True, null=True)
+    image = models.ImageField(
+        validators=[FileExtensionValidator(['bmp', 'gif', 'png', 'jpg', 'jpeg'])],  blank=True, null=True)
     description = models.CharField(max_length=200, blank=True, null=True)
     article = models.ForeignKey(Article, related_name='images', on_delete=models.CASCADE)
 
@@ -75,6 +77,10 @@ class File(models.Model):
                             validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],  
                             blank=True, null=True)
     article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
+
+    # def get_file_url(self):
+    #     print(settings.MEDIA_ROOT, self.file)
+    #     return str(settings.MEDIA_ROOT + self.file)
 
     def __str__(self):
         return str(self.file).split('/')[-1]

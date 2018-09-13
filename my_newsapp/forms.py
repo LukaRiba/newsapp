@@ -1,6 +1,7 @@
-from django.forms import ModelForm, BaseInlineFormSet, TextInput, ValidationError, Textarea
+from django.forms import ModelForm, BaseInlineFormSet, TextInput, FileInput, ValidationError, Textarea
 from django.forms.models import inlineformset_factory
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.validators import get_available_image_extensions
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field
@@ -28,6 +29,9 @@ class ImageForm(ModelForm):
         model = Image
         fields = ('image', 'description')
         widgets = {
+            'image': FileInput(attrs={
+                'accept': '.bmp, .gif, .png, .jpg, .jpeg',
+            }),
             'description': TextInput(attrs={
                 'autocomplete': 'off',
                 'class': 'textinput textInput form-control',
@@ -39,6 +43,11 @@ class FileForm(ModelForm):
     class Meta:
         model = File
         fields = ('file',)
+        widgets = {
+            'file': FileInput(attrs={
+                'accept': '.pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .zip',
+            })
+        }
 
 class ImageInlineFormSet(BaseInlineFormSet):
 
