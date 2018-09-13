@@ -29,35 +29,35 @@
     3.   Since your form is submitting to the same url, you can simply use action="". If you prefer, you can use action="{% url 'my_newsapp:create-article' %}"
   {% endcomment %}
 <div class="container mb-5 mt-5">
-  <form action="{% url 'my_newsapp:create-article' %}" method="POST" enctype="multipart/form-data">
+  <form action="{% url 'my_newsapp:create-article' %}" method="POST" enctype="multipart/form-data"> <!-- Main Form start -->
 
-    {% crispy form %}
+    <!-- ArticleForm start -->
+    {% crispy form %} 
+    <!-- ArticleForm end -->
+    
+    <div class="image-formset"> <!-- ImageInlineFormSet start -->
+      <h3 class="mt-5 mb-0">Add images for your article</h3>
+      <p style="color:lightslategray;">*First image is used for a thumbnail image</p>
 
+      {% if image_formset.non_form_errors %}
+        <div style="color:brown">
+        {{ image_formset.non_form_errors }}
+        </div>
+      {% endif %}
 
-
-    <h3 class="mt-5 mb-0">Add images for your article</h3>
-    <p style="color:lightslategray;">*First image is used for a thumbnail image</p>
-
-    {% if image_formset.non_form_errors %}
-      <div style="color:brown">
-      {{ image_formset.non_form_errors }}
+      <div class="row">
+        <div class="col-md-4">
+          <p>Images:</p>
+        </div>
+        <div class="col-md-6">
+          <p>Description:</p>
+        </div>
       </div>
-    {% endif %}
-
-    <div class="row">
-      <div class="col-md-4">
-        <p>Images:</p>
-      </div>
-      <div class="col-md-6">
-        <p>Description:</p>
-      </div>
-    </div>
 
       {{ image_formset.management_form }}
 
       {% for image_form in image_formset %}
-        <div class="row image-formset mb-3">
-
+        <div class="row image-form mb-3">
           <div class="col-md-4">
             {% comment %} {% if image_form.instance.pk %}{{ image_form.DELETE }}{% endif %} {% endcomment %}
             {{ image_form.image }}
@@ -70,17 +70,45 @@
               <span class="align-bottom overflow-hidden">No image choosen</span>
             </div>
           </div>
-
-          <div class="col-md-7">
-              {{ image_form.description }}
+          <div class="col-md-7 text-input">
+            {{ image_form.description }}
           </div>
-
         </div>
       {% endfor %}
+    </div> <!-- ImageInlineFormSet end -->
+    
+    <div class="file-formset"> <!-- FileInlineFormSet start -->
+      <h3 class="mt-5 mb-3">Add files</h3>
 
-      <hr class="mt-5">
+      <p>Files:</p>
+      
+      {{ file_formset.management_form }}
+
+      {% if file_formset.non_form_errors %}
+        <div style="color:brown">
+        {{ file_formset.non_form_errors }}
+        </div>
+      {% endif %}
+
+      {% for file_form in file_formset %}
+        <div class="row file-form mb-3">
+          <div class="col-md-4">
+            {{ file_form.file }}
+            <div class="position-bottom">
+              {% comment %} for="id_files-{{ forloop.counter0 }}-file" je rješenje da label-ovom for atributu dodijelim id
+              file inputa !!!{% endcomment %}
+              <label class="file-label btn btn-secondary mb-0 mr-3" for="id_files-{{ forloop.counter0 }}-file">Choose file</label> 
+              <span class="align-bottom overflow-hidden">No file choosen</span>
+            </div>
+          </div>
+          
+        </div>
+      {% endfor %}
+    </div> <!-- FileInlineFormSet end -->
+
+    <hr class="mt-5">
     <input type="submit" name="submit" value="Publish" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
-  </form>
+  </form> <!-- Main Form end -->
 </div>
 
 {% endblock content %}
@@ -91,27 +119,27 @@
   <script type="text/javascript">
 
     $(function() {
-      $('.image-formset').formset({
+      // ImageFormset settings
+      $('.image-form').formset({
           prefix: '{{ image_formset.prefix }}',
           addText: 'Add image',
           deleteText: 'Remove'
       });
-    });
 
-    $('.image-formset input[type="text"]').addClass( 'textinput textInput form-control' );
-    
-    // The <a> tag is an inline element and therefore cannot have a top or bottom margin. 
-    // But you can solve this by applying display: inline-block; to it.
-    $('.add-row').addClass('inline-block mt-1'); 
-    //$('.delete-row').addClass('');
+      // FileFormset settings
+      $('.file-form').formset({
+        prefix: '{{ file_formset.prefix }}',
+        addText: 'Add file',
+        deleteText: 'Remove'
+      });
 
-    //Adds event listener on file input elements (image input) - existing ones and dinamically created ones,
-    //for displaying choosen filename in image-form span (next to Choose image label/button)
-    $('input[type="file"]').on('change', function(e){
-      var fileName = '';
-      fileName = e.target.value.split( '\\' ).pop(); // gets filename from the path
-      if( fileName )
-          $(this).next('div').children('span').html(fileName) //Selects span next to Choose image label and sets fileName as text (html)
+      // for displaying names of choosen images and files
+      $('.image-formset, .file-formset').on('change', 'input[type="file"]', function(e){
+        var fileName = '';
+        fileName = e.target.value.split( '\\' ).pop(); // gets filename from the path
+        if( fileName )
+            $(this).next('div').children('span').html(fileName) //Selects span next to Choose image label and sets fileName as text (html)
+      });
     });
 </script>
 {% endblock script %}

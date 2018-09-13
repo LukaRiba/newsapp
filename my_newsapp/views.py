@@ -8,7 +8,7 @@ from django.views.decorators.cache import never_cache
 
 from .models import Article, Category
 from .utils import get_status_none_categories_random_ids
-from .forms import ArticleForm, ImageFormSet, LoginForm
+from .forms import ArticleForm, ImageFormSet, FileFormSet, LoginForm
 
 from comments.views import CommentsContextMixin
 
@@ -109,22 +109,29 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(CreateArticleView, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES)
-        else:
-            context['image_formset'] = ImageFormSet()
+        # if self.request.POST:
+        #     context['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES)
+        # else:
+        # context['image_formset'] = ImageFormSet()
+        context.update({
+            'image_formset': ImageFormSet(), 'file_formset': FileFormSet()
+            })
         return context
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
-        formset = ImageFormSet(request.POST, request.FILES)
-        if  form.is_valid and formset.is_valid():
+        image_formset = ImageFormSet(request.POST, request.FILES)
+        file_formset = FileFormSet(request.POST, request.FILES)
+        if form.is_valid and image_formset.is_valid() and file_formset.is_valid():
             form.save(commit=False)
             form.instance.author = self.request.user
-            formset.instance = form.save()
-            formset.save()    
+            image_formset.instance = file_formset.instance = form.save()
+            image_formset.save()
+            file_formset.save()    
             messages.info(self.request, self.success_msg)
             return HttpResponseRedirect(form.instance.get_absolute_url())
+        print('image formset non form errors', image_formset.non_form_errors())
+        print('file formset non form errors', file_formset.non_form_errors())
         return super(CreateArticleView, self).get(request, *args, **kwargs)
 
 class MyNewsLoginView(auth_views.LoginView):

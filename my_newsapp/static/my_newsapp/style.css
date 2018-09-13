@@ -127,11 +127,6 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   
 }
 
-.comments {
-  /* margin-right: 300px;
-  margin-left: 300px; */
-}
-
 .article pre, .article a {
   color: rgb(144, 77, 25);
   font-weight: 600;
@@ -189,6 +184,15 @@ input[type='file'] {
   overflow: hidden;
   position: absolute;
   z-index: -1;
+}
+
+.image-label, .file-label {
+  width: 135px;
+}
+
+.image-form > .delete-row, .file-form > .delete-row {
+  margin-left: 15px;
+  padding-top: 14px;
 }
 
 .position-bottom {

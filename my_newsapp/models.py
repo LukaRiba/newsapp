@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.validators import FileExtensionValidator
 
 from autoslug import AutoSlugField
 
@@ -69,4 +70,12 @@ class Image(models.Model):
     def __str__(self):
         return '%s' % self.image
 
+class File(models.Model):
+    file = models.FileField(upload_to='files/', 
+                            validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],  
+                            blank=True, null=True)
+    article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.file).split('/')[-1]
 

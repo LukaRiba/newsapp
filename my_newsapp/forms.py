@@ -5,7 +5,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field
 
-from .models import Article, Image
+from .models import Article, Image, File
 
 class ArticleForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -28,8 +28,17 @@ class ImageForm(ModelForm):
         model = Image
         fields = ('image', 'description')
         widgets = {
-            'description': TextInput(attrs={'autocomplete': 'off'}),
+            'description': TextInput(attrs={
+                'autocomplete': 'off',
+                'class': 'textinput textInput form-control',
+            }),
         }
+
+class FileForm(ModelForm):
+    
+    class Meta:
+        model = File
+        fields = ('file',)
 
 class ImageInlineFormSet(BaseInlineFormSet):
 
@@ -61,6 +70,31 @@ class ImageInlineFormSet(BaseInlineFormSet):
                 continue
         
 ImageFormSet = inlineformset_factory(Article, Image, form=ImageForm, formset=ImageInlineFormSet, 
+                                     extra=1, max_num=20,  can_delete=True)
+
+class FileInlineFormSet(BaseInlineFormSet):
+
+    def clean(self):
+        super(FileInlineFormSet, self).clean()
+        # Don't bother validating the formset unless each form is valid on its own
+        if any(self.errors):
+            return
+
+        files = []
+        for form in self.forms:
+            try:
+                file = form.cleaned_data['file']
+                # Check for duplicate files
+                file_name = file.name
+                if file_name in files:
+                    raise ValidationError(
+                        'You have uploaded duplicate files. Files have to be unique.'
+                    )
+                files.append(file_name)
+            except KeyError:
+                pass
+            
+FileFormSet = inlineformset_factory(Article, File, form=FileForm, formset=FileInlineFormSet, 
                                      extra=1, max_num=20,  can_delete=True)
 
 class LoginForm(AuthenticationForm):

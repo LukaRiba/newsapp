@@ -48,6 +48,7 @@
     <div class="article article-wrap"> <!-- article-wrap start -->
       <h2>{{ article.title }}</h2>
       <pre class="padding-bottom-20">In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
+      
       {% if article.images.count < 2 %} {% comment %} Show just that one image {% endcomment %}
       <div style="height: 350px">
         <img class="image-fit" src="{{ article.images.first.image.url }}"> 
@@ -103,6 +104,15 @@
       {% endif %}
       <p class="padding-top-40" style="z-index: 1000">{{ article.text | linebreaks }}</p> 
     </div> <!-- article-wrap end -->
+
+    {% if article.files.all %}
+      <div class="file-attachments mt-3"> <!-- attachments start -->
+        <h5>Attachments:</h5>
+        {% for file in article.files.all  %}
+          <a href="">{{ file }}</a>
+        {% endfor %}
+      </div> <!-- attachments end -->
+    {% endif %}
   </div> <!-- container end -->
 
   <div class="container comments">
