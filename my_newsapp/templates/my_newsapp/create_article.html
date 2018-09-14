@@ -35,6 +35,9 @@
     {% crispy form %} 
     <!-- ArticleForm end -->
     
+    {% block current_files  %} <!-- used in edit view to list files and images that edited article has -->
+    {% endblock current_files %}
+    
     <div class="image-formset"> <!-- ImageInlineFormSet start -->
       <h3 class="mt-5 mb-0">Add images</h3>
       <p style="color:lightslategray;">*First image is used for a thumbnail image</p>
@@ -112,11 +115,12 @@
       {% endfor %}
     </div> <!-- FileInlineFormSet end -->
 
-    <hr class="mt-5">
+    {% block submit_button %}
+    <hr style="margin-top: 2rem; border-top: 1px solid rgba(0, 0, 0, 0.2)">
     <input type="submit" name="submit" value="Publish" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
+    {% endblock submit_button %}
   </form> <!-- Main Form end -->
 </div>
-
 {% endblock content %}
 
 {% block script %}

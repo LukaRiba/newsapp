@@ -116,12 +116,15 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(CreateArticleView, self).get_context_data(**kwargs)
         if self.request.POST:
-            context['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES)
-            context['file_formset'] = FileFormSet(self.request.POST, self.request.FILES)
+            context.update({
+                'image_formset': ImageFormSet(self.request.POST, self.request.FILES), 
+                'file_formset': FileFormSet(self.request.POST, self.request.FILES)
+            })
         else:
             context.update({
-                'image_formset': ImageFormSet(), 'file_formset': FileFormSet()
-                })
+                'image_formset': ImageFormSet(), 
+                'file_formset': FileFormSet()
+            })
         return context
 
     def post(self, request, *args, **kwargs):
@@ -137,6 +140,36 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
             messages.info(self.request, self.success_msg)
             return HttpResponseRedirect(form.instance.get_absolute_url())
         return super(CreateArticleView, self).get(request, *args, **kwargs)
+
+class EditArticleView(CreateArticleView):
+    template_name = 'my_newsapp/edit_article.html'
+    success_msg = 'Article updated'
+    
+    # dispatch is called when the class instance loads
+    def dispatch(self, request, *args, **kwargs):
+        self.article = get_object_or_404(Article, id=self.kwargs['id'])
+        return super(EditArticleView, self).dispatch(request, *args, **kwargs)
+
+
+    def get_context_data(self, **kwargs):
+        context = super(EditArticleView, self).get_context_data(**kwargs)
+        context['article'] = self.article
+        print(self.article.images.all())
+        return context
+
+    def get_initial(self):
+        initial = super(EditArticleView, self).get_initial()
+        article = self.article
+        initial.update({
+            'title': article.title, 
+            'short_description': article.short_description, 
+            'text': article.text, 
+            'category': article.category
+        })
+        return initial
+
+
+
 
 class MyNewsLoginView(auth_views.LoginView):
     form_class = LoginForm

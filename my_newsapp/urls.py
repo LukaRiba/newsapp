@@ -13,6 +13,6 @@ urlpatterns = [
     url(r'^(?P<slug>[-\w]+)/$', views.CategoryView.as_view(), name='category'),
     url(r'^(?P<category>[\w-]+)/(?P<id>\d+)/(?P<slug>[\w-]+)/$',
         views.ArticleDetailView.as_view(), name='article-detail'),
-    url(r'download-file/(?P<id>\d+)/$',
-        views.file_download, name='file-download')
+    url(r'^edit-article/(?P<id>\d+)/$', views.EditArticleView.as_view(), name='edit-article'),
+    url(r'download-file/(?P<id>\d+)/$', views.file_download, name='file-download')
 ]

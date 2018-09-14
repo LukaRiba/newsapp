@@ -173,7 +173,7 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   text-align: right;
 }
 
-/* ----------------------- Create Article Form Styling ----------------------- */
+/* ----------------------- Create Article View Styling ----------------------- */
 
 /* Hides ugly html input type="file" element, but keeps it visible for browser.
    Label with for="<id_of_the_file_input_element>" is used instead */
@@ -208,6 +208,17 @@ input[type='file'] {
   overflow: hidden;
   word-wrap: nowrap;
 } 
+
+/* ----------------------- Edit Article View Styling ----------------------- */
+
+.current-images, .current-files {
+  padding: 0;
+}
+
+.current-images ul, .current-files ul {
+  list-style: none;
+  padding: inherit;
+}
 
 /* ---------------------- Bootstrap override ---------------------- */
 .custom-nav {

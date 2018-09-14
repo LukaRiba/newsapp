@@ -1,0 +1,51 @@
+{% extends "my_newsapp/create_article.html" %}
+
+{% load staticfiles thumbnail crispy_forms_tags %}
+
+{% block title %}Edit Article{% endblock title %}
+
+{% block current_files  %}
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-6 current-images">
+        <p>Current Images</p>
+        {% if article.images.all %}
+          <ul>
+            {% for image in article.images.all  %}
+              <li class="mb-2">{{ image }}<button class="ml-4">Delete</button></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No images</p>
+        {% endif %}    
+      </div>
+      <div class="col-md-6 current-files">
+        <p>Current Files</p>
+        {% if article.files.all %}
+          <ul>
+            {% for file in article.files.all  %}
+              <li class="mb-2">{{ file }}<button class="ml-4">Delete</button></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No files</p>
+        {% endif %}    
+      </div>
+    </div>
+  </div>
+{% endblock current_files %}
+
+{% block submit_button %}
+  <hr style="margin-top: 2rem; border-top: 1px solid rgba(0, 0, 0, 0.2)">
+  <input type="submit" name="submit" value="Update" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
+{% endblock submit_button %}
+
+{% block script %}
+  {{ block.super }}
+  <script>window.scrollTo(0, 250);</script>
+{% endblock script %}
+
+
+  
+
+

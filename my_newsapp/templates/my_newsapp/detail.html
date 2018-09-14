@@ -103,6 +103,15 @@
         </div> <!-- carousel container end -->
       {% endif %}
       <p class="padding-top-40" style="z-index: 1000">{{ article.text | linebreaks }}</p> 
+      
+      {% if user.is_authenticated and request.user == article.author %}
+        <button class="btn btn-light btn-m mr-4 mb-3">
+          <a href="{% url 'my_newsapp:edit-article' id=article.id %}">Edit Article</a>
+        </button>
+        <button class="btn btn-light btn-m mb-3">
+          <a href="">Delete</a>
+        </button>
+      {% endif %}
     </div> <!-- article-wrap end -->
 
     {% if article.files.all %}
