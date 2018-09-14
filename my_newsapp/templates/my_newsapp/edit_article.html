@@ -42,7 +42,13 @@
 
 {% block script %}
   {{ block.super }}
-  <script>window.scrollTo(0, 250);</script>
+  <script>
+    // scrolls to top of the form when page is accessed from article-detail-pages, maintains scroll in case
+    // of invalid forms. 
+    if ( !(document.referrer.includes('edit-article/')) ) {
+          window.scrollTo(0, 250);
+      }
+</script>
 {% endblock script %}
 
 

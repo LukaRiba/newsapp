@@ -45,8 +45,8 @@ class Category(models.Model):
         return self.title
 
 class Article(models.Model):
-    title = models.CharField(max_length=100, unique=True)
-    slug = AutoSlugField(null=True, default=None, unique=True, populate_from='title')
+    title = models.CharField(max_length=100)
+    slug = AutoSlugField(null=True, default=None, populate_from='title')
     text = models.TextField()
     short_description = models.TextField(max_length=300)
     pub_date = models.DateTimeField(auto_now_add=True)

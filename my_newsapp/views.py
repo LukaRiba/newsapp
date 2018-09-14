@@ -1,6 +1,6 @@
 import os
 
-from django.views.generic import TemplateView, ListView, DetailView, CreateView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -49,6 +49,24 @@ class HomeViewMixin:
     def get_other_articles(self, rand_ids):
         return Article.objects.filter(category__pk__in=rand_ids)[:5]
         
+class FormsetsContextMixin:
+    # comment
+        # Without context defined in 'if self.request.POST:' block, error messages won't be
+        # displayed on page in case of invalid formset, when post() method returns get() method.
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context.update({
+                'image_formset': ImageFormSet(self.request.POST, self.request.FILES), 
+                'file_formset': FileFormSet(self.request.POST, self.request.FILES)
+            })
+        else:
+            context.update({
+                'image_formset': ImageFormSet(), 
+                'file_formset': FileFormSet()
+            })
+        return context
+
 class HomeView(NavigationContextMixin, HomeViewMixin, TemplateView):
     template_name = 'my_newsapp/home.html'
 
@@ -104,28 +122,11 @@ class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView
         self.request.session['comments_owner_id'] = self.kwargs['id']
         return super(ArticleDetailView, self).get(request, *args, **kwargs)
 
-class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
+class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'
     form_class = ArticleForm
     success_msg = 'You created a new Article'
     login_url = 'my_newsapp:login'
-
-    # comment
-        # Without context defined in 'if self.request.POST:' block, error messages won't be
-        # displayed on page in case of invalid formset, when post() method returns get() method.
-    def get_context_data(self, **kwargs):
-        context = super(CreateArticleView, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context.update({
-                'image_formset': ImageFormSet(self.request.POST, self.request.FILES), 
-                'file_formset': FileFormSet(self.request.POST, self.request.FILES)
-            })
-        else:
-            context.update({
-                'image_formset': ImageFormSet(), 
-                'file_formset': FileFormSet()
-            })
-        return context
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
@@ -141,35 +142,34 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
             return HttpResponseRedirect(form.instance.get_absolute_url())
         return super(CreateArticleView, self).get(request, *args, **kwargs)
 
-class EditArticleView(CreateArticleView):
+class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, UpdateView):
     template_name = 'my_newsapp/edit_article.html'
     success_msg = 'Article updated'
+    form_class = ArticleForm
+    model = Article
     
-    # dispatch is called when the class instance loads
-    def dispatch(self, request, *args, **kwargs):
-        self.article = get_object_or_404(Article, id=self.kwargs['id'])
-        return super(EditArticleView, self).dispatch(request, *args, **kwargs)
-
-
+    # updates form context variable (defined in context through form_class) passing instance argument,
+    # for form to have initial data from Article object which is edited.
     def get_context_data(self, **kwargs):
         context = super(EditArticleView, self).get_context_data(**kwargs)
-        context['article'] = self.article
-        print(self.article.images.all())
+        context['form'] = self.form_class(instance=self.get_object())
         return context
+            
+    def get_object(self, queryset=None):
+        return Article.objects.get(id=self.kwargs['id'])
 
-    def get_initial(self):
-        initial = super(EditArticleView, self).get_initial()
-        article = self.article
-        initial.update({
-            'title': article.title, 
-            'short_description': article.short_description, 
-            'text': article.text, 
-            'category': article.category
-        })
-        return initial
-
-
-
+    def post(self, request, *args, **kwargs):
+        instance = self.get_object()
+        form = self.form_class(request.POST, instance=instance)
+        image_formset = ImageFormSet(request.POST, request.FILES, instance=instance)
+        file_formset = FileFormSet(request.POST, request.FILES, instance=instance)
+        if form.is_valid and image_formset.is_valid() and file_formset.is_valid():
+            form.save()
+            image_formset.save()
+            file_formset.save()    
+            messages.info(self.request, self.success_msg)
+            return HttpResponseRedirect(instance.get_absolute_url())
+        return super(EditArticleView, self).get(request, *args, **kwargs)
 
 class MyNewsLoginView(auth_views.LoginView):
     form_class = LoginForm

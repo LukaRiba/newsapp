@@ -27,9 +27,16 @@
     1.   {% csrf_token %} ne treba navesti jer ga crispy-forms navodi automatski 
     2.   atribut enctype="multipart/form-data" moramo obavezno navesti kako bi mogli uploadati slike, odnosno file-ove putem forme !!!
     3.   Since your form is submitting to the same url, you can simply use action="". If you prefer, you can use action="{% url 'my_newsapp:create-article' %}"
-  {% endcomment %}
+    4.   Pošto CreateArticleView i EditArticleView koriste isti template, time i istu formu, url u action atributu se mijenja ovisno o 
+         tome nalazi li se u context-u article keyword - ako da, znači da smo u Edit view-u gdje article predstavlja Article instancu koju
+         želimo editirati.  
+{% endcomment %}
 <div class="container mb-5 mt-5">
-  <form action="{% url 'my_newsapp:create-article' %}" method="POST" enctype="multipart/form-data"> <!-- Main Form start -->
+  <form action="{% if article %}
+                  {% url 'my_newsapp:edit-article' id=article.id %}
+                {% else %}
+                  {% url 'my_newsapp:create-article' %}  
+                {% endif %}" method="POST" enctype="multipart/form-data"> <!-- Main Form start -->
 
     <!-- ArticleForm start -->
     {% crispy form %} 
@@ -49,7 +56,6 @@
           </div>
         {% endif %}
       </div>
-      
 
       <div class="row">
         <div class="col-md-4">
