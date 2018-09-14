@@ -1,13 +1,13 @@
+import os
+
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import views as auth_views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.shortcuts import get_object_or_404
-from django.conf import settings
-from fileprovider.utils import sendfile 
 
 from .models import Article, Category, File
 from .utils import get_status_none_categories_random_ids
@@ -37,12 +37,12 @@ class HomeViewMixin:
         return context
 
     def get_primary_category(self, rand_ids):
-        if self.categories.has_primary():
+        if self.categories.have_primary():
             return self.categories.get_primary()
         return self.categories.get(id=rand_ids.pop())
 
     def get_secondary_category(self, rand_ids):
-        if self.categories.has_primary() and self.categories.has_secondary():
+        if self.categories.have_primary() and self.categories.have_secondary():
             return self.categories.get_secondary()
         return self.categories.get(id=rand_ids.pop())
 
@@ -104,20 +104,15 @@ class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView
         self.request.session['comments_owner_id'] = self.kwargs['id']
         return super(ArticleDetailView, self).get(request, *args, **kwargs)
 
-def file_download(request, pk):
-    target = get_object_or_404(File, pk)
-    path = settings.MEDIA_ROOT + str(target.file)
-    print(path)
-    return sendfile(path)
-
 class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'
     form_class = ArticleForm
     success_msg = 'You created a new Article'
     login_url = 'my_newsapp:login'
 
-    # Without context sefined in 'if self.request.POST:' block, error messages won't be
-    # displayed on page in case of invalid formset, when post() method returns get() method.
+    # comment
+        # Without context defined in 'if self.request.POST:' block, error messages won't be
+        # displayed on page in case of invalid formset, when post() method returns get() method.
     def get_context_data(self, **kwargs):
         context = super(CreateArticleView, self).get_context_data(**kwargs)
         if self.request.POST:
@@ -151,3 +146,12 @@ class MyNewsLoginView(auth_views.LoginView):
 class MyNewsLogoutView(auth_views.LogoutView):
     next_page = 'my_newsapp:login'
 
+def file_download(request, id):
+    target = get_object_or_404(File, id=id)
+    file_path = os.path.join(target.path())
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file.read(), content_type=target.content_type())
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            return response
+    raise Http404

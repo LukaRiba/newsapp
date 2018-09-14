@@ -35,5 +35,4 @@ if settings.DEBUG:
     urlpatterns = [url(r'^__debug__/', include(debug_toolbar.urls))] + urlpatterns
     # we add static after list
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    print(urlpatterns)
 

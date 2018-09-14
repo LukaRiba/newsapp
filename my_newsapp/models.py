@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import FileExtensionValidator
+from django.conf import settings
 
 from autoslug import AutoSlugField
 
@@ -14,13 +15,13 @@ CATEGORY_RELEVANCE_CHOICES = (
 )
 
 class CategoriesQuerySet(models.QuerySet):
-    def has_primary(self):
+    def have_primary(self):
         return self.filter(status='P').exists()
 
     def get_primary(self):
         return self.get(status='P')
 
-    def has_secondary(self):
+    def have_secondary(self):
         return self.filter(status='S').exists()
     
     def get_secondary(self):
@@ -77,9 +78,17 @@ class File(models.Model):
                             blank=True, null=True)
     article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
 
-    def get_absolute_url(self):
-        return reverse('my_newsapp:file-download', kwargs={'id': self.id, 'name': self.__str__()})
+    def path(self):
+        return settings.MEDIA_ROOT + str(self.file)
+
+    def name(self):
+        name = self.__str__()
+        return name
+
+    def content_type(self):
+        from magic import Magic
+        mime = Magic(mime=True)
+        return mime.from_file(self.path())
 
     def __str__(self):
         return str(self.file).split('/')[-1]
-
