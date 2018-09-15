@@ -23,110 +23,114 @@
 
 {% block content %}
 
-{% comment %} VAŽNO !!!
-    1.   {% csrf_token %} ne treba navesti jer ga crispy-forms navodi automatski 
-    2.   atribut enctype="multipart/form-data" moramo obavezno navesti kako bi mogli uploadati slike, odnosno file-ove putem forme !!!
-    3.   Since your form is submitting to the same url, you can simply use action="". If you prefer, you can use action="{% url 'my_newsapp:create-article' %}"
-    4.   Pošto CreateArticleView i EditArticleView koriste isti template, time i istu formu, url u action atributu se mijenja ovisno o 
-         tome nalazi li se u context-u article keyword - ako da, znači da smo u Edit view-u gdje article predstavlja Article instancu koju
-         želimo editirati.  
-{% endcomment %}
-<div class="container mb-5 mt-5">
-  <form action="{% if article %}
-                  {% url 'my_newsapp:edit-article' id=article.id %}
-                {% else %}
-                  {% url 'my_newsapp:create-article' %}  
-                {% endif %}" method="POST" enctype="multipart/form-data"> <!-- Main Form start -->
+  {% comment %} VAŽNO !!!
+      1.   {% csrf_token %} ne treba navesti jer ga crispy-forms navodi automatski 
+      2.   atribut enctype="multipart/form-data" moramo obavezno navesti kako bi mogli uploadati slike, odnosno file-ove putem forme !!!
+      3.   Since your form is submitting to the same url, you can simply use action="". If you prefer, you can use action="{% url 'my_newsapp:create-article' %}"
+      4.   Pošto CreateArticleView i EditArticleView koriste isti template, time i istu formu, url u action atributu se mijenja ovisno o 
+          tome nalazi li se u context-u article keyword - ako da, znači da smo u Edit view-u gdje article predstavlja Article instancu koju
+          želimo editirati.  
+  {% endcomment %}
+  <div class="container mb-5 mt-5">
+    <form action="{% if article %}
+                    {% url 'my_newsapp:edit-article' id=article.id %}
+                  {% else %}
+                    {% url 'my_newsapp:create-article' %}  
+                  {% endif %}" method="POST" enctype="multipart/form-data"> <!-- Main Form start -->
 
-    <!-- ArticleForm start -->
-    {% crispy form %} 
-    <!-- ArticleForm end -->
-    
-    {% block current_files  %} <!-- used in edit view to list files and images that edited article has -->
-    {% endblock current_files %}
-    
-    <div class="image-formset"> <!-- ImageInlineFormSet start -->
-      <h3 class="mt-5 mb-0">Add images</h3>
-      <p style="color:lightslategray;">*First image is used for a thumbnail image</p>
+      <!-- ArticleForm start -->
+      {% crispy form %} 
+      <!-- ArticleForm end -->
+      
+      {% block current_files  %} <!-- used in edit view to list files and images that edited article has -->
+      {% endblock current_files %}
+      
+      <div class="image-formset"> <!-- ImageInlineFormSet start -->
+        <h3 class="mt-5 mb-0">Add images</h3>
+        <p style="color:lightslategray;">*First image is used for a thumbnail image</p>
 
-      <div class="errors">
-        {% if image_formset.non_form_errors %}
-          <div style="color:brown">
-            {{ image_formset.non_form_errors }}
-          </div>
-        {% endif %}
-      </div>
-
-      <div class="row">
-        <div class="col-md-4">
-          <p>Images:</p>
+        <div class="errors">
+          {% if image_formset.non_form_errors %}
+            <div style="color:brown">
+              {{ image_formset.non_form_errors }}
+            </div>
+          {% endif %}
         </div>
-        <div class="col-md-6">
-          <p>Description:</p>
-        </div>
-      </div>
 
-      {{ image_formset.management_form }}
-
-      {% for image_form in image_formset %}
-        <div class="row image-form mb-3">
+        <div class="row">
           <div class="col-md-4">
-            {% comment %} {% if image_form.instance.pk %}{{ image_form.DELETE }}{% endif %} {% endcomment %}
-            {{ image_form.image }}
-            <div class="position-bottom">
-              {% comment %} for="id_images-{{ forloop.counter0 }}-image" je rješenje da label-ovom for atributu dodijelim id
-              file inputa !!!{% endcomment %}
-              <label class="image-label btn btn-secondary mb-0 mr-3" for="id_images-{{ forloop.counter0 }}-image">Choose image</label>
-              {% comment %} Span is an inline element. It has no width or height.
-              Turn it into a block-level element, then it will accept dimension directives. {% endcomment %} 
-              <span class="align-bottom overflow-hidden">No image choosen</span>
+            <p>Images:</p>
+          </div>
+          <div class="col-md-6">
+            <p>Description:</p>
+          </div>
+        </div>
+
+        {{ image_formset.management_form }}
+
+        {% for image_form in image_formset %}
+          <div class="row image-form mb-3">
+            <div class="col-md-4">
+              {% comment %} {% if image_form.instance.pk %}{{ image_form.DELETE }}{% endif %} {% endcomment %}
+              {{ image_form.image }}
+              <div class="position-bottom">
+                {% comment %} for="id_images-{{ forloop.counter0 }}-image" je rješenje da label-ovom for atributu dodijelim id
+                file inputa !!!{% endcomment %}
+                <label class="image-label btn btn-secondary mb-0 mr-3" for="id_images-{{ forloop.counter0 }}-image">Choose image</label>
+                {% comment %} Span is an inline element. It has no width or height.
+                Turn it into a block-level element, then it will accept dimension directives. {% endcomment %} 
+                <span class="align-bottom overflow-hidden">No image choosen</span>
+              </div>
+            </div>
+            <div class="col-md-7 text-input">
+              {{ image_form.description }}
             </div>
           </div>
-          <div class="col-md-7 text-input">
-            {{ image_form.description }}
-          </div>
-        </div>
-      {% endfor %}
-    </div> <!-- ImageInlineFormSet end -->
-    
-    <div class="file-formset"> <!-- FileInlineFormSet start -->
-      <h3 class="mt-5 mb-3">Add files</h3>
-
-      <div class="errors">
-        {% if file_formset.non_form_errors %}
-          <div style="color:brown">
-            {{ file_formset.non_form_errors }}
-          </div>
-        {% endif %}
-      </div>
+        {% endfor %}
+      </div> <!-- ImageInlineFormSet end -->
       
+      <div class="file-formset"> <!-- FileInlineFormSet start -->
+        <h3 class="mt-5 mb-3">Add files</h3>
 
-      <p>Files:</p>
-      
-      {{ file_formset.management_form }}
-
-      {% for file_form in file_formset %}
-        <div class="row file-form mb-3">
-          <div class="col-md-4">
-            {{ file_form.file }}
-            <div class="position-bottom">
-              {% comment %} for="id_files-{{ forloop.counter0 }}-file" je rješenje da label-ovom for atributu dodijelim id
-              file inputa !!!{% endcomment %}
-              <label class="file-label btn btn-secondary mb-0 mr-3" for="id_files-{{ forloop.counter0 }}-file">Choose file</label> 
-              <span class="align-bottom overflow-hidden">No file choosen</span>
+        <div class="errors">
+          {% if file_formset.non_form_errors %}
+            <div style="color:brown">
+              {{ file_formset.non_form_errors }}
             </div>
-          </div>
-          
+          {% endif %}
         </div>
-      {% endfor %}
-    </div> <!-- FileInlineFormSet end -->
+        
 
-    {% block submit_button %}
-    <hr style="margin-top: 2rem; border-top: 1px solid rgba(0, 0, 0, 0.2)">
-    <input type="submit" name="submit" value="Publish" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
-    {% endblock submit_button %}
-  </form> <!-- Main Form end -->
-</div>
+        <p>Files:</p>
+        
+        {{ file_formset.management_form }}
+
+        {% for file_form in file_formset %}
+          <div class="row file-form mb-3">
+            <div class="col-md-4">
+              {{ file_form.file }}
+              <div class="position-bottom">
+                {% comment %} for="id_files-{{ forloop.counter0 }}-file" je rješenje da label-ovom for atributu dodijelim id
+                file inputa !!!{% endcomment %}
+                <label class="file-label btn btn-secondary mb-0 mr-3" for="id_files-{{ forloop.counter0 }}-file">Choose file</label> 
+                <span class="align-bottom overflow-hidden">No file choosen</span>
+              </div>
+            </div>
+            
+          </div>
+        {% endfor %}
+      </div> <!-- FileInlineFormSet end -->
+
+      {% block submit_button %}
+      <hr style="margin-top: 2rem; border-top: 1px solid rgba(0, 0, 0, 0.2)">
+      <input type="submit" name="submit" value="Publish" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
+      {% endblock submit_button %}
+    </form> <!-- Main Form end -->
+  </div>
+  <!-- Here we include modals for deleting current article images and files in EditArticleView, because they contain forms,
+       and forms cannot be nested - here we are outside main Article form. -->
+  {% block modals %}
+  {% endblock modals %}
 {% endblock content %}
 
 {% block script %}

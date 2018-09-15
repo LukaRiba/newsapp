@@ -10,7 +10,7 @@ function deleteCommentOrReply(url, id){
         },
         success : function(response) {
             showResponseMessage(id, response);
-            removeCommentOrReply(id);
+            removeCommentOrReplyFromDOM(id);
             $(".modal").modal("hide");
         },
         error : function(xhr,errmsg) { reportError(xhr,errmsg); }
@@ -28,11 +28,13 @@ function getTarget(id) {
     return $('#delete-button-' + id).parent() //find target comment/reply through delete-button
 }
 
-function removeCommentOrReply(id) {
+function removeCommentOrReplyFromDOM(id) {
     $(getTarget(id)).fadeTo(700, 0.00, function(){ 
         $(this).slideUp(500, function() {
             if (isLastReply($(this))){
-                removeShowRepliesButton($(this));
+                let parentComment = getParentComment($(this));
+                removeShowRepliesButton(parentComment); 
+                displayNoRepliesYetMessage(parentComment); 
             }
             
             if(isComment(id)){
@@ -54,23 +56,21 @@ function removeCommentOrReply(id) {
     });
 }
 
-function removeShowRepliesButton(reply){
-    let parent = getParent(reply);
-    displayNoRepliesYetMessage(parent);
-}
-
 function isLastReply(reply){
-    return getParent(reply).find('.reply').length === 1;
+    return getParentComment(reply).find('.reply').length === 1;
 }
 
-function getParent(reply){
+function getParentComment(reply){
     return $(reply).parents('.comment');
+}
+
+function removeShowRepliesButton(comment){
+    comment.find('.show-replies').remove();
 }
 
 function displayNoRepliesYetMessage(comment){
     let commentId = comment.attr('id');
     let message = '<span class="no-replies-message" id="no-replies-message-' + commentId + '">No replies yet</span>'
-    comment.find('.show-replies').remove();
     comment.find('.text').after(message)
 }
 

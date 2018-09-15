@@ -1,0 +1,19 @@
+{% extends 'my_newsapp/snippets/base_delete_modal.html' %}
+
+{% block modal_id %} 
+  id="ImageDeleteModal-{{ image.id }}"
+{% endblock modal_id %}
+
+{% block delete_form__id_class_and_action %}
+  id="image-delete-form-{{ image.id }}"
+  class="image-delete-form"
+  action="{% url 'my_newsapp:delete-file-or-image' id=image.id %}"
+{% endblock delete_form__id_class_and_action %}
+
+{% block modal_title %}
+  Confirm image deletion
+{% endblock modal_title %}     
+            
+{% block modal_body %}
+  <p>Are you sure you want to delete this image</p>
+{% endblock modal_body %} 

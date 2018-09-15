@@ -212,13 +212,23 @@ input[type='file'] {
 /* ----------------------- Edit Article View Styling ----------------------- */
 
 .current-images, .current-files {
-  padding: 0;
+  padding: 15px;
+  background-color: rgba(235, 235, 235, 0.3);
 }
 
 .current-images ul, .current-files ul {
   list-style: none;
-  padding: inherit;
+  padding: 0;
+  margin-bottom: 0;
 }
+
+
+.current-images button, .current-files button {
+  padding: 0.075rem 0.75rem;
+  color: brown;
+  font-weight: 500;
+}
+
 
 /* ---------------------- Bootstrap override ---------------------- */
 .custom-nav {

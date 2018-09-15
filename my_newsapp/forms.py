@@ -55,9 +55,10 @@ class ImageInlineFormSet(BaseInlineFormSet):
         # Don't bother validating the formset unless each form is valid on its own
         if any(self.errors):
             return
-        # Check if image(s) uploaded 
+        # Check if image(s) is uploaded 
         if not self.files:
-            raise ValidationError('You have to upload at least one image.')
+            if not self.instance.images.all():
+                raise ValidationError('You have to upload at least one image.')
         images = []
         for form in self.forms:
             try:

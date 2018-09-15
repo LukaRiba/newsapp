@@ -8,12 +8,15 @@ from django.contrib.auth import views as auth_views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 
-from .models import Article, Category, File
+from .models import Article, Category, Image, File
 from .utils import get_status_none_categories_random_ids
 from .forms import ArticleForm, ImageFormSet, FileFormSet, LoginForm
 
 from comments.views import CommentsContextMixin
+from comments.decorators import require_ajax
 
 # defines context used by navigation which has to be shared between views
 class NavigationContextMixin:
@@ -145,14 +148,14 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsCont
 class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, UpdateView):
     template_name = 'my_newsapp/edit_article.html'
     success_msg = 'Article updated'
-    form_class = ArticleForm
+    form_class = ArticleForm # probably because of this ArticleForm submits when clicking on delete buttons of images or files
     model = Article
     
     # updates form context variable (defined in context through form_class) passing instance argument,
     # for form to have initial data from Article object which is edited.
     def get_context_data(self, **kwargs):
         context = super(EditArticleView, self).get_context_data(**kwargs)
-        context['form'] = self.form_class(instance=self.get_object())
+        context['form'] = ArticleForm(instance=self.get_object())
         return context
             
     def get_object(self, queryset=None):
@@ -160,7 +163,7 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
 
     def post(self, request, *args, **kwargs):
         instance = self.get_object()
-        form = self.form_class(request.POST, instance=instance)
+        form = ArticleForm(request.POST, instance=instance)
         image_formset = ImageFormSet(request.POST, request.FILES, instance=instance)
         file_formset = FileFormSet(request.POST, request.FILES, instance=instance)
         if form.is_valid and image_formset.is_valid() and file_formset.is_valid():
@@ -179,7 +182,7 @@ class MyNewsLoginView(auth_views.LoginView):
 class MyNewsLogoutView(auth_views.LogoutView):
     next_page = 'my_newsapp:login'
 
-def file_download(request, id):
+def download_file(request, id):
     target = get_object_or_404(File, id=id)
     file_path = os.path.join(target.path())
     if os.path.exists(file_path):
@@ -188,3 +191,18 @@ def file_download(request, id):
             response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
             return response
     raise Http404
+
+@login_required
+@require_POST
+@require_ajax
+def delete_file_or_image(request, id):
+    print('inside delete file or image view')
+    if request.POST.get('isImage'):
+        target = get_object_or_404(Image, id=id)
+        message = 'Image deleted'
+    else:
+        target = get_object_or_404(File, id=id)
+        message = 'File deleted'
+    target.delete()
+    return HttpResponse(message)
+    
