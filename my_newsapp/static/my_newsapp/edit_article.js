@@ -10,43 +10,93 @@ $(function(){
     $('.file-delete-form').each(function(){
         addFileDeleteFormSubmitListener($(this));
     });
+
+    $('.image-delete-form').each(function(){
+        addFileDeleteFormSubmitListener($(this), true);
+    });
 });
 
-function addFileDeleteFormSubmitListener(form) {
-    $(form).on('submit', function(event){
+function addFileDeleteFormSubmitListener(formElement, isImage=false ) {
+    $(formElement).on('submit', function(event){
         event.preventDefault();
         let url = $(this).attr('action');
         let id = url.split('/')[3];
-        deleteFile(url, id);
+        deleteFile(url, id, isImage);
     });
 }
 
-function deleteFile(url, id){
+function deleteFile(url, id, isImage){
     $.ajax({
         url : url,
         type : "POST",
         data : {
             id : id,
+            isImage: isImage
         },
-        success : function(response) {
+        success : function() {
             $(".modal").modal("hide");
-            removeFileListItemFromDOM(id, response);
+            removeFileListItemFromDOM(id, isImage);
         },
-        error : function(xhr,errmsg) { console.log('ERROR'); }//reportError(xhr,errmsg); }
+        error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
 }
 
-function removeFileListItemFromDOM(id, response){
-    let fileListItem = $('#file-' + id);
-    fileListItem.text(response).fadeOut(500).remove();
+function removeFileListItemFromDOM(id, isImage){
+    let fileListItem = getFileListItem(id, isImage);
+    removeFileListItem(fileListItem);
 }
 
-// function addImageDeleteFormSubmitListener(form) {
-//     $(form).on('submit', function(event){
-//         event.preventDefault();
-//         let url = $(this).attr('action');
-//         let id = url.split('/')[2];
-//         let isImage = true;
-//         deleteCommentOrReply(url, id, isImage);
-//     });
-// }
+function getFileListItem(id, isImage){
+    if(isImage){
+        return $('#image-' + id);
+    } else return ('#file-' + id);
+}
+
+function removeFileListItem(fileListItem){
+    let deleted = '<p><strong>Deleted</strong></p>';
+    let item = $(fileListItem);
+    if(isLastItem(item)){
+        removeWithFadeOut();
+    } else removeWithSlideUp();
+    
+    function removeWithSlideUp(){
+        item.html(deleted).delay(500).slideUp(300, function(){
+            $(this).remove();
+            showNoFilesMessageIfNoMoreFiles();
+        });
+    }
+
+    function removeWithFadeOut(){
+        item.html(deleted).delay(500).fadeOut(300,function(){
+            $(this).remove();
+            showNoFilesMessageIfNoMoreFiles();
+        });
+    }
+}
+    
+function isLastItem(item){
+    return $(item).siblings().length === 0
+}
+
+function showNoFilesMessageIfNoMoreFiles(){
+    if(noMoreFiles()){
+        $('.no-files').show();
+    }
+    if(noMoreImages()){
+        $('.no-images').show();
+    }
+}
+
+function noMoreFiles(){
+    return $('.current-files li').length === 0;
+}
+
+function noMoreImages(){
+    return $('.current-images li').length === 0;
+}
+
+function reportError(xhr,errmsg) {
+    $('#error-log').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+        " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+}

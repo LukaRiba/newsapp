@@ -196,13 +196,10 @@ def download_file(request, id):
 @require_POST
 @require_ajax
 def delete_file_or_image(request, id):
-    print('inside delete file or image view')
-    if request.POST.get('isImage'):
+    if request.POST.get('isImage') == 'true':
         target = get_object_or_404(Image, id=id)
-        message = 'Image deleted'
     else:
         target = get_object_or_404(File, id=id)
-        message = 'File deleted'
     target.delete()
-    return HttpResponse(message)
+    return HttpResponse(status=204) # The server successfully processed the request and is not returning any content.
     

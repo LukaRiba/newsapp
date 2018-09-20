@@ -10,6 +10,7 @@
       <div class="col-md-6 current-images">
         <p class="font-weight-bold">Current Images</p>
         {% if article.images.all %}
+          <p class="no-images" style="display: none;">No images</p> <!-- hide if images -->
           <ul>
             {% for image in article.images.all  %}
               <li id="image-{{ image.id }}" class="mb-2">{{ image }}
@@ -26,12 +27,13 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p>No images</p>
+          <p class="no-images">No images</p>
         {% endif %}    
       </div>
       <div class="col-md-6 current-files">
         <p class="font-weight-bold">Current Files</p>
         {% if article.files.all %}
+          <p class="no-files" style="display: none;">No Files</p> <!-- hide if images -->
           <ul>
             {% for file in article.files.all  %}
               <li id="file-{{ file.id }}" class="mb-2">{{ file }}
@@ -44,7 +46,7 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p>No files</p>
+          <p class="no-files">No files</p>
         {% endif %}    
       </div>
     </div>
