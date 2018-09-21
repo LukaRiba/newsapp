@@ -58,10 +58,10 @@
         </div>
 
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-sm-4">
             <p>Images:</p>
           </div>
-          <div class="col-md-6">
+          <div class="col-sm-6">
             <p>Description:</p>
           </div>
         </div>
@@ -70,7 +70,7 @@
 
         {% for image_form in image_formset %}
           <div class="row image-form mb-3">
-            <div class="col-md-4">
+            <div class="col-sm-4">
               {% comment %} {% if image_form.instance.pk %}{{ image_form.DELETE }}{% endif %} {% endcomment %}
               {{ image_form.image }}
               <div class="position-bottom">
@@ -82,7 +82,7 @@
                 <span class="align-bottom overflow-hidden">No image choosen</span>
               </div>
             </div>
-            <div class="col-md-7 text-input">
+            <div class="col-sm-7 text-input">
               {{ image_form.description }}
             </div>
           </div>
@@ -107,7 +107,7 @@
 
         {% for file_form in file_formset %}
           <div class="row file-form mb-3">
-            <div class="col-md-4">
+            <div class="col-sm-4">
               {{ file_form.file }}
               <div class="position-bottom">
                 {% comment %} for="id_files-{{ forloop.counter0 }}-file" je rješenje da label-ovom for atributu dodijelim id
@@ -127,10 +127,6 @@
       {% endblock submit_button %}
     </form> <!-- Main Form end -->
   </div>
-  <!-- Here we include modals for deleting current article images and files in EditArticleView, because they contain forms,
-       and forms cannot be nested - here we are outside main Article form. -->
-  {% block modals %}
-  {% endblock modals %}
 {% endblock content %}
 
 {% block script %}

@@ -1,7 +1,7 @@
 {% load comments_tags %}
 
 {% if load_more %}
-  {% for comment in next_comments.all %}
+  {% for comment in  next_comments.all%}
     {% include "comments/comments_snippet.html" %}
   {% endfor %}
 {% else %}

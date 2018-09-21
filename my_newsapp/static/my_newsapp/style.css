@@ -215,6 +215,21 @@ input[type='file'] {
   padding: 15px;
   background-color: rgba(235, 235, 235, 0.3);
 }
+.current-images, .current-files {
+  border: 15px solid white;
+}
+
+.current-images .image-name, .current-files .file-name {
+  height: 1.5rem;
+}
+
+.files-list {
+  white-space: nowrap;
+}
+
+.files-checkboxes li, .files-checkboxes p, .images-checkboxes li, .images-checkboxes p {
+  text-align: center;
+}
 
 .current-images ul, .current-files ul {
   list-style: none;

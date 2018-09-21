@@ -5,52 +5,88 @@
 {% block title %}Edit Article{% endblock title %}
 
 {% block current_files  %}
-  <div class="container mt-5">
-    <div class="row">
-      <div class="col-md-6 current-images">
-        <p class="font-weight-bold">Current Images</p>
-        {% if article.images.all %}
-          <p class="no-images" style="display: none;">No images</p> <!-- hide if images -->
-          <ul>
-            {% for image in article.images.all  %}
-              <li id="image-{{ image.id }}" class="mb-2">{{ image }}
-                <!-- eksplicitno naveden atribut type="button" je veoma bitan ovdje:
-                        The reason this is: In HTML5,any button without a type defaults to a "submit" type.
-                        Zbog toga, ako ne navedemo type="button", klikom na button automatsko se submitt-a
-                        kompletna Article forma, kao da smo kliknuli na Update button !!!! -->
-                <button type="button" class="btn btn-light btn-m ml-4" id="image-delete-button-{{ image.id }}" data-toggle="modal" data-target="#ImageDeleteModal-{{ image.id }}">
-                    Delete
-                </button>
-                <!-- Modal (image_delete_modal.html) is included at the bottom, because in parent template (create_article), 
-                  this block is inside main Article form, so we would have nested forms if modal is included here.   -->
+
+  <canvas id="canvas" style="font-size: 20px; display: none;"></canvas>
+
+  <div class="container mt-5"> <!-- main container start -->
+    <div class="row"> <!-- main row start -->
+      
+      <!-- Images div -->
+      <div class="col-md-6 current-images"> <!-- images main col start -->
+        <div class=row> <!-- images sub-row start -->
+          {% if article.images.all %}
+          <div class="col-sm-8 images-list"> <!-- images list col start -->
+            <p class="font-weight-bold">Current Images</p>
+              <ul>
+                {% for image in article.images.all  %}
+                  <li id="image-{{ image.id }}" class="image-name mb-2">
+                    {{ image }}
+                  </li>
+                {% endfor %}
+              </ul>
+          </div> <!-- images list col end -->
+          <div class="col-sm-4 images-checkboxes"> <!-- images checkbox col start -->
+            <p class="font-weight-bold">Delete ?</p>
+            <ul>
+            {% for image in article.images.all %}
+              <li class="mb-2">
+                {% comment %}
+                  name of input must have [] brackets at the end, then we call request.POST.getlist('image-checkbox[]') in
+                  django view, which returns array of checkbox values (here we get ids of selected images)
+                {% endcomment %}
+                <input type="checkbox" class="image-checkbox" name="image-checkbox[]" value="{{ image.id}}">
               </li>
             {% endfor %}
-          </ul>
-        {% else %}
-          <p class="no-images">No images</p>
-        {% endif %}    
-      </div>
-      <div class="col-md-6 current-files">
-        <p class="font-weight-bold">Current Files</p>
-        {% if article.files.all %}
-          <p class="no-files" style="display: none;">No Files</p> <!-- hide if images -->
-          <ul>
-            {% for file in article.files.all  %}
-              <li id="file-{{ file.id }}" class="mb-2">{{ file }}
-                <button type="button" class="btn btn-light btn-m ml-4" id="file-delete-button-{{ file.id }}" data-toggle="modal" data-target="#FileDeleteModal-{{ file.id }}">
-                    Delete
-                </button>
-                <!-- Modal (image_delete_modal.html) is included at the bottom, because in parent template (create_article), 
-                  this block is inside main Article form, so we would have nested forms if modal is included here.   -->
+            <ul/>            
+          </div> <!-- images checkbox col end -->
+          {% else %}
+          <div class="col-sm-8 images-list"> <!-- images list col start -->
+            <p class="font-weight-bold">Current Images</p>
+            <p class="no-images">No images</p>
+          </div> <!-- images list col end -->
+          {% endif %}
+        </div> <!-- images sub-row end -->
+      </div> <!-- images main col end -->
+
+
+      <!-- Files div -->
+      <div class="col-md-6 current-files"> <!-- files main col start -->
+        <div class=row> <!-- files sub-row start -->
+          {% if article.files.all %}
+          <div class="col-sm-8 files-list"> <!-- Files list col start -->
+            <p class="font-weight-bold">Current Files</p>
+              <ul>
+                {% for file in article.files.all  %}
+                  <li id="file-{{ file.id }}" class="file-name mb-2">
+                    {{ file }}
+                  </li>
+                {% endfor %}
+              </ul>
+          </div> <!-- Files list col end -->
+          <div class="col-sm-4 files-checkboxes"> <!-- Files checkbox col start -->
+            <p class="font-weight-bold">Delete ?</p>
+            <ul>
+            {% for file in article.files.all %}
+              <li class="mb-2">
+                {% comment %}
+                  name of input must have [] brackets at the end, then we call request.POST.getlist('file-checkbox[]') in
+                  django view, which returns array of checkbox values (here we get ids of selected files)
+                {% endcomment %}
+                <input type="checkbox" class="file-checkbox" name="file-checkbox[]" value="{{ file.id}}">
               </li>
             {% endfor %}
-          </ul>
-        {% else %}
-          <p class="no-files">No files</p>
-        {% endif %}    
-      </div>
-    </div>
-  </div>
+            <ul/>            
+          </div> <!-- Files checkbox col end -->
+          {% else %}
+          <div class="col-sm-8 images-list"> <!-- files list col start -->
+            <p class="font-weight-bold">Current Files</p>
+            <p class="no-images">No Files</p>
+          </div> <!-- files list col end -->
+          {% endif %}
+        </div> <!-- files sub-row end -->
+      </div> <!-- files main col end -->
+    </div> <!-- main row end -->
+  </div> <!-- main container end -->
 {% endblock current_files %}
 
 
@@ -60,26 +96,13 @@
   <input type="submit" name="submit" value="Update" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
 {% endblock submit_button %}
 
-<!-- modals are included here, because in parent template (create_article.html), this block comes after ArticleForm and 
-Image and File formsets, so modal forms are not nested inside main article form. If we put them   -->
-{% block modals %}
-  {% if article.images.all %}
-    {% for image in article.images.all %}
-      {% include 'my_newsapp/snippets/image_delete_modal.html' %}
-    {% endfor %}
-  {% endif %}
-  {% if article.files.all %}
-    {% for file in article.files.all %}
-      {% include 'my_newsapp/snippets/file_delete_modal.html' %}
-    {% endfor %}
-  {% endif %}
-{% endblock modals %}
+
 
 
 
 {% block script %}
   {{ block.super }}
-  <script type="module" src="{% static 'my_newsapp/edit_article.js' %}"></script>
+  <script src="{% static 'my_newsapp/edit_article.js' %}"></script>
 {% endblock script %}
 
 

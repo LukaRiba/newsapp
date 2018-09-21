@@ -148,14 +148,14 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsCont
 class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, UpdateView):
     template_name = 'my_newsapp/edit_article.html'
     success_msg = 'Article updated'
-    form_class = ArticleForm # probably because of this ArticleForm submits when clicking on delete buttons of images or files
+    form_class = ArticleForm
     model = Article
     
     # updates form context variable (defined in context through form_class) passing instance argument,
     # for form to have initial data from Article object which is edited.
     def get_context_data(self, **kwargs):
         context = super(EditArticleView, self).get_context_data(**kwargs)
-        context['form'] = ArticleForm(instance=self.get_object())
+        context['form'] = self.form_class(instance=self.get_object())
         return context
             
     def get_object(self, queryset=None):
@@ -163,10 +163,12 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
 
     def post(self, request, *args, **kwargs):
         instance = self.get_object()
-        form = ArticleForm(request.POST, instance=instance)
+        form = self.form_class(request.POST, instance=instance)
         image_formset = ImageFormSet(request.POST, request.FILES, instance=instance)
         file_formset = FileFormSet(request.POST, request.FILES, instance=instance)
         if form.is_valid and image_formset.is_valid() and file_formset.is_valid():
+            self.delete_selected_images(request)
+            self.delete_selected_files(request)
             form.save()
             image_formset.save()
             file_formset.save()    
@@ -174,6 +176,16 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
             return HttpResponseRedirect(instance.get_absolute_url())
         return super(EditArticleView, self).get(request, *args, **kwargs)
 
+    def delete_selected_images(self, request):
+        image_ids = request.POST.getlist('image-checkbox[]')
+        for image in Image.objects.filter(pk__in=image_ids):
+            image.delete()
+
+    def delete_selected_files(self, request):
+        file_ids = request.POST.getlist('file-checkbox[]')
+        for file in File.objects.filter(pk__in=file_ids):
+            file.delete()
+        
 class MyNewsLoginView(auth_views.LoginView):
     form_class = LoginForm
     template_name = 'my_newsapp/login.html'

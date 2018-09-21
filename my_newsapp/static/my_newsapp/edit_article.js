@@ -1,102 +1,49 @@
-import './csrf.js'; // Import an entire module for side effects only, without importing anything. This runs the module's global code, but doesn't actually import any values.
-
 $(function(){
     // scrolls to top of the form when page is accessed from article-detail-pages, maintains scroll in case
     // of invalid forms. 
     if ( !(document.referrer.includes('edit-article/')) ) {
         window.scrollTo(0, 250);
     }
-    
-    $('.file-delete-form').each(function(){
-        addFileDeleteFormSubmitListener($(this));
-    });
 
-    $('.image-delete-form').each(function(){
-        addFileDeleteFormSubmitListener($(this), true);
-    });
+    cutFileNameIfOverflow('.files-list', '#file-69');
 });
 
-function addFileDeleteFormSubmitListener(formElement, isImage=false ) {
-    $(formElement).on('submit', function(event){
-        event.preventDefault();
-        let url = $(this).attr('action');
-        let id = url.split('/')[3];
-        deleteFile(url, id, isImage);
-    });
-}
-
-function deleteFile(url, id, isImage){
-    $.ajax({
-        url : url,
-        type : "POST",
-        data : {
-            id : id,
-            isImage: isImage
-        },
-        success : function() {
-            $(".modal").modal("hide");
-            removeFileListItemFromDOM(id, isImage);
-        },
-        error : function(xhr,errmsg) { reportError(xhr,errmsg); }
-    });
-}
-
-function removeFileListItemFromDOM(id, isImage){
-    let fileListItem = getFileListItem(id, isImage);
-    removeFileListItem(fileListItem);
-}
-
-function getFileListItem(id, isImage){
-    if(isImage){
-        return $('#image-' + id);
-    } else return ('#file-' + id);
-}
-
-function removeFileListItem(fileListItem){
-    let deleted = '<p><strong>Deleted</strong></p>';
-    let item = $(fileListItem);
-    if(isLastItem(item)){
-        removeWithFadeOut();
-    } else removeWithSlideUp();
+let getTextWidth = function(text, font) {
+    let myCanvas = document.getElementById('canvas');
+    let context = myCanvas.getContext("2d");
+    context.font = font;
     
-    function removeWithSlideUp(){
-        item.html(deleted).delay(500).slideUp(300, function(){
-            $(this).remove();
-            showNoFilesMessageIfNoMoreFiles();
-        });
-    }
+    let metrics = context.measureText(text);
+    return metrics.width;
+ }
 
-    function removeWithFadeOut(){
-        item.html(deleted).delay(500).fadeOut(300,function(){
-            $(this).remove();
-            showNoFilesMessageIfNoMoreFiles();
-        });
-    }
-}
+function cutFileNameIfOverflow(container, fileNameElement){
+    let maxWidth = $(container).width();
+    let fileName = getFileName(fileNameElement);
+    let extension = getExtension(fileName);
+    let fileNameWithoutExtension = getFileNameWithoutExtension(fileName);
+    let characters = fileNameWithoutExtension.split('');
     
-function isLastItem(item){
-    return $(item).siblings().length === 0
-}
-
-function showNoFilesMessageIfNoMoreFiles(){
-    if(noMoreFiles()){
-        $('.no-files').show();
+    while(getTextWidth(fileName, '400 16px Arial') > maxWidth){
+        characters.pop();
+        fileName = characters.join('') + '...' + extension;
+        console.log(fileName);
     }
-    if(noMoreImages()){
-        $('.no-images').show();
-    }
+    $(fileNameElement).text(fileName);
 }
 
-function noMoreFiles(){
-    return $('.current-files li').length === 0;
+function getExtension(fileName){
+    let splitList = fileName.split('.');
+    return splitList[splitList.length - 1];
 }
 
-function noMoreImages(){
-    return $('.current-images li').length === 0;
+function getFileName(selector){
+    return $(selector).text().trim();
 }
 
-function reportError(xhr,errmsg) {
-    $('#error-log').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
-        " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
-    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+function getFileNameWithoutExtension(fileName){
+    let splitList = fileName.split('.');
+    splitList.pop(); // removes last element (extension)
+    return splitList.join('');
 }
+
