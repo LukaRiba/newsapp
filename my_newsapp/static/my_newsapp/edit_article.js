@@ -5,29 +5,31 @@ $(function(){
         window.scrollTo(0, 250);
     }
 
-    cutFileNameIfOverflow('.files-list', '#file-69');
+    // cuts text which is wider than container element 
+    handleFileNamesOverflow();
+
+    // cuts on window resize
+    $( window ).resize(function() {
+        handleFileNamesOverflow();
+      });
+
+    function handleFileNamesOverflow(){
+        $('.files-list li, .images-list li').each(function(){
+            cutFileNameIfOverflow($(this));
+        });
+    }
 });
 
-let getTextWidth = function(text, font) {
-    let myCanvas = document.getElementById('canvas');
-    let context = myCanvas.getContext("2d");
-    context.font = font;
-    
-    let metrics = context.measureText(text);
-    return metrics.width;
- }
-
-function cutFileNameIfOverflow(container, fileNameElement){
-    let maxWidth = $(container).width();
+function cutFileNameIfOverflow(fileNameElement){
+    let elementWidth = $(fileNameElement).width();
     let fileName = getFileName(fileNameElement);
     let extension = getExtension(fileName);
     let fileNameWithoutExtension = getFileNameWithoutExtension(fileName);
     let characters = fileNameWithoutExtension.split('');
     
-    while(getTextWidth(fileName, '400 16px Arial') > maxWidth){
+    while(getTextWidth(fileName, '400 16px Arial') > elementWidth){
         characters.pop();
         fileName = characters.join('') + '...' + extension;
-        console.log(fileName);
     }
     $(fileNameElement).text(fileName);
 }
@@ -46,4 +48,13 @@ function getFileNameWithoutExtension(fileName){
     splitList.pop(); // removes last element (extension)
     return splitList.join('');
 }
+
+let getTextWidth = function(text, font) {
+    let myCanvas = document.getElementById('canvas');
+    let context = myCanvas.getContext('2d');
+    context.font = font;
+    
+    let metrics = context.measureText(text);
+    return metrics.width;
+ }
 
