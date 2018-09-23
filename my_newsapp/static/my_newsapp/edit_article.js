@@ -5,24 +5,34 @@ $(function(){
         window.scrollTo(0, 250);
     }
 
-    // cuts text which is wider than container element 
+    storeOriginalFileNames();
+
+    // cut filenames if owerflow
     handleFileNamesOverflow();
 
-    // cuts on window resize
+    // cut filenames if owerflow on window resize
     $( window ).resize(function() {
         handleFileNamesOverflow();
       });
-
-    function handleFileNamesOverflow(){
-        $('.files-list li, .images-list li').each(function(){
-            cutFileNameIfOverflow($(this));
-        });
-    }
 });
 
-function cutFileNameIfOverflow(fileNameElement){
+function storeOriginalFileNames(){
+    let originalFileNames = [];
+    $('.files-list li, .images-list li').each(function(){
+        originalFileNames.push(getFileName($(this)));
+    });
+    // localStorage only supports strings. Use JSON.stringify() and JSON.parse().
+    localStorage.setItem('originalFileNames', JSON.stringify(originalFileNames));
+}
+
+function handleFileNamesOverflow(){
+    $('.files-list li, .images-list li').each(function(i){
+        cutFileNameIfOverflow($(this), JSON.parse(localStorage.getItem('originalFileNames'))[i]);
+    });
+}
+
+function cutFileNameIfOverflow(fileNameElement, fileName){
     let elementWidth = $(fileNameElement).width();
-    let fileName = getFileName(fileNameElement);
     let extension = getExtension(fileName);
     let fileNameWithoutExtension = getFileNameWithoutExtension(fileName);
     let characters = fileNameWithoutExtension.split('');
