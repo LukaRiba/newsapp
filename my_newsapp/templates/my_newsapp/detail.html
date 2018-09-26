@@ -119,7 +119,14 @@
         <h5 class="mb-3">Attachments:</h5>
         {% for file in article.files.all  %}
           <!-- ?{{ file.article.slug }}-{{ file.name }}/ sam dodao da imam infu u url-u koji file i od kojeg article-a se skida -->
-          <p><a href="{% url 'my_newsapp:download-file' id=file.id %}?{{ file.article.slug }}-{{ file.name }}/">{{ file }}</a></p> 
+          <p>
+            {% with file.get_type_icon as icon %}
+              <div class="file-icon">
+                <img src="{% static icon %}">
+              </div>              
+            {% endwith %} 
+            <a href="{% url 'my_newsapp:download-file' id=file.id %}?{{ file.article.slug }}-{{ file.name }}/">{{ file }}</a>
+          </p> 
         {% endfor %}
       </div> <!-- attachments end -->
     {% endif %}

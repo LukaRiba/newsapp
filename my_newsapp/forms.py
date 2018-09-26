@@ -48,6 +48,13 @@ class FileForm(ModelForm):
             })
         }
 
+    # def save(self, commit=True):
+    #     instance = super(FileForm, self).save(commit=False)
+    #     instance.icon = instance.get_type_icon()
+    #     if commit:
+    #         instance.save()
+    #     return instance
+
 class ImageInlineFormSet(BaseInlineFormSet):
 
     def clean(self):

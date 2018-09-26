@@ -75,8 +75,20 @@ class Image(models.Model):
 class File(models.Model):
     file = models.FileField(upload_to='files/', 
                             validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],  
-                            blank=True, null=True)
+                            blank=True, null=True)                            
     article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
+    # icon = models.CharField(max_length=50, default='')
+
+    CONTENT_TYPE_ICON_PAIRS = (
+        ('application/pdf', 'pdf.png'),
+        ('application/zip', 'zip.jpg'),
+        ('application/msword', 'doc_docx.png'),
+        ('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'doc_docx.png'),
+        ('application/vnd.ms-powerpoint', 'ppt_pptx.png'),
+        ('application/vnd.openxmlformats-officedocument.presentationml.presentation', 'ppt_pptx.png'),
+        ('application/vnd.ms-excel', 'xls_xlsx.png'),
+        ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'xls_xlsx.png'),
+    )
 
     def path(self):
         return settings.MEDIA_ROOT + str(self.file)
@@ -90,5 +102,10 @@ class File(models.Model):
         mime = Magic(mime=True)
         return mime.from_file(self.path())
 
+    def get_type_icon(self):
+        for pair in self.CONTENT_TYPE_ICON_PAIRS:
+            if pair[0] == self.content_type():
+                return 'my_newsapp/file_type_icons/' + pair[1]
+        
     def __str__(self):
         return str(self.file).split('/')[-1]

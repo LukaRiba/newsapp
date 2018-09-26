@@ -127,6 +127,23 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   
 }
 
+/* ---- article_detail.html attached files icons resizing ---- */
+.file-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.file-icon img {
+  width: 100%;
+  height: 100%;
+}
+
+.file-attachments a {
+  color: rgb(49, 49, 49);
+}
+
 .article pre, .article a {
   color: rgb(144, 77, 25);
   font-weight: 600;

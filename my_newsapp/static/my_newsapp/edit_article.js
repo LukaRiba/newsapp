@@ -6,23 +6,30 @@ $(function(){
     }
 
     storeOriginalFileNames();
+    
+    resizeObserver.observe(document.querySelector('.current-files-and-images'));
 
-    // cut filenames if owerflow
-    handleFileNamesOverflow();
-
-    // cut filenames if owerflow on window resize
-    $( window ).resize(function() {
-        handleFileNamesOverflow();
-      });
 });
 
 function storeOriginalFileNames(){
     let originalFileNames = [];
-    $('.files-list li, .images-list li').each(function(){
+    $('.images-list li, .files-list li').each(function(){
         originalFileNames.push(getFileName($(this)));
     });
     // localStorage only supports strings. Use JSON.stringify() and JSON.parse().
     localStorage.setItem('originalFileNames', JSON.stringify(originalFileNames));
+}
+
+const resizeObserver = new ResizeObserver(entries => {
+    entries.forEach(entry => {
+        entry.target.querySelectorAll('.images-list li, .files-list li').forEach((li, index) => {
+            cutFileNameIfOverflow(li, JSON.parse(localStorage.getItem('originalFileNames'))[index]);
+        });
+    });
+  });
+
+function getFileName(selector){
+    return $(selector).text().trim();
 }
 
 function handleFileNamesOverflow(){
@@ -32,11 +39,12 @@ function handleFileNamesOverflow(){
 }
 
 function cutFileNameIfOverflow(fileNameElement, fileName){
+    console.log('cutting - inside cutFileName function');
     let elementWidth = $(fileNameElement).width();
     let extension = getExtension(fileName);
     let fileNameWithoutExtension = getFileNameWithoutExtension(fileName);
     let characters = fileNameWithoutExtension.split('');
-    
+
     while(getTextWidth(fileName, '400 16px Arial') > elementWidth){
         characters.pop();
         fileName = characters.join('') + '...' + extension;
@@ -47,10 +55,6 @@ function cutFileNameIfOverflow(fileNameElement, fileName){
 function getExtension(fileName){
     let splitList = fileName.split('.');
     return splitList[splitList.length - 1];
-}
-
-function getFileName(selector){
-    return $(selector).text().trim();
 }
 
 function getFileNameWithoutExtension(fileName){
