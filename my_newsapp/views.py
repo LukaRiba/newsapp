@@ -1,22 +1,20 @@
 import os
 
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import views as auth_views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
 
 from .models import Article, Category, Image, File
 from .utils import get_status_none_categories_random_ids
 from .forms import ArticleForm, ImageFormSet, FileFormSet, LoginForm
 
 from comments.views import CommentsContextMixin
-from comments.decorators import require_ajax
 
 # defines context used by navigation which has to be shared between views
 class NavigationContextMixin:
@@ -185,6 +183,11 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
         file_ids = request.POST.getlist('file-checkbox[]')
         for file in File.objects.filter(pk__in=file_ids):
             file.delete()
+
+class DeleteArticleView(DeleteView):
+    model = Article
+    pk_url_kwarg = 'id'
+    success_url = reverse_lazy('my_newsapp:home')
         
 class MyNewsLoginView(auth_views.LoginView):
     form_class = LoginForm
@@ -203,15 +206,4 @@ def download_file(request, id):
             response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
             return response
     raise Http404
-
-@login_required
-@require_POST
-@require_ajax
-def delete_file_or_image(request, id):
-    if request.POST.get('isImage') == 'true':
-        target = get_object_or_404(Image, id=id)
-    else:
-        target = get_object_or_404(File, id=id)
-    target.delete()
-    return HttpResponse(status=204) # The server successfully processed the request and is not returning any content.
     

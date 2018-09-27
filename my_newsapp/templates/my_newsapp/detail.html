@@ -108,9 +108,10 @@
         <button class="btn btn-light btn-m mr-4 mb-3">
           <a href="{% url 'my_newsapp:edit-article' id=article.id %}">Edit Article</a>
         </button>
-        <button class="btn btn-light btn-m mb-3">
-          <a href="">Delete</a>
+        <button type="button" class="btn btn-light btn-m mb-3 article-delete-button" data-toggle="modal" data-target="#ArticleDeleteModal">
+          Delete
         </button>
+        {% include "my_newsapp/snippets/article_delete_modal.html" %}
       {% endif %}
     </div> <!-- article-wrap end -->
 
@@ -118,15 +119,13 @@
       <div class="file-attachments mt-3"> <!-- attachments start -->
         <h5 class="mb-3">Attachments:</h5>
         {% for file in article.files.all  %}
-          <!-- ?{{ file.article.slug }}-{{ file.name }}/ sam dodao da imam infu u url-u koji file i od kojeg article-a se skida -->
-          <p>
+          <div class="attachment">
             {% with file.get_type_icon as icon %}
-              <div class="file-icon">
-                <img src="{% static icon %}">
-              </div>              
+              <div class="file-icon mr-2" style="background-image: url('{% static icon %}');" ></div>              
             {% endwith %} 
+            <!-- ?{{ file.article.slug }}-{{ file.name }}/ sam dodao da imam info u url-u koji file i od kojeg article-a se skida -->
             <a href="{% url 'my_newsapp:download-file' id=file.id %}?{{ file.article.slug }}-{{ file.name }}/">{{ file }}</a>
-          </p> 
+          </div> 
         {% endfor %}
       </div> <!-- attachments end -->
     {% endif %}

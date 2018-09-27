@@ -1,4 +1,4 @@
-import preventArticleUpdateIfNoImages from './edit_article.js';
+import {preventArticleUpdateIfNoImages} from './edit_article.js';
 
 $(function() {
     // ImageFormset settings

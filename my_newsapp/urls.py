@@ -15,5 +15,5 @@ urlpatterns = [
         views.ArticleDetailView.as_view(), name='article-detail'),
     url(r'^edit-article/(?P<id>\d+)/$', views.EditArticleView.as_view(), name='edit-article'),
     url(r'^download-file/(?P<id>\d+)/$', views.download_file, name='download-file'),
-    url(r'^delete-file-or-image/(?P<id>\d+)/$', views.delete_file_or_image, name='delete-file-or-image'),
+    url(r'^delete-article/(?P<id>\d+)/$', views.DeleteArticleView.as_view(), name='delete-article'),
 ]

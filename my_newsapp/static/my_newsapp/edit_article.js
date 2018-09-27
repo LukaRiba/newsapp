@@ -1,13 +1,17 @@
 $(function(){
     // scrolls to top of the form when page is accessed from article-detail-pages, maintains scroll in case
     // of invalid forms. 
-    if ( !(document.referrer.includes('edit-article/')) ) {
+    if ( !(document.referrer.includes('edit-article')) ) {
         window.scrollTo(0, 250);
     }
 
     storeOriginalFileNames();
     
-    resizeObserver.observe(document.querySelector('.current-files-and-images'));
+    // if statement because of exporting another function - when function is imported in another module,
+    // which is runned in different template where '.current-files-and-images' doesn't exist, observe()
+    //method tries to run and then throws exception.
+    if(document.querySelector('.current-files-and-images'))
+        resizeObserver.observe(document.querySelector('.current-files-and-images'));
 
     // After checking/unchecking checkboxes or after uploading images, disables/enables submit button
     // if necessary
@@ -73,23 +77,31 @@ let getTextWidth = function(text, font) {
     return metrics.width;
  }
 
- /*---------- Prevent that updated article has no image  ----------*/
+ /*---------- Prevent that updated article has no image. Only in EditArticleView  ----------*/
 
- function preventArticleUpdateIfNoImages(){
-    let submitButton = $('#submit-button');
-    if( allImagesSelectedForDeletion() && !imageChoosenForUpload() ){
-        if (submitButton.is(':disabled') === false){
-            console.log('disabling button');
-            displayWarningMessage();
-            submitButton.prop('disabled', true);
-        }
-    } else {
-        if (submitButton.is(':disabled') === true) {
-            console.log('enabling button');
-            removeWarningMessage();
-            submitButton.prop('disabled', false);
+function preventArticleUpdateIfNoImages(){
+    if(isEditArticleView()){
+        let submitButton = $('#submit-button');
+
+        if( allImagesSelectedForDeletion() && !imageChoosenForUpload() ){
+            if (submitButton.is(':disabled') === false){
+                displayWarningMessage();
+                submitButton.prop('disabled', true);
+            }
+        } else {
+            if (submitButton.is(':disabled') === true) {
+                removeWarningMessage();
+                submitButton.prop('disabled', false);
+            }
         }
     }
+}
+
+function isEditArticleView(){
+    if (window.location.href.includes('edit-article')){
+        return true;
+    }
+    return false;
 }
 
 function allImagesSelectedForDeletion(){
@@ -97,7 +109,6 @@ function allImagesSelectedForDeletion(){
     for (let i = 0; i < imageCheckboxes.length; i++) {
         if (!imageCheckboxes[i].checked) return false;
     }
-    console.log('All images selected for deletion');
     return true;
 }
 
@@ -106,7 +117,6 @@ function imageChoosenForUpload(){
     for (let i = 0; i < imageInputs.length; i++) {
         if ( !(imageInputs[i].value === '') ) return true;
     }
-    console.log('No images choosen for upload');
     return false;
 }
 
@@ -119,7 +129,4 @@ function removeWarningMessage(){
     $('#no-image-warning').remove();
 }
 
-export default preventArticleUpdateIfNoImages;
-
-
-
+export {preventArticleUpdateIfNoImages}
