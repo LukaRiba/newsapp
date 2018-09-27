@@ -93,7 +93,7 @@
 
 {% block submit_button %}
   <hr style="margin-top: 2rem; border-top: 1px solid rgba(0, 0, 0, 0.2)">
-  <input type="submit" name="submit" value="Update" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
+  <input type="submit" name="submit" value="Update" class="btn btn-primary btn-lg mt-2" id="submit-button">
 {% endblock submit_button %}
 
 
@@ -102,7 +102,7 @@
 
 {% block script %}
   {{ block.super }}
-  <script src="{% static 'my_newsapp/edit_article.js' %}"></script>
+  <script type="module" src="{% static 'my_newsapp/edit_article.js' %}"></script>
 {% endblock script %}
 
 

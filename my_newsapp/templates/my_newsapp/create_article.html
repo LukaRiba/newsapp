@@ -123,7 +123,7 @@
 
       {% block submit_button %}
       <hr style="margin-top: 2rem; border-top: 1px solid rgba(0, 0, 0, 0.2)">
-      <input type="submit" name="submit" value="Publish" class="btn btn-primary btn-lg mt-2" id="submit-id-submit">
+      <input type="submit" name="submit" value="Publish" class="btn btn-primary btn-lg mt-2" id="submit-button">
       {% endblock submit_button %}
     </form> <!-- Main Form end -->
   </div>
@@ -132,50 +132,6 @@
 {% block script %}
   {{ block.super }}
   <script src="{% static 'js/jquery.formset.js' %}"></script>
-  <script type="text/javascript">
-
-    $(function() {
-      // ImageFormset settings
-      $('.image-form').formset({
-          prefix: '{{ image_formset.prefix }}',
-          addText: 'Add image',
-          deleteText: 'Remove'
-      });
-
-      // FileFormset settings
-      $('.file-form').formset({
-        prefix: '{{ file_formset.prefix }}',
-        addText: 'Add file',
-        deleteText: 'Remove'
-      });
-
-      displayFileName('.image-formset', 'image', ['bmp', 'gif', 'png', 'jpg', 'jpeg']);
-      displayFileName('.file-formset', 'file', ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip']);
-    });
-
-    // for displaying names of choosen images and files
-    function displayFileName(selector, type, allowedExtensions){
-      $(selector).on('change', 'input[type="file"]', function(e){
-        var fileName = e.target.value.split( '\\' ).pop(); // gets filename from the path
-        var fileExtension = fileName.split('.').pop() // gets file extension
-        $(this).next('div').children('span').html(fileName) //Selects span next to Choose image label and sets fileName as text (html)
-        
-        // Check if not allowed files choosen
-        if ( !(allowedExtensions.indexOf(fileExtension) > -1) ){
-          // display warning message
-          $(selector).children('.errors').prepend(
-            '<ul><li style="color: brown">Files with extension .' + fileExtension + ' are not allowed</li></ul>'); 
-          // clear file input
-          $(this).val('');
-          // remove file name
-          $(this).next('div').children('span').html('No ' + type + ' choosen');
-        }
-        else{
-          if( $(selector).find('.errors ul').length > 0 )
-           $(selector).find('.errors ul').remove();
-        }    
-      });  
-    }
-</script>
+  <script type="module" src="{% static 'my_newsapp/create_article.js' %}"></script>
 {% endblock script %}
 

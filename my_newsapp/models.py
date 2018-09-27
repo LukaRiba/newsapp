@@ -77,7 +77,6 @@ class File(models.Model):
                             validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],  
                             blank=True, null=True)                            
     article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
-    # icon = models.CharField(max_length=50, default='')
 
     CONTENT_TYPE_ICON_PAIRS = (
         ('application/pdf', 'pdf.png'),
@@ -90,6 +89,17 @@ class File(models.Model):
         ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'xls_xlsx.png'),
     )
 
+    def get_type_icon(self):
+        for pair in self.CONTENT_TYPE_ICON_PAIRS:
+            content_type, icon = pair[0], pair[1]
+            if content_type == self.content_type():
+                return 'my_newsapp/file_type_icons/' + icon
+
+    def content_type(self):
+        from magic import Magic
+        mime = Magic(mime=True)
+        return mime.from_file(self.path())
+
     def path(self):
         return settings.MEDIA_ROOT + str(self.file)
 
@@ -97,15 +107,5 @@ class File(models.Model):
         name = self.__str__()
         return name
 
-    def content_type(self):
-        from magic import Magic
-        mime = Magic(mime=True)
-        return mime.from_file(self.path())
-
-    def get_type_icon(self):
-        for pair in self.CONTENT_TYPE_ICON_PAIRS:
-            if pair[0] == self.content_type():
-                return 'my_newsapp/file_type_icons/' + pair[1]
-        
     def __str__(self):
         return str(self.file).split('/')[-1]

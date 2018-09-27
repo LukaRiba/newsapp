@@ -30,6 +30,7 @@ class ImageForm(ModelForm):
         widgets = {
             'image': FileInput(attrs={
                 'accept': '.bmp, .gif, .png, .jpg, .jpeg',
+                'class': 'image-input'
             }),
             'description': TextInput(attrs={
                 'autocomplete': 'off',
@@ -48,13 +49,6 @@ class FileForm(ModelForm):
             })
         }
 
-    # def save(self, commit=True):
-    #     instance = super(FileForm, self).save(commit=False)
-    #     instance.icon = instance.get_type_icon()
-    #     if commit:
-    #         instance.save()
-    #     return instance
-
 class ImageInlineFormSet(BaseInlineFormSet):
 
     def clean(self):
@@ -62,10 +56,11 @@ class ImageInlineFormSet(BaseInlineFormSet):
         # Don't bother validating the formset unless each form is valid on its own
         if any(self.errors):
             return
-        # Check if image(s) is uploaded 
-        if not self.files:
+        # Check for image(s)
+        if not self.files: # if no image has been uploaded
             if not self.instance.images.all():
                 raise ValidationError('You have to upload at least one image.')
+
         images = []
         for form in self.forms:
             try:
