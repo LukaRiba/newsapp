@@ -40,7 +40,7 @@ def create_comment(request):
         context = {
             # Returns created comment in an one-element QuerySet (itterable object is required because template 
             # uses forloop tag). First comment in QuerySet is just created one, because of ordering = ['-pub_date'].
-            # Probably not good solution because it all() on possibly large db table. Maybe is better with filter()
+            # Probably not good solution because it calls all() on possibly large db table. Maybe is better with filter()
             # against pub_date - Comment.objects.filter(pub_date__lte=timezone.now() - timezone.timedelta(minutes=1) ?
             'comments': Comment.objects.all()[0:1],
             'reply_form': ReplyForm(),

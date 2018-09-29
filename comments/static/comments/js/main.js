@@ -175,7 +175,7 @@ function addShowLessCommentsButtonListener(){
         // and because now visible comments equal breakpoint number (10), 10 comments stay visible. When clicking on this button, if there are for example
         // 18 visible comments, and we pass visibleComments as argument to getPreviousBreakpoint(), getPreviousBreakpoint() will return 15,
         // so 3 comments would be removed. Thats what we want! But, on second click, there are 15 visible comments, and getPreviousBreakpoint()
-        // again returns 15, so removeExtraComments does nothing -> thats the reason we pass visibleComments - 1 to getPreviousBreakpoint().
+        // again returns 15, so removeExtraComments does nothing -> thats the reason we pass 'visibleComments - 1' to getPreviousBreakpoint().
         // Now it returns next (lower) previous breakpoint (because visibleComments - 1 is 14, so it calculates previous breakpoint which is 10), 
         // and removeExtraComments() removes 5 more comments.
         removeExtraComments(visibleComments, getPreviousBreakpoint(visibleComments - 1));

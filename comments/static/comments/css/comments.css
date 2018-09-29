@@ -1,5 +1,9 @@
 /* koristiti sass da mogu neste-ati sve selektore unutar .comments-body selektora, a ne ovako*/
 
+#comments-count {
+	display: none;
+}
+
 .comments-body {
 	margin-bottom: 100px;
 }

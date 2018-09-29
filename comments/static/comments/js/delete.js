@@ -1,4 +1,4 @@
-import {updateCommentsCounter, reportError} from './create_comment.js';
+import {countTotalComments, updateCommentsCounter, reportError} from './create_comment.js';
 import {manageVisibleComments} from './manage_visible_comments.js';
 
 function deleteCommentOrReply(url, id){
@@ -38,7 +38,7 @@ function removeCommentOrReplyFromDOM(id) {
             }
             
             if(isComment(id)){
-                commentsCount--;
+                decrementCommentsCount();
                 updateCommentsCounter();
                 // Deletes comment. It's important to call it here because manageVisibleComments(); has to be called after comment removal.
                 // This is because then visibleCommentsCount() returns exact num of visible comments remained after deletion.
@@ -46,7 +46,8 @@ function removeCommentOrReplyFromDOM(id) {
                 // Calls loadMoreComments() from 'else if' block (visibleComments < previousBreakPoint) which sends ajax request.
                 // Ajax is send from ajax.
                 manageVisibleComments(); 
-            } else $(this).remove(); // reply is removed.
+            } 
+            else $(this).remove(); // It is reply -> reply is removed.
     
             if (lastCommentDeleted()){
                 displayNoCommentsYetMessage();
@@ -74,16 +75,20 @@ function displayNoRepliesYetMessage(comment){
     comment.find('.text').after(message)
 }
 
+function isComment(id){
+    return getTarget(id).hasClass('comment');
+}
+
+function decrementCommentsCount(){
+    $('#comments-count').text(countTotalComments() - 1);
+}
+
 function displayNoCommentsYetMessage(){
     $('#comments').prepend('<p id="no-comments-yet-message">No comments yet.</p>')
 }
 
 function lastCommentDeleted(){
     return $('.comment').length === 0;
-}
-
-function isComment(id){
-    return getTarget(id).hasClass('comment');
 }
 
 export default deleteCommentOrReply;

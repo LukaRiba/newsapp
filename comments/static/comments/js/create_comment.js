@@ -17,7 +17,7 @@ function createComment(textarea){
         success : function(newComment) {
             addComment(newComment);
             resetCommentForm(textarea);
-            commentsCount++;
+            incrementCommentsCount();
             updateCommentsCounter();
             manageVisibleComments();
         },
@@ -57,7 +57,12 @@ function removeNoCommentsMessage() {
     $('#no-comments-yet-message').remove();
 }
 
+function incrementCommentsCount(){
+    $('#comments-count').text(countTotalComments() + 1);
+}
+
 function updateCommentsCounter(){
+    let commentsCount = countTotalComments();
     let text = ' comments';
     if(commentsCount === 1) { //commentsCount is global variable defined in base.html
         text = ' comment';
@@ -66,6 +71,10 @@ function updateCommentsCounter(){
         }
     }
     getCommentsCounter().html('<strong>' + commentsCount + text + '</strong>');
+}
+
+function countTotalComments(){
+    return Number($('#comments-count').text());
 }
 
 function addCommentsCounterToDOM(){
@@ -84,6 +93,7 @@ function reportError(xhr,errmsg) {
 }
 
 export {
+    countTotalComments,
     createComment,
     updateCommentsCounter,
     reportError

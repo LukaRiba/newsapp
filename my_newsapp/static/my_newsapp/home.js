@@ -22,7 +22,7 @@ function hideOverflowed(container, elements, margin, minElements){
         while (totalHeight(elements) + margin > container.offsetHeight && overflowing > minElements) {
             elements[overflowing].style.display = 'none';
             overflowing --;
-    }
+        }
     return;   
     } 
 }

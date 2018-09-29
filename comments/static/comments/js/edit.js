@@ -23,7 +23,7 @@ function updateCommentOrReply(id, response){
 }
 
 function getTarget(id) {
-    return $('#edit-button-' + id).parent() //find target comment/reply through delete-button
+    return $('#edit-button-' + id).parent() //find target comment/reply through edit-button
 }
 
 export default editCommentOrReply;

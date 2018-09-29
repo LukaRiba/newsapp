@@ -1,3 +1,4 @@
+import {countTotalComments} from './create_comment.js';
 import {addLoadMoreCommentsButtonListener,
         updateLoadMoreCommentsButton,
         getLastVisibleCommentId,
@@ -5,6 +6,7 @@ import {addLoadMoreCommentsButtonListener,
         loadMoreComments} from './load_comments.js';
 
 function manageVisibleComments(){
+    let commentsCount = countTotalComments();
     let visibleComments = visibleCommentsCount();
     let previousBreakPoint = getPreviousBreakpoint(visibleComments);
     let nextBreakPoint = getNextBreakPoint(visibleComments);
@@ -12,7 +14,6 @@ function manageVisibleComments(){
     //              Also adds 'Load more comments button' if visibleComments === commentsCount
     //           2. After deleting comment while there are still more visible comments than breakpoint number. 
     //              Condition visibleComments === commentsCount is never reached in this case.  
-    // commentsCount represents total comments in db for specified owner object; it is updated after every comment creation/deletion. 
     if(visibleComments > previousBreakPoint){
         if(visibleComments === commentsCount){ 
             if(commentsCount === 6){ addLoadMoreCommentsButton(); } // if there were less than 6 comments on page load, no button was rendered
@@ -77,12 +78,9 @@ function addLoadMoreCommentsButton(){
 // there are 10, and breakpoint is 10(accquired via getPreviousBreakpoint)), 10 visible comments are maintained.
 function removeExtraComments(visibleComments, wantedComments){
     while(visibleComments > wantedComments){  
-       // console.log('visible comments: ' + visibleComments + '   wanted comments: ' +  wantedComments + '   -   Removing!');
         $('.comment').last().remove();
         visibleComments--;
     }
-    //console.log('visible comments: ' + visibleComments + '   wanted comments: ' +  wantedComments + '   -   Finished!'); 
-    //console.log('');  
 }
 
 function toggleShowLessButton(){
