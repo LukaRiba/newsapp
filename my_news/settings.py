@@ -39,8 +39,9 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'easy_thumbnails',
     'crispy_forms',
-    'betterforms',
-    'fileprovider',
+    'django_unused_media', # usage: python manage.py cleanup_unused_media
+    'betterforms', # is it used?
+    'fileprovider', # is it used?
     'my_newsapp',
     'comments',
 ]

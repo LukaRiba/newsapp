@@ -1,7 +1,24 @@
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from .forms import ImageFormSet
+from my_newsapp.forms import ArticleForm, ImageFormSet
+
+class ArticleFormTests(TestCase):
+
+    def setUp(self):
+        article_form = ArticleForm()
+        
+    
+
+
+
+
+
+
+
+
+
+
 
 # Popis assert metoda -> https://docs.python.org/2/library/unittest.html#unittest.TestCase.debug
 #                     -> https://docs.djangoproject.com/en/1.11/topics/testing/tools/#assertions
@@ -39,21 +56,20 @@ class CreateArticleFormTests(TestCase):
             'images-1-image': SimpleUploadedFile(img2.name, img2.read())
         }
         #comment
-        # Kod testiranja bilo koje forme, samim time i formset-a, ukoliko forma sadrži FileField,
-        # kod instanciranja se fileov-i prosljeđuju kao poseban dictionary, uz post data dictionary. Vidimo dolje
-        # primjer konstruktora za BaseInlineFormset:
-        #   class BaseInlineFormSet(BaseModelFormSet):
-        #        """A formset for child objects related to a parent."""
-        #        def __init__(self, data=None, files=None, instance=None,
-        #                     save_as_new=False, prefix=None, queryset=None, **kwargs):
-        # U biti, isto to činimo kada inicijaliziramo FormSet u view-u, pa bound-amo data-u tako što
-        # konstruktoru damo argumente request.Post (data) i request.FILES - to se tada odnosi na data i file-ove
-        # koje je user ispunio/dodao u stvarnu formu na CreateArticleView-u:
-        #     [...]
-        #     context['image_formset'] = ImageFormSet(self.request.POST, files=self.request.FILES)
-        #     [...]
-        #  Isto moramo simulirati u test-u, kao tu.
-        #endcomment
+            # Kod testiranja bilo koje forme, samim time i formset-a, ukoliko forma sadrži FileField,
+            # kod instanciranja se fileov-i prosljeđuju kao poseban dictionary, uz post data dictionary. Vidimo dolje
+            # primjer konstruktora za BaseInlineFormset:
+            #   class BaseInlineFormSet(BaseModelFormSet):
+            #        """A formset for child objects related to a parent."""
+            #        def __init__(self, data=None, files=None, instance=None,
+            #                     save_as_new=False, prefix=None, queryset=None, **kwargs):
+            # U biti, isto to činimo kada inicijaliziramo FormSet u view-u, pa bound-amo data-u tako što
+            # konstruktoru damo argumente request.Post (data) i request.FILES - to se tada odnosi na data i file-ove
+            # koje je user ispunio/dodao u stvarnu formu na CreateArticleView-u:
+            #     [...]
+            #     context['image_formset'] = ImageFormSet(self.request.POST, files=self.request.FILES)
+            #     [...]
+            #  Isto moramo simulirati u test-u, kao tu.
         formset = ImageFormSet(data, files)
         self.assertTrue(formset.is_valid())
         self.assertEqual(formset.errors, [{}, {}])
