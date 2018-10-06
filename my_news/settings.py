@@ -147,5 +147,5 @@ LOGIN_REDIRECT_URL = '/news/home'
 
 FILEPROVIDER_NAME = 'python'
 
-#INTERNAL_IPS = '127.0.0.1'
+#INTERNAL_IPS = '127.0.0.1'  # debug_toolbar on/off
 

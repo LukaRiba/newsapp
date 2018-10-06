@@ -38,12 +38,12 @@ class HomeViewMixin:
         return context
 
     def get_primary_category(self, rand_ids):
-        if self.categories.have_primary():
+        if self.categories.has_primary():
             return self.categories.get_primary()
         return self.categories.get(id=rand_ids.pop())
 
     def get_secondary_category(self, rand_ids):
-        if self.categories.have_primary() and self.categories.have_secondary():
+        if self.categories.has_primary() and self.categories.has_secondary():
             return self.categories.get_secondary()
         return self.categories.get(id=rand_ids.pop())
 

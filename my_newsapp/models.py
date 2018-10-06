@@ -15,13 +15,13 @@ CATEGORY_RELEVANCE_CHOICES = (
 )
 
 class CategoriesQuerySet(models.QuerySet):
-    def have_primary(self):
+    def has_primary(self):
         return self.filter(status='P').exists()
 
     def get_primary(self):
         return self.get(status='P')
 
-    def have_secondary(self):
+    def has_secondary(self):
         return self.filter(status='S').exists()
     
     def get_secondary(self):
@@ -75,7 +75,7 @@ class Image(models.Model):
 class File(models.Model):
     file = models.FileField(upload_to='files/', 
                             validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],  
-                            blank=True, null=True)                            
+                            blank=True, null=True, verbose_name=lambda obj: obj.name)                            
     article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
 
     CONTENT_TYPE_ICON_PAIRS = (
@@ -91,7 +91,7 @@ class File(models.Model):
 
     def get_type_icon(self):
         for pair in self.CONTENT_TYPE_ICON_PAIRS:
-            content_type, icon = pair[0], pair[1]
+            content_type, icon = pair
             if content_type == self.content_type():
                 return 'my_newsapp/file_type_icons/' + icon
 
@@ -104,8 +104,7 @@ class File(models.Model):
         return settings.MEDIA_ROOT + str(self.file)
 
     def name(self):
-        name = self.__str__()
-        return name
+        return self.__str__()
 
     def __str__(self):
         return str(self.file).split('/')[-1]
