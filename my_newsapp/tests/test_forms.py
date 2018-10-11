@@ -4,27 +4,27 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from my_newsapp.forms import ArticleForm, ImageFormSet
 from my_newsapp.models import Category
 
-class ArticleFormTests(TestCase):
+# class ArticleFormTests(TestCase):
 
-    def setUp(self):
-        Category.objects.get_or_create(title='Some category', slug='slug1')
-        self.data = {
-            'title': 'Title' , 
-            'short_description': 'Short description', 
-            'text': 'Text of the article', 
-            'category': 'Category'
-        }
+#     def setUp(self):
+#         Category.objects.get_or_create(title='Some category', slug='slug1')
+#         self.data = {
+#             'title': 'Title' , 
+#             'short_description': 'Short description', 
+#             'text': 'Text of the article', 
+#             'category': 'Category'
+#         }
 
-    def setup_form_data(self):
-        pass
+#     def setup_form_data(self):
+#         pass
 
-    def test_form_with_no_data(self):
-        form = ArticleForm({})
-        self.assertEqual(form.is_valid(), False)
+#     def test_form_with_no_data(self):
+#         form = ArticleForm({})
+#         self.assertEqual(form.is_valid(), False)
 
-    def test_form_with_valid_data(self):
-        form = ArticleForm(self.data)
-        self.assertEqual(form.is_valid(), True)
+#     def test_form_with_valid_data(self):
+#         form = ArticleForm(self.data)
+#         self.assertEqual(form.is_valid(), True)
 
     
 

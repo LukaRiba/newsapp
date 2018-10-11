@@ -43,12 +43,16 @@ class HomeViewMixin:
         return self.categories.get(id=rand_ids.pop())
 
     def get_secondary_category(self, rand_ids):
-        if self.categories.has_primary() and self.categories.has_secondary():
+        if self.categories.has_secondary():
             return self.categories.get_secondary()
         return self.categories.get(id=rand_ids.pop())
 
     def get_other_articles(self, rand_ids):
-        return Article.objects.filter(category__pk__in=rand_ids)[:5]
+        other_articles = Article.objects.filter(category__pk__in=rand_ids)
+        if other_articles.count() < 6:
+            return other_articles
+        else:
+            return other_articles[:6]
         
 class FormsetsContextMixin:
     # comment

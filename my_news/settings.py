@@ -25,7 +25,9 @@ SECRET_KEY = '8_8)^_q#dt@5mzf%@q&&20dyze47nx^6ptwu7cxc)$m_-6uzjk'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# when using tests.Client - without this host provided (ALLOWED_HOSTS = []) it throws error: 
+#   Invalid HTTP_HOST header: 'testserver'. You may need to add 'testserver' to ALLOWED_HOSTS.
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 
 # Application definition
 
@@ -118,9 +120,11 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
+DATE_FORMAT = 'M j, Y' # rendered date format
 
-USE_L10N = True
+USE_L10N = False # because it overrides DATE_FORMAT
+
+USE_I18N = True
 
 USE_TZ = True
 
@@ -147,5 +151,5 @@ LOGIN_REDIRECT_URL = '/news/home'
 
 FILEPROVIDER_NAME = 'python'
 
-#INTERNAL_IPS = '127.0.0.1'  # debug_toolbar on/off
+INTERNAL_IPS = '127.0.0.1'  # debug_toolbar on/off
 
