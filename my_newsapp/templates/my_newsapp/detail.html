@@ -47,7 +47,8 @@
   <div class="container"> <!-- container start -->
     <div class="article article-wrap"> <!-- article-wrap start -->
       <h2>{{ article.title }}</h2>
-      <pre class="padding-bottom-20">In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
+      <pre>In <a href="{{ article.category.get_absolute_url }}">{{article.category.title}}</a>, by {{ article.author }}</pre>
+      <p class="detail-pub-date pb-2">{{article.pub_date.date}}</p>
       
       {% if article.images.count < 2 %} {% comment %} Show just that one image {% endcomment %}
       <div style="height: 350px">

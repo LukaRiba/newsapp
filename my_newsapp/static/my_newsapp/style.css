@@ -193,6 +193,12 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   text-align: right;
 }
 
+/* article.pub_date in detail page */
+.detail-pub-date {
+  color: rgb(144, 77, 25);
+  font-size: 12px;
+}
+
 /* ----------------------- Create Article View Styling ----------------------- */
 
 /* Hides ugly html input type="file" element, but keeps it visible for browser.
