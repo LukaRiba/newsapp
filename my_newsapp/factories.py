@@ -13,17 +13,27 @@ from .models import Category, Article, Image, File
 def create_slug(sentence):
     return '-'.join(sentence.split(' ')).lower()
 
-# Remove example.jpg files created by factory.django.ImageField() which are not used for anything (probably bug)
-def remove_auto_generated_example_image_files():
-    for file in os.listdir(settings.MEDIA_ROOT):
-        if is_example_image_file_auto_generated_by_factory(file):
-            os.remove('{0}{1}'.format(settings.MEDIA_ROOT, file))
+# Remove example.jpg and example.dat files created by factory.django.ImageField() and factory.django.FileField()
+def remove_auto_generated_example_files():
+    directories = [images_dir(), files_dir()]
+    for directory in directories:
+        for file in os.listdir(directory):
+            if is_example_file_auto_generated_by_factory(file):
+                os.remove('{0}{1}'.format(directory, file))
 
-def is_example_image_file_auto_generated_by_factory(file):
+def images_dir():
+    return settings.MEDIA_ROOT
+
+def files_dir():
+    return os.path.join(settings.MEDIA_ROOT, 'files/')
+
+def is_example_file_auto_generated_by_factory(file):
     return file.startswith('example') and (time.time() > os.path.getmtime(media_path(file)) > time.time() - 10) 
 
 def media_path(file):
-    return '{0}{1}'.format(settings.MEDIA_ROOT, file)
+    if file.endswith('.dat'):
+        return '{0}{1}'.format(files_dir(), file)
+    return '{0}{1}'.format(images_dir(), file)
 
 class UserFactory(factory.django.DjangoModelFactory):
 
@@ -56,7 +66,7 @@ class ArticleFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: '{0}'.format(create_slug(obj.title)))
     text = factory.Faker('text')
     short_description = factory.Faker('text', max_nb_chars=50)
-    # Without tzinfo raises RuntimeWarning: DateTimeField Article.pub_date received anaive datetime
+    # Without tzinfo RuntimeWarning is raised: DateTimeField Article.pub_date received anaive datetime
     # while time zone support is active. 
     pub_date = factory.Faker('past_datetime', tzinfo=timezone.utc)
     author = factory.SubFactory(UserFactory)

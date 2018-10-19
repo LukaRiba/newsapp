@@ -137,7 +137,11 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsCont
         form = self.form_class(request.POST)
         image_formset = ImageFormSet(request.POST, request.FILES)
         file_formset = FileFormSet(request.POST, request.FILES)
-        if form.is_valid and image_formset.is_valid() and file_formset.is_valid():
+        # refactor:
+            # if forms_are_valid(self, request...):
+            #     create_article()
+            #     ..
+        if form.is_valid()  and file_formset.is_valid() and image_formset.is_valid():
             form.save(commit=False)
             form.instance.author = self.request.user
             image_formset.instance = file_formset.instance = form.save()
@@ -149,11 +153,12 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsCont
 
 class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, UpdateView):
     template_name = 'my_newsapp/edit_article.html'
-    success_msg = 'Article updated'
     form_class = ArticleForm
     model = Article
+    success_msg = 'Article updated'
+    login_url = 'my_newsapp:login'
     
-    # updates form context variable (defined in context through form_class) passing instance argument,
+    # updates form context variable (defined in context through form_class attribute) passing instance argument,
     # for form to have initial data from Article object which is edited.
     def get_context_data(self, **kwargs):
         context = super(EditArticleView, self).get_context_data(**kwargs)
@@ -168,7 +173,7 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
         form = self.form_class(request.POST, instance=instance)
         image_formset = ImageFormSet(request.POST, request.FILES, instance=instance)
         file_formset = FileFormSet(request.POST, request.FILES, instance=instance)
-        if form.is_valid and image_formset.is_valid() and file_formset.is_valid():
+        if form.is_valid() and image_formset.is_valid() and file_formset.is_valid():
             self.delete_selected_images(request)
             self.delete_selected_files(request)
             form.save()

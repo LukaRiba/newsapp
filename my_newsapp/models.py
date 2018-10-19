@@ -45,7 +45,7 @@ class Category(models.Model):
         return self.title
 
 class Article(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, unique=True)
     slug = AutoSlugField(null=True, default=None, populate_from='title')
     text = models.TextField()
     short_description = models.TextField(max_length=300)
@@ -75,7 +75,7 @@ class Image(models.Model):
 class File(models.Model):
     file = models.FileField(upload_to='files/', 
                             validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],  
-                            blank=True, null=True, verbose_name=lambda obj: obj.name)                            
+                            blank=True, null=True)                            
     article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
 
     CONTENT_TYPE_ICON_PAIRS = (

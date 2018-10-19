@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 
 from my_newsapp.models import Category, Article
 from my_newsapp.factories import (CategoryFactory, ArticleFactory, ImageFactory, FileFactory,
-                                  remove_auto_generated_example_image_files)
+                                  remove_auto_generated_example_files)
 from my_newsapp.utils import get_test_file
 
 class CategoryTests(TestCase):
@@ -15,7 +15,7 @@ class CategoryTests(TestCase):
         CategoryFactory.create_batch(size=8)
 
     def tearDown(self):
-        remove_auto_generated_example_image_files()
+        remove_auto_generated_example_files()
 
     def test_category_object_created(self):
         self.assertEqual(Category.objects.count(), 10)
@@ -110,7 +110,7 @@ class ImageTests(TestCase):
     def tearDown(self): # look FileTests tearDown() for explanation
         self.image.image.delete()
         self.invalid_image.image.delete()
-        remove_auto_generated_example_image_files() # look factories.ImageFactory for explanation
+        remove_auto_generated_example_files() # look factories.ImageFactory for explanation
         
     def test_image_create_with_supported_extension(self):
         # comment

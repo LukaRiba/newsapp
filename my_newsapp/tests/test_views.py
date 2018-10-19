@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase, RequestFactory
 from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView
@@ -5,12 +7,17 @@ from django.db.models.query import QuerySet
 from django.core.paginator import InvalidPage
 from django.test import Client
 from django.contrib.auth.models import User
+from django.contrib.sessions.middleware import SessionMiddleware
+from django.core import serializers
 
 from my_newsapp.views import NavigationContextMixin, HomeViewMixin, HomeView
-from my_newsapp.factories import UserFactory, CategoryFactory, ArticleFactory, ImageFactory, FileFactory
-from my_newsapp.models import Category, Article
-from my_newsapp.utils import get_status_none_categories_random_ids
-from my_newsapp.views import CategoryView
+from my_newsapp.factories import (UserFactory, CategoryFactory, ArticleFactory, ImageFactory, FileFactory,
+                                  remove_auto_generated_example_files)
+from my_newsapp.models import Category, Article, Image, File
+from my_newsapp.utils import get_status_none_categories_random_ids, get_test_file, field_values
+                              
+from my_newsapp.views import CategoryView, ArticleDetailView
+from my_newsapp.forms import ArticleForm, ImageInlineFormSet, FileInlineFormSet
 
 # from https://tech.people-doc.com/django-unit-test-your-views.html
 def setup_view(view, request, *args, **kwargs):
@@ -21,6 +28,17 @@ def setup_view(view, request, *args, **kwargs):
     view.args = args
     view.kwargs = kwargs
     return view
+
+def delete_article_test_files(article):
+    for image in article.images.all():
+        image.image.delete() 
+    for file in article.files.all():
+        file.file.delete() 
+    
+# help method
+def print_templates(response):
+    for template in response.templates:
+        print(template.name)
 
 class NavigationContextMixinTests(TestCase):
 
@@ -181,16 +199,20 @@ class HomeViewTests(TestCase):
         self.assertTrue('secondary_category' in self.response.context)
         self.assertTrue('other_articles' in self.response.context)
 
-    def test_home_view_loads_anonymous_user(self):
+    def test_home_view_loads_user(self):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed('my_newsapp/home.html')
+        self.assertTemplateUsed('my_newsapp/navigation.html')
+
+
+    # as navbar is shared throughout views via NavigationContextMixin, this is tested for this view only
+    def test_navbar_has_login_link_for_anonymous_user(self):
         self.assertContains(self.response, '<a class="nav-link" href="/news/login/?next=/news/home/">Login</a>')
 
-    def test_home_view_loads_logged_in_user(self):
+    # as navbar is shared throughout views via NavigationContextMixin, this is tested for this view only
+    def test_navbar_has_logout_link_for_logged_user(self):
         self.client.login(username='testuser', password='testpass123') # login client as created user
         response = self.client.get('/news/home/') # self.response in setUp is made with unlogged client
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('my_newsapp/home.html')
         self.assertContains(response, '<a class="nav-link" href="/news/logout/">Logout</a>')
 
     def test_contains_primary_category_articles(self):
@@ -224,25 +246,28 @@ class LatestArticlesViewTests(TestCase):
         response_page_one_querystring = self.client.get('/news/latest-articles/?page=1')
         self.assertEqual(response.content, response_page_one_querystring.content)
 
-    def test_latest_articles_view_page_1(self):
+    def test_paginator_page_1(self):
         page_1 = self.client.get('/news/latest-articles/?page=1')
         self.assertEqual(page_1.status_code, 200)
         self.assertTemplateUsed('my_newsapp/latest_articles.html')
+        self.assertTemplateUsed('my_newsapp/navigation.html')
         self.assertContains(page_1, 'Latest Articles')
         self.assertTrue('articles' in page_1.context)
         self.assertEqual(len(page_1.context['articles']), 5)
 
-    def test_latest_articles_view_page_2(self):
+    def test_paginator_page_2(self):
         page_2 = self.client.get('/news/latest-articles/?page=2')
         self.assertEqual(page_2.status_code, 200)
         self.assertTemplateUsed('my_newsapp/latest_articles.html')
+        self.assertTemplateUsed('my_newsapp/navigation.html')
         self.assertContains(page_2, 'Latest Articles')
         self.assertTrue('articles' in page_2.context)
         self.assertEqual(len(page_2.context['articles']), 3) # as paginate_by = 5, 3 articles are left for 3rd page.
     
-    def test_latest_articles_view_non_existing_page(self):
+    def test_paginator_non_existing_page(self):
         page_3 = self.client.get('/news/latest-articles/?page=3')
         self.assertTemplateNotUsed('my_newsapp/latest_articles.html')
+        self.assertTemplateUsed('my_newsapp/navigation.html')
         self.assertEqual(page_3.status_code, 404)
         self.assertRaises(InvalidPage)
 
@@ -258,31 +283,34 @@ class CategoryViewTests(TestCase):
         response_page_one_querystring = self.client.get(self.url + '?page=1')
         self.assertEqual(response.content, response_page_one_querystring.content)
 
-    def test_category_view_page_1(self):
+    def test_paginator_page_1(self):
         page_1 = self.client.get(self.url + '?page=1')
         self.assertEqual(page_1.status_code, 200)
         self.assertTemplateUsed('my_newsapp/category.html')
+        self.assertTemplateUsed('my_newsapp/navigation.html')
         self.assertContains(page_1, self.test_category.title)
         self.assertTrue('articles' in page_1.context)
         self.assertEqual(len(page_1.context['articles']), 5)
 
-    def test_category_view_page_2(self):
+    def test_paginator_page_2(self):
         page_2 = self.client.get(self.url + '?page=2')
         self.assertEqual(page_2.status_code, 200)
         self.assertTemplateUsed('my_newsapp/category.html')
+        self.assertTemplateUsed('my_newsapp/navigation.html')
         self.assertContains(page_2, self.test_category.title)
         self.assertTrue('articles' in page_2.context)
         self.assertEqual(len(page_2.context['articles']), 3) # as paginate_by = 5, 3 articles are left for 3rd page.
     
-    def test_category_view_non_existing_page(self):
+    def test_paginator_non_existing_page(self):
         page_3 = self.client.get(self.url + '?page=3')
         self.assertTemplateNotUsed('my_newsapp/category.html')
+        self.assertTemplateUsed('my_newsapp/navigation.html')
         self.assertEqual(page_3.status_code, 404)
         self.assertRaises(InvalidPage)
 
     def test_get_category_method(self):
         # as get_category() doesn't use request object, we create one with empty path, just to pass it to setup_view().
-        request = RequestFactory().get('')
+        request = RequestFactory().get('/')
         slug = self.test_category.slug
         view = setup_view(CategoryView(), request, slug=slug)
         
@@ -291,7 +319,7 @@ class CategoryViewTests(TestCase):
     def test_get_queryset_method(self):
         ArticleFactory.create_batch(size=3, category=self.test_category)
 
-        request = RequestFactory().get('')
+        request = RequestFactory().get('/')
         slug = self.test_category.slug
         view = setup_view(CategoryView(), request, slug=slug)
 
@@ -300,32 +328,489 @@ class CategoryViewTests(TestCase):
 class ArticleDetailViewTests(TestCase):
     
     def setUp(self):
-        self.test_article = ArticleFactory(title='Test Article')
-        ImageFactory.create_batch(size=2, article=self.test_article)
-        FileFactory.create_batch(size=2, article=self.test_article)
-        self.url = reverse('my_newsapp:article-detail', kwargs={'category': self.test_article.category.slug, 
-            'id': self.test_article.id, 'slug': self.test_article.slug})
+        self.user = User.objects.create_user(username='testuser', password='testpass123')      
+        self.article = ArticleFactory(title='Test Article')
+        ImageFactory(article=self.article)
+        self.url = reverse('my_newsapp:article-detail', kwargs={'category': self.article.category.slug, 
+            'id': self.article.id, 'slug': self.article.slug})
         self.response = self.client.get(self.url)
 
-    def test_article_detail_view_loads(self):
+    def article_detail_view_loads(self):
         self.assertTrue('article' in self.response.context)
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateNotUsed('my_newsapp/detail.html')
+        self.assertTemplateUsed('my_newsapp/navigation.html')
+        self.assertTemplateUsed('comments/base.html')
 
-    def test_response_content(self):
-        self.assertContains(self.response, self.test_article.title)
-        self.assertNotContains(self.response, self.test_article.short_description)
+    def article_fields_are_in_response(self):
+        self.assertContains(self.response, self.article.title)
+        self.assertNotContains(self.response, self.article.short_description)
         # replace('\n', '<br />') because linebreaks is applied in template
-        self.assertContains(self.response, self.test_article.text.replace('\n', '<br />'))
-        self.assertContains(self.response, self.test_article.pub_date.strftime('%b %d, %Y'))
-        self.assertContains(self.response, self.test_article.author)
-        self.assertContains(self.response, self.test_article.category)
+        self.assertContains(self.response, self.article.text.replace('\n', '<br />'))
+        self.assertContains(self.response, self.article.pub_date.strftime('%b %d, %Y'))
+        self.assertContains(self.response, self.article.author)
+        self.assertContains(self.response, self.article.category)
 
-        for image in self.test_article.images.all():
+    def article_category_image_is_in_response(self):
+        self.assertContains(self.response, self.article.category.image)
+        
+    def article_image_is_in_response(self):
+        self.assertEqual(len(self.article.images.all()), 1)
+        for image in self.article.images.all():
             self.assertContains(self.response, image.image)
 
-        for file in self.test_article.files.all():
-            self.assertContains(self.response, file.name())
+    def test_no_carousel_gallery_for_one_image(self):
+        self.assertTemplateUsed('my_newsapp/snippets/image_carousel.html')
+
+    def test_carousel_gallery_when_article_has_more_than_one_images(self):
+        ImageFactory(article=self.article)
+        response = self.client.get(self.url) # get new response object which now has newly created image in it
+        
+        self.assertEqual(len(self.article.images.all()), 2)
+        self.assertTemplateUsed(response, 'my_newsapp/snippets/image_carousel.html')
+        self.assertContains(response, '<div id="gallery" class="carousel slide" data-ride="carousel">')
+
+    def test_article_has_no_attached_files(self):
+        self.assertNotContains(self.response, 'Attachments')
+
+    def test_article_has_attached_files(self):
+        FileFactory(article=self.article)
+        FileFactory(article=self.article)
+        response = self.client.get(self.url) # get new response object which now has newly created files in it
+
+        self.assertContains(response, 'Attachments')
+        for file in self.article.files.all():
+            self.assertContains(response, file.name())
+
+    def test_EditArticle_and_Delete_buttons_shown_when_user_is_author_of_the_article_and_loggend_in(self):
+        self.article.author = self.user
+        self.article.save()
+        
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(self.url)
+
+        self.assertContains(response, '<a href="/news/edit-article/{}/">Edit Article</a>'.format(self.article.id))
+        self.assertContains(response, 'article-delete-button')
+        self.assertTemplateUsed('my_newsapp/snippets/article_delete_modal.html')
+
+    def test_EditArticle_and_Delete_buttons_not_shown_when_user_not_author_of_the_article(self):
+        # not logged in
+        self.assertNotContains(self.response, '<a href="/news/edit-article/{}/">Edit Article</a>'.format(self.article.id))
+        self.assertNotContains(self.response, 'article-delete-button')
+        self.assertTemplateNotUsed('my_newsapp/snippets/article_delete_modal.html')
+
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(self.url)
+        
+        # logged in
+        self.assertNotContains(response, '<a href="/news/edit-article/{}/">Edit Article</a>'.format(self.article.id))
+        self.assertNotContains(response, 'article-delete-button')
+        self.assertTemplateNotUsed('my_newsapp/snippets/article_delete_modal.html')
+
+    # if session isn't addedv-> AttributeError: 'WSGIRequest' object has no attribute 'session'
+    def test_get_method(self):
+        request = RequestFactory().get('/')
+        
+        # adding session
+        middleware = SessionMiddleware()
+        middleware.process_request(request)
+        request.session.save()
+
+        # setup view
+        view = setup_view(ArticleDetailView(), request, category=self.article.category.slug, 
+            id=self.article.id, slug=self.article.slug)
+
+        # run method
+        view.get(request)
+
+        # check
+        self.assertTrue('comments_owner_model_name' in request.session)
+        self.assertTrue('comments_owner_id' in request.session)
+
+    def test_request_session_variables(self):
+        session = self.client.session
+        
+        self.assertEqual(session['comments_owner_model_name'], 'Article')
+        self.assertEqual(session['comments_owner_id'], str(self.article.id))
+
+class CreateArticleViewTests(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass123')
+        self.url = reverse('my_newsapp:create-article')
+
+        # initial empty form and formset fields when page loads
+        self.initial_data = {
+            # ArticleForm
+            'title': '', 
+            'short_description': '', 
+            'text': '', 
+            'category': '', 
+            
+            # ImageFormSet
+            'images-TOTAL_FORMS': '1', 
+            'images-INITIAL_FORMS': '0', 
+            'images-MIN_NUM_FORMS': '0', 
+            'images-MAX_NUM_FORMS': '20', 
+            'images-0-image': '', 
+            'images-0-description': '', 
+            
+            # FileFormSet
+            'files-TOTAL_FORMS': '1', 
+            'files-INITIAL_FORMS': '0', 
+            'files-MIN_NUM_FORMS': '0', 
+            'files-MAX_NUM_FORMS': '20', 
+            'files-0-file': '', 
+        } 
+
+        self.category = CategoryFactory(slug='testing')
+
+    def test_redirects_anonymous_user_to_login_page(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('my_newsapp:login') + '?next=' + self.url)
+
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('my_newsapp:login') + '?next=' + self.url)
+
+    def test_loads_for_logged_in_user(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('my_newsapp/create_article.html')
+        self.assertTemplateUsed('my_newsapp/snippets/navigation.html')
+
+    def test_form_and_formsets_are_in_context(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertTrue('form' in response.context)
+        self.assertIsInstance(response.context['form'], ArticleForm)
+        self.assertTrue('image_formset' in response.context)
+        self.assertIsInstance(response.context['image_formset'], ImageInlineFormSet)
+        self.assertTrue('file_formset' in response.context)
+        self.assertIsInstance(response.context['file_formset'], FileInlineFormSet)
+
+    def test_post_with_no_form_and_formset_data(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url, self.initial_data)
+        self.assertEqual(response.status_code, 200)
+
+        #check ArticleForm
+        article_form = response.context['form'] 
+        self.assertFalse(article_form.is_valid())
+        for field in article_form.fields:
+            self.assertFormError(response, 'form', field, 'This field is required.')
+        self.assertContains(response, 'This field is required.', count=4)
+
+        # check ImageFormSet
+        image_formset = response.context['image_formset']
+        self.assertFalse(image_formset.is_valid())
+        self.assertContains(response, 'You have to upload at least one image.')
+
+        # check FileFormSet - is invalid only when duplicate files are updated
+        file_formset = response.context['file_formset']
+        self.assertTrue(file_formset.is_valid())
+
+        # check article not created
+        self.assertEqual(Article.objects.count(), 0)
+
+    def test_post_with_valid_form_but_invalid_formsets_data(self):
+        self.client.login(username='testuser', password='testpass123')
+        # becase dict's update() doesn't return anything, we must assign initial_data to data first
+        data = self.initial_data
+        data.update({
+            'title': 'test article', 
+            'short_description': 'this is a test article data', 
+            'text': 'some text', 
+            'category': self.category.id,
+
+            # upload 2 identical files for file_formset to be invalid
+            'files-TOTAL_FORMS': '2', 
+            'files-0-file': get_test_file('test_doc_file.doc'),
+            'files-1-file': get_test_file('test_doc_file.doc'),   
+        })
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(response.context['form'].is_valid())
+        self.assertFalse(response.context['image_formset'].is_valid())
+        self.assertContains(response, 'You have to upload at least one image.')
+        self.assertFalse(response.context['file_formset'].is_valid())
+        self.assertContains(response, 'You have uploaded duplicate files. Files have to be unique.')
+
+        # check article not created
+        self.assertEqual(Article.objects.count(), 0)
+
+    def test_post_with_invalid_form_but_valid_formsets_data(self):
+        self.client.login(username='testuser', password='testpass123')
+        data = self.initial_data
+        data.update({
+            'title': 'test article', 
+            'short_description': 'this is a test article data', 
+            'text': 'some text', 
+            'category': 'here should be category id',
+
+            'images-0-image': get_test_file('test_image.png'),
+ 
+            'files-0-file': get_test_file('test_doc_file.doc'),
+        })
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFalse(response.context['form'].is_valid())
+        self.assertTrue(response.context['image_formset'].is_valid())
+        self.assertTrue(response.context['file_formset'].is_valid())
+
+        # check article not created
+        self.assertEqual(Article.objects.count(), 0)
+
+    def test_post_with_article_title_that_already_exists(self):
+        ArticleFactory(title='test article')
+
+        self.client.login(username='testuser', password='testpass123')
+
+        data = self.initial_data
+        data.update({
+            'title': 'test article', 
+            'short_description': 'this is a test article', 
+            'text': 'some text', 
+            'category': self.category.id,
+
+            'images-0-image': get_test_file('test_image.png'),
+ 
+            'files-0-file': get_test_file('test_doc_file.doc'),
+        })
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(response, 'form', 'title', 'Article with this Title already exists.')
+        self.assertContains(response, 'Article with this Title already exists.')
+
+         # check article not created through post
+        self.assertEqual(Article.objects.count(), 1)
+
+    def test_post_with_valid_data(self):
+        self.client.login(username='testuser', password='testpass123')
+        data = self.initial_data
+        data.update({
+            'title': 'test article', 
+            'short_description': 'this is a test article data', 
+            'text': 'some text', 
+            'category': self.category.id,
+
+            'images-0-image': get_test_file('test_image.png'),
+ 
+            'files-0-file': get_test_file('test_doc_file.doc'),
+        })
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+
+        # check article not created
+        try:
+            article = Article.objects.get(title='test article')
+        except Article.DoesNotExist:
+            self.fail('article is not created')
+
+        self.assertEqual(article.images.first().__str__(), 'test_image.png')
+        self.assertEqual(article.files.first().name(), 'test_doc_file.doc')
+
+        self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
+            'category': article.category.slug, 
+            'id': article.id, 
+            'slug': article.slug
+        }))
+
+        # deletes uploaded files from media and media/files folder
+        article.images.first().image.delete()
+        article.files.first().file.delete()
+
+class EditArticleViewTests(TestCase):
+    
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass123')
+        self.article = ArticleFactory(title='test article')
+        ImageFactory.create_batch(size=2, article=self.article)
+        FileFactory.create_batch(size=2, article=self.article)
+        self.url = reverse('my_newsapp:edit-article', kwargs={'id': self.article.id})
+        self.initial_values = field_values(self.article)
+
+        self.initial_data = {
+            # ArticleForm
+            'title': self.article.title, 
+            'short_description': self.article.short_description, 
+            'text': self.article.text, 
+            'category': self.article.category.id, 
+            
+            # ImageFormSet
+            'images-TOTAL_FORMS': '1', 
+            'images-INITIAL_FORMS': '0', 
+            'images-MIN_NUM_FORMS': '0', 
+            'images-MAX_NUM_FORMS': '20', 
+            'images-0-image': '', 
+            'images-0-description': '', 
+            
+            # FileFormSet
+            'files-TOTAL_FORMS': '1', 
+            'files-INITIAL_FORMS': '0', 
+            'files-MIN_NUM_FORMS': '0', 
+            'files-MAX_NUM_FORMS': '20', 
+            'files-0-file': '', 
+
+            # add checkboxes through update(), no need do put them as they are empty lists.
+            # 'image-checkbox[]': [],
+            # 'file-checkbox[]': []
+        } 
+
+    # comment
+        # tearDown() runs after every test method, but tearDownClass only after all test methods have been executed.
+        # But for some reason, this class method causes error:
+        #       "django.db.transaction.TransactionManagementError: An error occurred in the current transaction. You can't 
+        #       execute queries until the end of the 'atomic' block", which gets throwned by other classes from this file,
+        # for example HomeViewTests, LatestArticlesViewTests and so on. 
+        # @classmethod
+        # def tearDownClass(cls):
+        #     remove_auto_generated_example_files()
+    def tearDown(self):
+        remove_auto_generated_example_files()
+        delete_article_test_files(self.article)
+
+    def test_redirects_anonymous_user_to_login_page(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('my_newsapp:login') + '?next=' + self.url)
+
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('my_newsapp:login') + '?next=' + self.url)
+
+    def test_loads_for_logged_in_user(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        
+        for template in response.templates:
+            self.assertTemplateUsed(response, template.name)
+
+        # check ArticleForm initial data
+        article_form = response.context['form']
+        self.assertEqual(article_form.instance, self.article)
+
+        # compare initial form field values correspond article attribute (field) values.
+        for field in article_form:
+            # because category field is html select element, whose option elements have values of category.id, not title 
+            if field.name == 'category': 
+                self.assertEqual(field.value(), self.article.category.id)
+            else:
+                self.assertEqual(field.value(), getattr(self.article, field.name))
+
+        self.assertContains(response, '<div class="col-md-6 current-images">')
+        self.assertContains(response, '<div class="col-md-6 current-files">')
+
+    def test_post_when_nothing_edited(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url, self.initial_data)
+
+        updated_article = Article.objects.first()
+        updated_values = field_values(updated_article)
+
+        self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
+            'category': updated_article.category.slug, 
+            'id': updated_article.id, 
+            'slug': updated_article.slug
+        }))
+        
+        # check that article field values, including images and files didn't change
+        self.assertFalse(any([self.initial_values[field] != updated_values[field] for field in self.initial_values.keys()]))
+
+    def test_post_when_article_form_fields_change(self):
+        self.initial_data.update({
+            'text': 'this is changed text',
+            'category': CategoryFactory().id
+        })
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url, self.initial_data)
+
+        updated_article = Article.objects.first()
+        updated_values = field_values(updated_article)
+
+        self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
+            'category': updated_article.category.slug, 
+            'id': updated_article.id, 
+            'slug': updated_article.slug
+        }))
+
+        # check that article's fields have been updated 
+        self.assertNotEqual(self.initial_values['text'], updated_values['text'])
+        self.assertNotEqual(self.initial_values['category'], updated_values['category'])
+
+    def test_post_upload_new_article_images_and_files(self):
+        self.initial_data.update({
+            'images-0-image': get_test_file('test_image.png'),
+            'files-0-file': get_test_file('test_doc_file.doc') # .txt file doesn't upload for some reason. Do not use it!
+        })
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url, self.initial_data)
+
+        updated_article = Article.objects.first()
+        updated_values = field_values(updated_article)
+
+        self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
+            'category': updated_article.category.slug, 
+            'id': updated_article.id, 
+            'slug': updated_article.slug
+        }))
+
+        # check that article's fields have been updated 
+        self.assertNotEqual(self.initial_values['images'], updated_values['images'])
+        self.assertNotEqual(self.initial_values['files'], updated_values['files'])
+
+        # putted in tearDown()
+        # delete_article_test_files(updated_article)
+    
+
+    def test_post_delete_some_of_article_images_and_files(self):
+        pass
+
+    def test_post_delete_all_article_files(self):
+        pass
+
+    def test_post_delete_all_images_while_not_uploading_new_image(self):
+        pass
+
+    def test_post_delete_all_images_and_upload_new_image(self):
+        pass
+
+    
+
+
+
+
+
         
 
-        # dalje: test za samo jednu sliku
+
+
+
+        
+    
+        
+    #  image_formset valid without image uploaded if article has image meaning
+    # not every is selected for deletion, images/files deletion, redirect to edited article detail page, 
+
+class DeleteArticleViewTests(TestCase):
+    pass
+
+class MyNewsappLoginViewTests(TestCase):
+    pass
+
+class MyNewsappLogoutViewTests(TestCase):
+    pass
+
+class DownloadFileTests(TestCase):
+    pass
+

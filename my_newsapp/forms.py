@@ -8,11 +8,6 @@ from crispy_forms.layout import Layout, Field
 from .models import Article, Image, File
 
 class ArticleForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ArticleForm, self).__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_tag = False
-           
     class Meta:
         model = Article
         fields = ('title', 'short_description', 'text', 'category')
@@ -22,6 +17,13 @@ class ArticleForm(ModelForm):
             'text': Textarea(attrs={'rows':20}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(ArticleForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        # disables html required attribute in fields
+        # self.use_required_attribute =  False
+        
 class ImageForm(ModelForm):
     
     class Meta:
@@ -53,12 +55,18 @@ class ImageInlineFormSet(BaseInlineFormSet):
 
     def clean(self):
         super(ImageInlineFormSet, self).clean()
+
         # Don't bother validating the formset unless each form is valid on its own
         if any(self.errors):
             return
-        # Check for image(s)
-        if not self.files: # if no image has been uploaded
-            if not self.instance.images.all():
+
+        # comment
+            # the line: 'if not self.files:' is not good solution because it checks for files in request.FILES for
+            # files, and if we upload files in file_formset, but not in image_formset, this contition will ge false,
+            # because there are self.files as both image_formset and file_formset are passed same file dict (request.POST)
+            # in constructors inside CreateArticleView.
+        if not any([ 'image' in key for key in self.files.keys() ]): # if no image has been uploaded
+            if not self.instance.images.all(): # check if article already has image (if editing article)
                 raise ValidationError('You have to upload at least one image.')
 
         images = []
@@ -78,7 +86,7 @@ class ImageInlineFormSet(BaseInlineFormSet):
                 images.append(image_name)
             # Ako uploadamo sliku u npr. drugoj formi, a u prvoj ne, KeyError will raise za prvu formu
             except KeyError: 
-                continue
+                pass
         
 ImageFormSet = inlineformset_factory(Article, Image, form=ImageForm, formset=ImageInlineFormSet, 
                                      extra=1, max_num=20,  can_delete=True)
@@ -117,4 +125,3 @@ class LoginForm(AuthenticationForm):
             Field('username'),
             Field('password'),    
             )
-        
