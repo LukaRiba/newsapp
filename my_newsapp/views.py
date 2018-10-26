@@ -7,8 +7,8 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import views as auth_views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404
+from django.urls import reverse, reverse_lazy
+from django.shortcuts import render, get_object_or_404
 
 from .models import Article, Category, Image, File
 from .utils import get_status_none_categories_random_ids
@@ -40,12 +40,12 @@ class HomeViewMixin:
     def get_primary_category(self, rand_ids):
         if self.categories.has_primary():
             return self.categories.get_primary()
-        return self.categories.get(id=rand_ids.pop())
+        return self.categories.get(id=rand_ids.pop()) if rand_ids else None
 
     def get_secondary_category(self, rand_ids):
         if self.categories.has_secondary():
             return self.categories.get_secondary()
-        return self.categories.get(id=rand_ids.pop())
+        return self.categories.get(id=rand_ids.pop()) if rand_ids else None
 
     def get_other_articles(self, rand_ids):
         other_articles = Article.objects.filter(category__pk__in=rand_ids)
@@ -137,10 +137,6 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsCont
         form = self.form_class(request.POST)
         image_formset = ImageFormSet(request.POST, request.FILES)
         file_formset = FileFormSet(request.POST, request.FILES)
-        # refactor:
-            # if forms_are_valid(self, request...):
-            #     create_article()
-            #     ..
         if form.is_valid()  and file_formset.is_valid() and image_formset.is_valid():
             form.save(commit=False)
             form.instance.author = self.request.user
@@ -150,7 +146,7 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsCont
             messages.info(self.request, self.success_msg)
             return HttpResponseRedirect(form.instance.get_absolute_url())
         return super(CreateArticleView, self).get(request, *args, **kwargs)
-
+        
 class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, UpdateView):
     template_name = 'my_newsapp/edit_article.html'
     form_class = ArticleForm
@@ -158,22 +154,33 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
     success_msg = 'Article updated'
     login_url = 'my_newsapp:login'
     
-    # updates form context variable (defined in context through form_class attribute) passing instance argument,
-    # for form to have initial data from Article object which is edited.
+    # comment 
+        # image_formset.selected_images contain ids of images that have been selected for deletion before posting.
+        # As post() method returns get() method in case of invalid image_formset (or others), ImageInlineFormSet
+        # clean() is called again (why? - probbably because then context is updated with form/formset errors which than
+        # can be accessed in template) and then, for Validation error to be properly raised for case when all images
+        # are selected for deletion and none is uploaded, we must pass ids of selected_images to clean(). We can do
+        # that here in line 'context['image_formset'].selected_images = self.request.POST.getlist('image-checkbox[]')'
+        # because request.POST is not empty in that case, as get_context_data() is called from post() (via get()). Then
+        # we can access selected_images in clean() method, popping them from kwargs in ImageInlineFormSet __init__()
+        # method (so **kwargs contain image_formset attributes). When we go to edit article view by clicking 'Edit
+        # Article' button in detail view, then that is normal get request, so selected_images is None, as request.POST
+        # is empty dict. But in that case, clean() is not even called.
     def get_context_data(self, **kwargs):
         context = super(EditArticleView, self).get_context_data(**kwargs)
-        context['form'] = self.form_class(instance=self.get_object())
+        context['image_formset'].instance = self.get_object()
+        context['image_formset'].selected_images = self.request.POST.getlist('image-checkbox[]') 
         return context
-            
+        
     def get_object(self, queryset=None):
         return Article.objects.get(id=self.kwargs['id'])
 
     def post(self, request, *args, **kwargs):
         instance = self.get_object()
         form = self.form_class(request.POST, instance=instance)
-        image_formset = ImageFormSet(request.POST, request.FILES, instance=instance)
+        image_formset = ImageFormSet(request.POST, request.FILES, instance=instance, request=request)
         file_formset = FileFormSet(request.POST, request.FILES, instance=instance)
-        if form.is_valid() and image_formset.is_valid() and file_formset.is_valid():
+        if form.is_valid() and image_formset.is_valid() and file_formset.is_valid():            
             self.delete_selected_images(request)
             self.delete_selected_files(request)
             form.save()
@@ -185,15 +192,18 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
 
     def delete_selected_images(self, request):
         image_ids = request.POST.getlist('image-checkbox[]')
-        for image in Image.objects.filter(pk__in=image_ids):
-            image.delete()
+        self.get_object().images.filter(pk__in=image_ids).delete()
 
     def delete_selected_files(self, request):
         file_ids = request.POST.getlist('file-checkbox[]')
-        for file in File.objects.filter(pk__in=file_ids):
-            file.delete()
+        self.get_object().files.filter(pk__in=file_ids).delete()
 
 class DeleteArticleView(DeleteView):
+
+    # redirects to home if tried to enter url in browser
+    def get(self, request, *args, **kwargs):
+        return HttpResponseRedirect(reverse('my_newsapp:home'))
+
     model = Article
     pk_url_kwarg = 'id'
     success_url = reverse_lazy('my_newsapp:home')

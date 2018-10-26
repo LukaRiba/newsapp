@@ -1,6 +1,6 @@
 import json
 
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, TransactionTestCase
 from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView
 from django.db.models.query import QuerySet
@@ -84,6 +84,11 @@ class HomeViewMixinTests(TestCase):
         self.assertEqual(returned_category.status, None)
         self.assertTrue(returned_category in Category.objects.all())
 
+    def test_get_primary_category_method__no_category_exists(self):
+        Category.objects.all().delete()  # now rand_ids will be empty
+        returned_category = self.test_view.get_primary_category(self.rand_ids())
+        self.assertTrue(returned_category == None)
+
     def test_get_secondary_category_method__secondary_category_exists(self):
         CategoryFactory(status='S')
         returned_category = self.test_view.get_secondary_category(self.rand_ids())
@@ -93,6 +98,11 @@ class HomeViewMixinTests(TestCase):
         returned_category = self.test_view.get_secondary_category(self.rand_ids())
         self.assertEqual(returned_category.status, None)
         self.assertTrue(returned_category in Category.objects.all())
+
+    def test_get_secondary_category_method__no_category_exists(self):
+        Category.objects.all().delete() # now rand_ids will be empty
+        returned_category = self.test_view.get_secondary_category(self.rand_ids())
+        self.assertTrue(returned_category == None)
 
     def test_get_other_articles_method__only_status_none_categories(self):
         # create one article for each category
@@ -128,7 +138,10 @@ class HomeViewMixinTests(TestCase):
         for article in articles:
             self.assertTrue(article.category.status == None)
 
-    def test_primary_and_secondary_category_objects_exist(self):
+    def test_get_other_articles_method__no_category_exist(self):
+        pass
+
+    def test_context_primary_and_secondary_category_objects_exist(self):
         CategoryFactory(status='P')
         CategoryFactory(status='S')
 
@@ -629,7 +642,7 @@ class CreateArticleViewTests(TestCase):
         article.images.first().image.delete()
         article.files.first().file.delete()
 
-class EditArticleViewTests(TestCase):
+class EditArticleViewTests(TransactionTestCase):
     
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='testpass123')
@@ -661,9 +674,9 @@ class EditArticleViewTests(TestCase):
             'files-MAX_NUM_FORMS': '20', 
             'files-0-file': '', 
 
-            # add checkboxes through update(), no need do put them as they are empty lists.
-            # 'image-checkbox[]': [],
-            # 'file-checkbox[]': []
+            # images and files selected for deletion
+            'image-checkbox[]': [],
+            'file-checkbox[]': []
         } 
 
     # comment
@@ -715,7 +728,15 @@ class EditArticleViewTests(TestCase):
         self.client.login(username='testuser', password='testpass123')
         response = self.client.post(self.url, self.initial_data)
 
-        updated_article = Article.objects.first()
+        # get field values again now the article is updated
+        # comment - important
+            # We must use updated_article here (get article again from db after client.post) because than we are sure
+            # that we get correct updated values, which we will not with field_values(self.article); we would get 
+            # pre-update values (for non relational fields - everyone except images and files -> se comment in
+            # test_post_when_article_form_fields_change). Test will still pass here hovever, because we are checking
+            # that values are not changed if we don't change them in the view, but we would then comparing old values with
+            # old values which is not what is intended, and in next test errors would arise.    
+        updated_article = Article.objects.first() 
         updated_values = field_values(updated_article)
 
         self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
@@ -724,18 +745,36 @@ class EditArticleViewTests(TestCase):
             'slug': updated_article.slug
         }))
         
+        # check that self.article and updated_article are actually the same instance
+        self.assertEqual(self.article, updated_article)
+
         # check that article field values, including images and files didn't change
         self.assertFalse(any([self.initial_values[field] != updated_values[field] for field in self.initial_values.keys()]))
 
     def test_post_when_article_form_fields_change(self):
-        self.initial_data.update({
+        data = self.initial_data
+        data.update({
+            'title': 'New Title', 
+            'short_description': 'new description',
             'text': 'this is changed text',
-            'category': CategoryFactory().id
+            'category': CategoryFactory(title='New Category').id
         })
-        self.client.login(username='testuser', password='testpass123')
-        response = self.client.post(self.url, self.initial_data)
 
-        updated_article = Article.objects.first()
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url, data)
+
+        # get field values again now the article is updated
+        # comment - important
+            # If field_values() called with self.article, old values ar getted even after article is updated. So, we get
+            # article again from database (updated_article), and now we get updated values. But images and files fields
+            # are updated if within self.article, probably because in field_values() we get them using all() method, which
+            # queryes db, and other field values are getted from self.article directly without querying database ???
+            # For example, if we don't get updated from db (Article.objects.first() ) article in 
+            # test_post_upload_new_article_images_and_files, and use self.article instead updated_article, test will
+            # pass and field_values(self.article) would have uploaded image and file in article's images and files
+            # fields. ??? 
+            # The same is for deleting files and images - we don't have to use updated_article, we can use self.article.
+        updated_article = Article.objects.first() 
         updated_values = field_values(updated_article)
 
         self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
@@ -745,65 +784,130 @@ class EditArticleViewTests(TestCase):
         }))
 
         # check that article's fields have been updated 
+        self.assertNotEqual(self.initial_values['title'], updated_values['title'])
+        self.assertEqual(updated_article.title, 'New Title')
+
+        self.assertNotEqual(self.initial_values['short_description'], updated_values['short_description'])
+        self.assertEqual(updated_article.short_description, 'new description')
+
         self.assertNotEqual(self.initial_values['text'], updated_values['text'])
+        self.assertEqual(updated_article.text, 'this is changed text')
+
         self.assertNotEqual(self.initial_values['category'], updated_values['category'])
+        self.assertEqual(updated_article.category.title, 'New Category')
 
     def test_post_upload_new_article_images_and_files(self):
-        self.initial_data.update({
+        data = self.initial_data
+        data.update({
             'images-0-image': get_test_file('test_image.png'),
             'files-0-file': get_test_file('test_doc_file.doc') # .txt file doesn't upload for some reason. Do not use it!
         })
         self.client.login(username='testuser', password='testpass123')
-        response = self.client.post(self.url, self.initial_data)
+        response = self.client.post(self.url, data)
 
-        updated_article = Article.objects.first()
+        # get field values again now the article is updated
+        updated_article = Article.objects.first() 
         updated_values = field_values(updated_article)
-
+       
         self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
             'category': updated_article.category.slug, 
             'id': updated_article.id, 
             'slug': updated_article.slug
         }))
 
-        # check that article's fields have been updated 
+        # check that one image and one file have been added
         self.assertNotEqual(self.initial_values['images'], updated_values['images'])
+        self.assertEqual(updated_article.images.count(), 3)
         self.assertNotEqual(self.initial_values['files'], updated_values['files'])
-
-        # putted in tearDown()
-        # delete_article_test_files(updated_article)
-    
+        self.assertEqual(updated_article.files.count(), 3)
 
     def test_post_delete_some_of_article_images_and_files(self):
-        pass
+        data = self.initial_data
+        data.update({
+            # lists of images/files ids
+            'image-checkbox[]': ['1'],
+            'file-checkbox[]': ['2']
+        })
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url, data)
 
+        self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
+            'category': self.article.category.slug, 
+            'id': self.article.id, 
+            'slug': self.article.slug
+        }))
+
+        # check that one image is deleted
+        self.assertEqual(self.article.images.count(), 1)
+        # check that all files are deleted
+        self.assertEqual(self.article.files.count(), 1)
+        
     def test_post_delete_all_article_files(self):
-        pass
+        data = self.initial_data
+        data.update({
+            'file-checkbox[]': ['1' ,'2']
+        })
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url, data)
+
+        self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
+            'category': self.article.category.slug, 
+            'id': self.article.id, 
+            'slug': self.article.slug
+        }))
+
+        # check that all files are deleted
+        self.assertEqual(self.article.files.count(), 0)
 
     def test_post_delete_all_images_while_not_uploading_new_image(self):
-        pass
+        data = self.initial_data
+        data.update({
+            'image-checkbox[]': ['1', '2']
+        })
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, 200)
+
+        image_formset = response.context['image_formset']
+        self.assertFalse(image_formset.is_valid())
+        # everything passes ok, formset is invalid, but message is not shown ??? fix that!
+        self.assertContains(response, 'Article must have at least one image. Upload new one if deleting all existing ones.')
 
     def test_post_delete_all_images_and_upload_new_image(self):
-        pass
+        data = self.initial_data
+        data.update({
+            'image-checkbox[]': ['1', '2'], # delete all images
+            'images-0-image': get_test_file('test_image.png')
+        })
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url, data)
 
-    
+        self.assertRedirects(response, reverse('my_newsapp:article-detail', kwargs={
+            'category': self.article.category.slug, 
+            'id': self.article.id, 
+            'slug': self.article.slug
+        }))
 
-
-
-
-
-        
-
-
-
-
-        
-    
-        
-    #  image_formset valid without image uploaded if article has image meaning
-    # not every is selected for deletion, images/files deletion, redirect to edited article detail page, 
+        # check that old images are deletet and new one is uploaded 
+        self.assertEqual(self.article.images.count(), 1)
+        self.assertEqual(self.article.images.first().image, 'test_image.png')
 
 class DeleteArticleViewTests(TestCase):
-    pass
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass123')
+        self.article = ArticleFactory(title='test article')
+        self.url = reverse('my_newsapp:delete-article', kwargs={'id': self.article.id})
+
+    def test_get_anonymous_user(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse('my_newsapp:home'))
+
+    def test_get_logged_user(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse('my_newsapp:home'))
 
 class MyNewsappLoginViewTests(TestCase):
     pass

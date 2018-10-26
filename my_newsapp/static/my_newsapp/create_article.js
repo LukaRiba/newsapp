@@ -8,7 +8,7 @@ $(function() {
         addText: 'Add image',
         deleteText: 'Remove',
         // Image-form with uploaded image can be removed. So, it is important to check here too 
-        removed: preventArticleUpdateIfNoImages
+        // removed: preventArticleUpdateIfNoImages
     });
 
     // FileFormset settings

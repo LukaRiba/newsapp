@@ -19,30 +19,34 @@ def get_test_file(filename):
     file = open(os.path.join(settings.BASE_DIR, 'my_newsapp/tests/test_files/', filename), 'rb')
     return SimpleUploadedFile(file.name, file.read())
 
-# returns a dictionary model field names as keys, and with values as field values (all strings)
+# returns a dictionary with model field names as keys, and with field values as values (all strings).
 def field_values(instance):
-    model = type(instance)
-    field_names = [field.name for field in model._meta.get_fields()]
+    field_names = [field.name for field in instance._meta.get_fields()]
     # comment
         # 1.   For relational fields (images, files or comments - istances of models whose fk is Article model)
-        #      getattr(self.article, field) returns RelatedManager object, so we have to add of statement for
+        #      getattr(self.article, field) returns RelatedManager object, so we have to add if statement for
         #      that fields to call all() method on getattr(self.article, field), which then returns QuerySet of
         #      related model instances.  
-        # 2.   Without using str() method, image which is uploaded through self.client.post() will be listed in 
-        #      self.initial_values too. Thats because, even if we store self.article's field values using this
-        #      method in a self.initial_values before actually updateing article through self.client.post(), query methods
-        #      used in here (model._meta.get_fields(), instance._meta.get_field()) are probably
-        #      lazy evaluated only when we use self.initial_values, and we do it an assertions, which come after
+        # 2.   Without using str() method on getattr(instance, field).all(), image which is uploaded through self.client.post() 
+        #      will be listed in self.initial_values too. Thats because getattr(instance, field).all() returns queryset
+        #      which is lazy evaluated, so it is evaluated only when we use self.initial_values in assertions, which come after
         #      client.post - so, self.initial_values will contain valuues of updated article instead values before updateing!     
-        #      With using str(), it looks like these methods are forced to evaluate when we call this method in setUp():
+        #      With using str() on getattr(instance, field).all(),  evaluation is forced here in this method, which is called in setUp():
         #           self.initial_values = field_values(self.article)
         #      Then, after client.post(), we once more run this method with updated_article (we could run it on self.article,
         #      as it is updated now, but this way is cleaner), and now, new values are saved. Then we compare keys from
-        #      from self.initial_values amd field_values(updated_article) dictinonaries in our assertions.   
-    values = [str(getattr(instance, field_name).all()) if 
-              str(instance._meta.get_field(field_name).__class__) in (
-                  "<class 'django.contrib.contenttypes.fields.GenericRelation'>",
-                  "<class 'django.db.models.fields.reverse_related.ManyToOneRel'>"
+        #      from self.initial_values and field_values(updated_article) dictinonaries in our assertions.  
+        #      One more thing about str() - if we dont use str() on getattr(instance, field).all(), initial and updated querysets
+        #      will contain newly uploaded image because of lazy evaluation - but the test will pass ! That's because, even if 
+        #      both querysets have exactly same image objects, they are not equal objects:
+        #           q1 == q2   ->   False,
+        #      but  str(q1) == str(q2)    or    list(q1) == list(q2)    -> True
+        #      So, test now passes as it should, because, 1. queryset evaluation is forced, so self.initial_values 
+        #      don't contain uploaded image, and querysets are now actually not equal (2 vs 3 images).
+    values = [str(getattr(instance, field_name).all()) if # str() forces evaluation of QuerySet.
+              str(instance._meta.get_field(field_name).__class__) in ( # str() for comparing to be possible.
+                  "<class 'django.db.models.fields.reverse_related.ManyToOneRel'>",
+                  "<class 'django.contrib.contenttypes.fields.GenericRelation'>"
               ) 
-              else str(getattr(instance, field_name)) for field_name in field_names]
+              else getattr(instance, field_name) for field_name in field_names]
     return dict(zip(field_names, values)) 

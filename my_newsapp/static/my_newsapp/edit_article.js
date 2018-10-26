@@ -16,7 +16,7 @@ $(function(){
     // After checking/unchecking checkboxes or after uploading images, disables/enables submit button
     // if necessary
     $('form').on('change', '.image-input, .image-checkbox', function(){
-        preventArticleUpdateIfNoImages();
+        // preventArticleUpdateIfNoImages();
     });
 
 });

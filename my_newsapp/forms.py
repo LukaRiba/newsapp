@@ -53,6 +53,15 @@ class FileForm(ModelForm):
 
 class ImageInlineFormSet(BaseInlineFormSet):
 
+    # comment important
+        # here self.selected_images is None, that's because __init__() is called from get_context_data() before kwargs 
+        # are updated -> context['image_formset'].selected_images = self.request.POST.getlist('image-checkbox[]'). But,
+        # when calling it in all_images_selected_for_deletion(), we get wanted image ids as by then kwargs are updated.
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None) 
+        self.selected_images = kwargs.pop('selected_images', None) 
+        super(ImageInlineFormSet, self).__init__(*args, **kwargs)
+
     def clean(self):
         super(ImageInlineFormSet, self).clean()
 
@@ -65,9 +74,11 @@ class ImageInlineFormSet(BaseInlineFormSet):
             # files, and if we upload files in file_formset, but not in image_formset, this contition will ge false,
             # because there are self.files as both image_formset and file_formset are passed same file dict (request.POST)
             # in constructors inside CreateArticleView.
-        if not any([ 'image' in key for key in self.files.keys() ]): # if no image has been uploaded
-            if not self.instance.images.all(): # check if article already has image (if editing article)
+        if not any([ 'image' in key for key in self.files.keys() ]): # if no image has been uploaded.
+            if not self.image_ids(): # if article has no images. Possible case in create-article view.
                 raise ValidationError('You have to upload at least one image.')
+            if self.all_images_selected_for_deletion(): # possible case in edit-article view
+                raise ValidationError('Article must have at least one image. Upload new one if deleting all existing ones.')
 
         images = []
         for form in self.forms:
@@ -87,7 +98,21 @@ class ImageInlineFormSet(BaseInlineFormSet):
             # Ako uploadamo sliku u npr. drugoj formi, a u prvoj ne, KeyError will raise za prvu formu
             except KeyError: 
                 pass
-        
+
+    def all_images_selected_for_deletion(self):
+        for image_id in self.image_ids():
+            # str(image_id) bacause 'image-checkbox[]' stores values as strings, not integers.
+            try: # when clean() is called from EditArticleView post() method
+                if not str(image_id) in self.request.POST.getlist('image-checkbox[]'):
+                    return False
+            except AttributeError: # when clean() is called second time, in case of invalid image_formset when post() returns get() 
+                if not str(image_id) in self.selected_images: # here self.selected_images get ids from get_contexta_data() which is called through get() method
+                    return False
+        return True
+    
+    def image_ids(self):
+        return [image.id for image in self.instance.images.all()]
+
 ImageFormSet = inlineformset_factory(Article, Image, form=ImageForm, formset=ImageInlineFormSet, 
                                      extra=1, max_num=20,  can_delete=True)
 
