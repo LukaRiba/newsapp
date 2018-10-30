@@ -87,6 +87,9 @@ class ArticleTests(TestCase):
     def setUp(self):
         ArticleFactory.create_batch(size=5)
 
+    def tearDown(self):
+        remove_auto_generated_example_files()
+
     def test_get_absolute_url_method(self):
         article = Article.objects.all()[0]
         self.assertEqual(article.get_absolute_url(), 

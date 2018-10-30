@@ -15,7 +15,6 @@ from my_newsapp.factories import (UserFactory, CategoryFactory, ArticleFactory, 
                                   remove_auto_generated_example_files)
 from my_newsapp.models import Category, Article, Image, File
 from my_newsapp.utils import get_status_none_categories_random_ids, get_test_file, field_values
-                              
 from my_newsapp.views import CategoryView, ArticleDetailView
 from my_newsapp.forms import ArticleForm, ImageInlineFormSet, FileInlineFormSet
 
@@ -138,8 +137,17 @@ class HomeViewMixinTests(TestCase):
         for article in articles:
             self.assertTrue(article.category.status == None)
 
+    def test_get_other_articles_method__no_articles_exists(self):
+        articles = self.test_view.get_other_articles(self.rand_ids())
+
+        self.assertEqual(articles.count(), 0)
+
     def test_get_other_articles_method__no_category_exist(self):
-        pass
+        Category.objects.all().delete() # now rand_ids will be empty
+        articles = self.test_view.get_other_articles(self.rand_ids())
+
+        self.assertEqual(articles.count(), 0)
+        
 
     def test_context_primary_and_secondary_category_objects_exist(self):
         CategoryFactory(status='P')
@@ -206,6 +214,9 @@ class HomeViewTests(TestCase):
        
         self.response = self.client.get('/news/home/')
 
+    def tearDown(self):
+        remove_auto_generated_example_files()
+
     def test_context_is_in_response(self):
         self.assertTrue('categories' in self.response.context)
         self.assertTrue('primary_category' in self.response.context)
@@ -253,6 +264,9 @@ class LatestArticlesViewTests(TestCase):
 
     def setUp(self):
         ArticleFactory.create_batch(size=8)
+
+    def tearDown(self):
+        remove_auto_generated_example_files()
         
     def test_response_contents_are_equal(self):
         response = self.client.get('/news/latest-articles/')
@@ -290,6 +304,9 @@ class CategoryViewTests(TestCase):
         self.test_category = CategoryFactory(title='Test Category', slug='test-category')
         ArticleFactory.create_batch(size=8, category=self.test_category)
         self.url = reverse('my_newsapp:category', kwargs={'slug': self.test_category.slug})
+
+    def tearDown(self):
+        remove_auto_generated_example_files()
 
     def test_response_contents_are_equal(self):
         response = self.client.get(self.url)
@@ -347,6 +364,9 @@ class ArticleDetailViewTests(TestCase):
         self.url = reverse('my_newsapp:article-detail', kwargs={'category': self.article.category.slug, 
             'id': self.article.id, 'slug': self.article.slug})
         self.response = self.client.get(self.url)
+
+    def tearDown(self):
+        remove_auto_generated_example_files()
 
     def article_detail_view_loads(self):
         self.assertTrue('article' in self.response.context)
@@ -477,6 +497,9 @@ class CreateArticleViewTests(TestCase):
         } 
 
         self.category = CategoryFactory(slug='testing')
+
+    def tearDown(self):
+        remove_auto_generated_example_files()
 
     def test_redirects_anonymous_user_to_login_page(self):
         response = self.client.get(self.url)
@@ -900,21 +923,115 @@ class DeleteArticleViewTests(TestCase):
         self.article = ArticleFactory(title='test article')
         self.url = reverse('my_newsapp:delete-article', kwargs={'id': self.article.id})
 
-    def test_get_anonymous_user(self):
+    def test_get_with_anonymous_user(self):
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse('my_newsapp:home'))
+        self.assertEqual(response.status_code, 405)
 
-    def test_get_logged_user(self):
+    def test_get_with_logged_user(self):
         self.client.login(username='testuser', password='testpass123')
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 405)
+
+    def test_article_deletion_with_anonymous_user(self):
+        response = self.client.post(self.url)
+
+        # redirect to login page
+        self.assertRedirects(response, '{}{}{}{}'.format(
+            reverse('my_newsapp:login'), '?next=/news/delete-article/', self.article.id, '/')
+        )
+
+    def test_article_deletion_with_logged_user(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(self.url)
+
+        # check that article is deleted
+        with self.assertRaises(Article.DoesNotExist) as cm: 
+            Article.objects.get(title='test article')
+            self.assertEqual(cm.exception.msg, 'Article matching query does not exist.')
+
+        # article is deleted -> redirect to home page
+        self.assertRedirects(response, reverse('my_newsapp:home'))
+        
+class MyNewsappLoginViewTests(TestCase):
+    
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass123')
+        self.url = reverse('my_newsapp:login')
+
+    def test_get(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '...please login or continue as guest')
+
+    def test_post_with_empty_fields(self):
+        response = self.client.post(self.url, {})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '...please login or continue as guest')
+        # comment
+            # two messages, one for every field. Shows up when html required attributes are disabled in fields.
+            # If requred attributes are enabled, page doesn't reload and we se pop ups which say 'Please fill out
+            # this field'. But, test here passes, because these html5 behaviour is built on top (i believe so):
+        self.assertContains(response, 'This field is required.', 2) 
+
+    def test_post_with_invalid_data(self):
+        response = self.client.post(self.url, {'username': 'wrong_user', 'password': 'invalidpass333'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '...please login or continue as guest')
+        self.assertContains(response, 
+            'Please enter a correct username and password. Note that both fields may be case-sensitive.') 
+
+    def test_post_with_valid_data(self):
+        # comment
+            # Here we are setting follow=True in post method arguments. That's because if not we get error :
+            # 'AssertionError: 301 != 200 : Couldn't retrieve redirection page '/news/home': response code was 301
+            # (expected 200)'. From django documentation:
+            #       If you set follow to True the client will follow any redirects and a redirect_chain 
+            #       attribute will be set in the response object containing tuples of the intermediate urls and status
+            #       codes.  
+        response = self.client.post(self.url, {'username': 'testuser', 'password': 'testpass123'}, follow=True)
+
         self.assertRedirects(response, reverse('my_newsapp:home'))
 
-class MyNewsappLoginViewTests(TestCase):
-    pass
-
 class MyNewsappLogoutViewTests(TestCase):
-    pass
+    
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass123')
+        self.client.login(username='testuser', password='testpass123')
+        self.url = reverse('my_newsapp:logout')
+
+    def test_logging_out(self):
+        response = self.client.get(self.url)
+
+        self.assertRedirects(response, reverse('my_newsapp:login'))
 
 class DownloadFileTests(TestCase):
-    pass
+    
+    def setUp(self):
+        self.file = FileFactory(file=get_test_file('test_doc_file.doc'))
+        self.url = (reverse('my_newsapp:download-file', kwargs={'id': self.file.id}))
 
+    def tearDown(self):
+        delete_article_test_files(self.file.article)
+                
+    def test_file_doesnt_exist(self):
+        response = self.client.get(reverse('my_newsapp:download-file', kwargs={'id': 100}))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_file_invalid_path(self):
+        self.file.file.delete()
+        response = self.client.get(reverse('my_newsapp:download-file', kwargs={'id': self.file.id}))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_file_exists(self):
+        response = self.client.get(reverse('my_newsapp:download-file', kwargs={'id': self.file.id}))
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], self.file.content_type())
+        self.assertIn(self.file.name(), response['Content-Disposition'])
+
+        

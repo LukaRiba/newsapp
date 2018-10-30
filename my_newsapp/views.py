@@ -7,6 +7,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import views as auth_views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_http_methods
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import render, get_object_or_404
 
@@ -47,6 +48,7 @@ class HomeViewMixin:
             return self.categories.get_secondary()
         return self.categories.get(id=rand_ids.pop()) if rand_ids else None
 
+    # returns empty QuerySet if there are no articles in category, or no rand_ids (no category)
     def get_other_articles(self, rand_ids):
         other_articles = Article.objects.filter(category__pk__in=rand_ids)
         if other_articles.count() < 6:
@@ -198,14 +200,11 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
         file_ids = request.POST.getlist('file-checkbox[]')
         self.get_object().files.filter(pk__in=file_ids).delete()
 
-class DeleteArticleView(DeleteView):
-
-    # redirects to home if tried to enter url in browser
-    def get(self, request, *args, **kwargs):
-        return HttpResponseRedirect(reverse('my_newsapp:home'))
-
+@method_decorator(require_http_methods(['POST']), name='dispatch')
+class DeleteArticleView(LoginRequiredMixin, DeleteView):
     model = Article
     pk_url_kwarg = 'id'
+    login_url = 'my_newsapp:login'
     success_url = reverse_lazy('my_newsapp:home')
         
 class MyNewsLoginView(auth_views.LoginView):
@@ -219,7 +218,7 @@ class MyNewsLogoutView(auth_views.LogoutView):
 def download_file(request, id):
     target = get_object_or_404(File, id=id)
     file_path = os.path.join(target.path())
-    if os.path.exists(file_path):
+    if os.path.exists(file_path) and not os.path.isdir(file_path):
         with open(file_path, 'rb') as file:
             response = HttpResponse(file.read(), content_type=target.content_type())
             response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)

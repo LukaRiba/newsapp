@@ -99,14 +99,14 @@ class ImageInlineFormSet(BaseInlineFormSet):
             except KeyError: 
                 pass
 
+    # str(image_id) bacause 'image-checkbox[]' stores values as strings, not as integers.
     def all_images_selected_for_deletion(self):
         for image_id in self.image_ids():
-            # str(image_id) bacause 'image-checkbox[]' stores values as strings, not integers.
             try: # when clean() is called from EditArticleView post() method
                 if not str(image_id) in self.request.POST.getlist('image-checkbox[]'):
                     return False
             except AttributeError: # when clean() is called second time, in case of invalid image_formset when post() returns get() 
-                if not str(image_id) in self.selected_images: # here self.selected_images get ids from get_contexta_data() which is called through get() method
+                if not str(image_id) in self.selected_images: 
                     return False
         return True
     
@@ -146,6 +146,8 @@ class LoginForm(AuthenticationForm):
         super(LoginForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
+        # disables html required attribute in fields
+        # self.use_required_attribute = False
         self.helper.layout = Layout(
             Field('username'),
             Field('password'),    
