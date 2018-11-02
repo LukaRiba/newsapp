@@ -120,7 +120,7 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
-DATE_FORMAT = 'M j, Y' # rendered date format
+DATE_FORMAT = 'M d, Y' # rendered date format
 
 USE_L10N = False # because it overrides DATE_FORMAT
 

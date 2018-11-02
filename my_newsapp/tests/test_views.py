@@ -1,11 +1,8 @@
-import json
-
 from django.test import TestCase, RequestFactory, TransactionTestCase
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.db.models.query import QuerySet
 from django.core.paginator import InvalidPage
-from django.test import Client
 from django.contrib.auth.models import User
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core import serializers
@@ -551,7 +548,7 @@ class CreateArticleViewTests(TestCase):
         # check article not created
         self.assertEqual(Article.objects.count(), 0)
 
-    def test_post_with_valid_form_but_invalid_formsets_data(self):
+    def test_post_with_valid_form_but_no_image_uploaded_and_duplicate_files(self):
         self.client.login(username='testuser', password='testpass123')
         # becase dict's update() doesn't return anything, we must assign initial_data to data first
         data = self.initial_data
@@ -575,6 +572,68 @@ class CreateArticleViewTests(TestCase):
         self.assertContains(response, 'You have to upload at least one image.')
         self.assertFalse(response.context['file_formset'].is_valid())
         self.assertContains(response, 'You have uploaded duplicate files. Files have to be unique.')
+
+        # check article not created
+        self.assertEqual(Article.objects.count(), 0)
+
+    def test_post_with_valid_form_with_no_image_uploaded_and_image_formsets_have_only_description(self):
+        self.client.login(username='testuser', password='testpass123')
+        data = self.initial_data
+        data.update({
+            'title': 'test article', 
+            'short_description': 'this is a test article data', 
+            'text': 'some text', 
+            'category': self.category.id,
+
+            # upload 2 identical files for file_formset to be invalid
+            'images-TOTAL_FORMS': '2', 
+            'images-0-image': '', 
+            'images-0-description': 'first image',
+            'images-1-image': '', 
+            'images-1-description': 'second image', 
+        })
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(response.context['form'].is_valid())
+        self.assertFalse(response.context['image_formset'].is_valid())
+        self.assertContains(response, 'You cannot have description if image is not choosen.', 2)
+        self.assertTrue(response.context['file_formset'].is_valid())
+        # Even if no image is uploaded, there is no error message 'You have to upload at least one image.' because
+        # if there are errors in ImageForms, ImageFormSet is not validated (see ImageInlineFormSet clean()).
+        self.assertNotContains(response, 'You have to upload at least one image.')
+
+        # check article not created
+        self.assertEqual(Article.objects.count(), 0)
+    
+    def test_post_with_valid_form_with_image_uploaded_but_other_image_formsets_have_only_description(self):
+        self.client.login(username='testuser', password='testpass123')
+        # becase dict's update() doesn't return anything, we must assign initial_data to data first
+        data = self.initial_data
+        data.update({
+            'title': 'test article', 
+            'short_description': 'this is a test article data', 
+            'text': 'some text', 
+            'category': self.category.id,
+
+            # upload 2 identical files for file_formset to be invalid
+            'images-TOTAL_FORMS': '3', 
+            'images-0-image': get_test_file('test_image.png'), 
+            'images-0-description': 'first image',
+            'images-1-image': '', 
+            'images-1-description': 'second image',
+            'images-2-image': '', 
+            'images-2-description': 'third image',      
+        })
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(response.context['form'].is_valid())
+        self.assertFalse(response.context['image_formset'].is_valid())
+        self.assertContains(response, 'You cannot have description if image is not choosen.', 2)
+        self.assertTrue(response.context['file_formset'].is_valid())
 
         # check article not created
         self.assertEqual(Article.objects.count(), 0)

@@ -16,8 +16,14 @@ def get_status_none_categories_random_ids():
     return ids
 
 def get_test_file(filename):
-    file = open(os.path.join(settings.BASE_DIR, 'my_newsapp/tests/test_files/', filename), 'rb')
-    return SimpleUploadedFile(file.name, file.read())
+    file_path = os.path.join(settings.BASE_DIR, 'my_newsapp/tests/test_files/', filename)
+    file = open(file_path, 'rb')
+    return SimpleUploadedFile(file.name, file.read(), content_type=content_type(file_path))
+
+def content_type(file_path):
+    from magic import Magic
+    mime = Magic(mime=True)
+    return mime.from_file(file_path)
 
 # returns a dictionary with model field names as keys, and with field values as values (all strings).
 def field_values(instance):

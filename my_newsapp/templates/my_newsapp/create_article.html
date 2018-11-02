@@ -68,7 +68,12 @@
 
         {{ image_formset.management_form }}
 
-        {% for image_form in image_formset %}
+        {% for image_form in image_formset %} <!-- image_forms start -->
+          {% if image_form.errors %}
+            <span style="color:brown; font-size:14px;">
+              {{ image_form.non_field_errors }}
+            </span>
+          {% endif %}
           <div class="row image-form mb-3">
             <div class="col-sm-4">
               {% comment %} {% if image_form.instance.pk %}{{ image_form.DELETE }}{% endif %} {% endcomment %}
@@ -86,7 +91,7 @@
               {{ image_form.description }}
             </div>
           </div>
-        {% endfor %}
+        {% endfor %} <!-- image_forms end -->
       </div> <!-- ImageInlineFormSet end -->
       
       <div class="file-formset"> <!-- FileInlineFormSet start -->

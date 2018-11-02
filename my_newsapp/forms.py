@@ -22,7 +22,7 @@ class ArticleForm(ModelForm):
         self.helper = FormHelper()
         self.helper.form_tag = False
         # disables html required attribute in fields
-        # self.use_required_attribute =  False
+        self.use_required_attribute =  False
         
 class ImageForm(ModelForm):
     
@@ -39,6 +39,18 @@ class ImageForm(ModelForm):
                 'class': 'textinput textInput form-control',
             }),
         }
+
+    def clean(self):
+        super(ImageForm, self).clean()
+        try:
+            image = self.cleaned_data['image']
+        except KeyError: # if format not supported, image is not uploaded and there is no 'image' key in cleaned data
+            raise ValidationError('Image cannot be uploaded. Valid formats are bmp, gif, png, jpg and jpeg.')
+        description = self.cleaned_data['description']
+        # Check if there is description but no image
+        if description and not image:
+            raise ValidationError('You cannot have description if image is not choosen.', code='description_only')
+         
 
 class FileForm(ModelForm):
     
@@ -65,8 +77,8 @@ class ImageInlineFormSet(BaseInlineFormSet):
     def clean(self):
         super(ImageInlineFormSet, self).clean()
 
-        # Don't bother validating the formset unless each form is valid on its own
-        if any(self.errors):
+        #  Don't bother validating the formset unless each form is valid on its own
+        if any(self.errors): 
             return
 
         # comment
@@ -84,17 +96,13 @@ class ImageInlineFormSet(BaseInlineFormSet):
         for form in self.forms:
             try:
                 image = form.cleaned_data['image']
-                description = form.cleaned_data['description']
-                # Check if there is description but no image
-                if description and not image:
-                    raise ValidationError('You cannot have description if image is not choosen')
-                # Check for duplicate images
-                image_name = image.name
-                if image_name in images:
-                    raise ValidationError(
-                        'You have uploaded duplicate image files. Image files have to be unique.'
-                    )
-                images.append(image_name)
+                if image:
+                    image_name = image.name
+                    if image_name in images:
+                        raise ValidationError(
+                            'You have uploaded duplicate image files. Image files have to be unique.'
+                        )
+                    images.append(image_name)
             # Ako uploadamo sliku u npr. drugoj formi, a u prvoj ne, KeyError will raise za prvu formu
             except KeyError: 
                 pass
