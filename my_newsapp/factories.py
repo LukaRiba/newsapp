@@ -1,6 +1,5 @@
 import os
 import time
-from random import shuffle
 
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -71,11 +70,6 @@ class ArticleFactory(factory.django.DjangoModelFactory):
     pub_date = factory.Faker('past_datetime', tzinfo=timezone.utc)
     author = factory.SubFactory(UserFactory)
     category = factory.SubFactory(CategoryFactory)
-
-def get_valid_image_format():
-    valid_formats = ['bmp', 'gif', 'png', 'jpg', 'jpeg']
-    shuffle(valid_formats)
-    return valid_formats[0]
 
 class ImageFactory(factory.django.DjangoModelFactory):
 

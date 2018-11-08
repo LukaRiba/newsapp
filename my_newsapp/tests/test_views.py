@@ -31,11 +31,6 @@ def delete_article_test_files(article):
     for file in article.files.all():
         file.file.delete() 
     
-# help method
-def print_templates(response):
-    for template in response.templates:
-        print(template.name)
-
 class NavigationContextMixinTests(TestCase):
 
     class TestView(NavigationContextMixin, TemplateView):
@@ -1092,5 +1087,3 @@ class DownloadFileTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], self.file.content_type())
         self.assertIn(self.file.name(), response['Content-Disposition'])
-
-        

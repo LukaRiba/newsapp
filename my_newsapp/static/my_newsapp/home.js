@@ -52,7 +52,7 @@ function totalHeight(elements){
     return totalHeight;
 }
 
-//*****************************************************************************
+// *****************************************************************************
 // Cutting article's short descriptions
 
 var articlePreviews = document.querySelectorAll('.article-preview');

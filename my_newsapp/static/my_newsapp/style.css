@@ -51,6 +51,36 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   padding-right: 20px;
 }
 
+.article-thumbnail-container {
+  text-align:center;
+}
+.article-thumbnail-image {
+  background-size: cover;
+  height: 150px;
+  width: inherit;  
+  display:inline-block;
+  background-position: center;
+}
+
+/* these two blocks produce bottom border which is shortened left and right by 3%.
+   This pattern can be used for any border and for any shortening. Used in home.html  */
+/* ++++++++++++++++++++++++++++ */
+.border-bottom-shorter {
+  position: relative;
+  z-index : 1;
+}
+
+.border-bottom-shorter:before {
+  content: "";
+  position: absolute;
+  left: 3%;
+  bottom: 0;
+  height: 1px;
+  width: 94%;  /* or 100px */
+  border-bottom: 1px solid #dee2e6;
+}
+/* ++++++++++++++++++++++++++++ */
+
 .mt-60px {
   margin-top: 60px;
 }
@@ -103,19 +133,6 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
    padding instead margin, it is still visible */
 .article-wrap {
   overflow: hidden !important;
-}
-
-/* Limitira paragraf na određeni broj linija
-  max-height: = line-height: × <number-of-lines> in em. 
-*/
-.max-lines {
-  display: block; /* or inline-block */
-  text-overflow: ellipsis;
-  word-wrap: break-word;
-  overflow: hidden;
-  /* max-height: 3.6em; */
-  /* line-height: 1.2em; */
-  
 }
 
 .article {

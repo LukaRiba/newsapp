@@ -1,6 +1,10 @@
+import io
+from unittest.mock import patch, mock_open
+
 from django.test import TestCase
 
-from my_newsapp.utils import get_status_none_categories_random_ids, content_type, field_values
+from my_newsapp.utils import (get_status_none_categories_random_ids, content_type, field_values, 
+    get_test_files_dir_path, get_test_file)
 from my_newsapp.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
 
 class UtilsTests(TestCase):
@@ -23,7 +27,7 @@ class UtilsTests(TestCase):
         # check that returned lists contain equal elements (ids)
         self.assertEqual(sorted(none_ids), sorted(another_none_ids))
 
-        # check that status none categiries ids are in lists returned by function.
+        # check that status none categories ids are in lists returned by function.
         # check only one as they contain equal elements (if we are here, assertion above has passed)
         for category in none_categories:
             self.assertIn(category.id, none_ids)
@@ -36,6 +40,28 @@ class UtilsTests(TestCase):
         file_content_type = 'application/pdf'
 
         self.assertEqual(content_type(file_path), file_content_type)
+
+    def test_get_test_files_dir_path(self):
+        with self.settings(BASE_DIR='/base_dir/'):
+            self.assertEqual(get_test_files_dir_path(), '/base_dir/my_newsapp/tests/test_files/')
+
+    @patch('my_newsapp.utils.get_test_files_dir_path', return_value='/test_files/')
+    @patch('my_newsapp.utils.content_type', return_value='text/plain')
+    @patch('builtins.open', new_callable=mock_open, read_data=io.BytesIO(b'test data').read())
+    def test_get_test_file(self, m_open, m_content_type, m_get_test_files_dir_path):
+        filename = 'fake_test_file.txt'
+        # as name of file object returned by real open() function returns file path
+        file_path = m_open().name = f'{m_get_test_files_dir_path()}{filename}' 
+        simple_uploaded_file = get_test_file(filename)
+
+        assert type(simple_uploaded_file).__name__ == 'SimpleUploadedFile'
+        assert simple_uploaded_file.name == filename # SimpleUploadedFile cuts the path and maintains just name of the file
+        assert simple_uploaded_file.read() == b'test data'
+        assert simple_uploaded_file.content_type == 'text/plain'
+
+        m_open.assert_called_with(file_path, 'rb')
+        m_content_type.assert_called_with(file_path)
+        m_get_test_files_dir_path.assert_called_with()
 
     def test_field_values(self):
         article = ArticleFactory()
