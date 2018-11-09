@@ -4,7 +4,7 @@
 
 {% block title %}Edit Article{% endblock title %}
 
-{% block current_files  %}
+{% block current_files %}
 
   <canvas id="canvas" style="display: none;"></canvas>
 
@@ -15,7 +15,7 @@
       <div class="col-md-6 current-images"> <!-- images main col start -->
         <div class=row> <!-- images sub-row start -->
           {% if article.images.all %}
-          <div class="col-sm-8 images-list"> <!-- images list col start -->
+          <div class="col-sm-8 col-6 images-list"> <!-- images list col start -->
             <p class="font-weight-bold">Current Images</p>
               <ul>
                 {% for image in article.images.all  %}
@@ -25,7 +25,7 @@
                 {% endfor %}
               </ul>
           </div> <!-- images list col end -->
-          <div class="col-sm-4 images-checkboxes"> <!-- images checkbox col start -->
+          <div class="col-sm-4 col-6 images-checkboxes"> <!-- images checkbox col start -->
             <p class="font-weight-bold">Delete ?</p>
             <ul>
             {% for image in article.images.all %}
@@ -48,12 +48,11 @@
         </div> <!-- images sub-row end -->
       </div> <!-- images main col end -->
 
-
       <!-- Files div -->
       <div class="col-md-6 current-files"> <!-- files main col start -->
         <div class=row> <!-- files sub-row start -->
           {% if article.files.all %}
-          <div class="col-sm-8 files-list"> <!-- Files list col start -->
+          <div class="col-sm-8 col-6 files-list"> <!-- Files list col start -->
             <p class="font-weight-bold">Current Files</p>
               <ul>
                 {% for file in article.files.all  %}
@@ -63,7 +62,7 @@
                 {% endfor %}
               </ul>
           </div> <!-- Files list col end -->
-          <div class="col-sm-4 files-checkboxes"> <!-- Files checkbox col start -->
+          <div class="col-sm-4 col-6 files-checkboxes"> <!-- Files checkbox col start -->
             <p class="font-weight-bold">Delete ?</p>
             <ul>
             {% for file in article.files.all %}
@@ -78,7 +77,7 @@
             <ul/>            
           </div> <!-- Files checkbox col end -->
           {% else %}
-          <div class="col-sm-8 images-list"> <!-- files list col start -->
+          <div class="pl-3"> <!-- files list col start -->
             <p class="font-weight-bold">Current Files</p>
             <p class="no-images">No Files</p>
           </div> <!-- files list col end -->
@@ -89,23 +88,12 @@
   </div> <!-- main container end -->
 {% endblock current_files %}
 
-
-
 {% block submit_button %}
   <hr style="margin-top: 2rem; border-top: 1px solid rgba(0, 0, 0, 0.2)">
   <input type="submit" name="submit" value="Update" class="btn btn-primary btn-lg mt-2" id="submit-button">
 {% endblock submit_button %}
 
-
-
-
-
 {% block script %}
   {{ block.super }}
   <script type="module" src="{% static 'my_newsapp/edit_article.js' %}"></script>
 {% endblock script %}
-
-
-  
-
-

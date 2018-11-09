@@ -47,6 +47,10 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   padding-bottom: 20px;
 }
 
+.padding-bottom-40 {
+  padding-bottom: 40px;
+}
+
 .padding-right-20 {
   padding-right: 20px;
 }
@@ -250,8 +254,16 @@ input[type='file'] {
   text-overflow: ellipsis;
   overflow: hidden;
   word-wrap: nowrap;
-} 
+}
 
+.add-row {
+  color: seagreen;
+  font-weight: 600;
+}
+
+.delete-row {
+  color: crimson;
+}
 /* ----------------------- Edit Article View Styling ----------------------- */
 
 .current-images, .current-files {

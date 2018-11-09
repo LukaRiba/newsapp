@@ -37,6 +37,7 @@ class ImageForm(ModelForm):
             'description': TextInput(attrs={
                 'autocomplete': 'off',
                 'class': 'textinput textInput form-control',
+                'placeholder': 'Describe image'
             }),
         }
 

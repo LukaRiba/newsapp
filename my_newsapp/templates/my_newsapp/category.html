@@ -26,40 +26,37 @@
 
 {% block content %}
 
-  <div class="container mt-60px">
-      <h2 class="padding-bottom-20 text-cornflowerblue">{{ articles.first.category.title }}</h2>
-    </div>
-    {% if is_paginated %}
-      {% include 'my_newsapp/snippets/pagination.html' %}
-    {% endif %}
-    <div class="container">
-      <hr>
-    </div>
+<div class="container"> <!-- main container end -->
+  <h2 class="pt-5 pb-4 text-cornflowerblue">{{ articles.first.category.title }}</h2>
+  {% if is_paginated %}
+    {% include 'my_newsapp/snippets/pagination.html' %}
+  {% endif %}
+  <hr>
 
   {% for article in articles  %}
-  <div class="container">
-    <div class="row padding-top-20 padding-bottom-20">
-      <div class="col-md-2">
-        <img src="{% thumbnail article.images.first.image 150x150 crop %}">
+    <div class="row padding-top-20 padding-bottom-20 border-bottom-shorter">
+      <div class="col-xl-2 col-lg-2 col-md-9 col-sm-12">
+        <div class="article-thumbnail-image" style="background-image: url('{{ article.images.first.image.url }}');"></div>
       </div>
-      <div class="col-md-6">
+      <div class="col-xl-8 col-lg-7 col-md-12 col-sm-12 order-lg-1 order-md-2 order-sm-1">
         <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
         <p>{{ article.short_description }}</p>
       </div>
-      <div class="col-md-4 text-lightbrown padding-top-20 text-right">
-        <p style="margin-top: 40px">Written by {{ article.author }}</p>
-        <p>{{ article.pub_date.date }}</p> {% comment %} date() metoda vraća samo datum; bez nje ispisuje se i datum i vrijeme {% endcomment %}
+      <div class="col-xl-2 col-lg-3 col-md-3 col-sm-12 order-lg-2 order-md-1 order-sm-2  text-lightbrown">
+        <div class="row" style="padding: inherit;">
+          <div class="col-md-12 col-4 pl-0 pr-2"><p>Written by {{ article.author }}</p></div>
+          <div class="col-md-12 col-4 pl-0 pr-2"><p>{{ article.pub_date.date }}</p></div>
+        </div>
       </div>
     </div>
-    <hr>
-  </div>
-{% endfor %}
+  {% endfor %}
 
-{% if is_paginated %}
-  <div class="mt-5 mb-5">
-    {% include 'my_newsapp/snippets/pagination.html' %}
-  </div>
-{% endif %}
+  {% if is_paginated %}
+    <div class="mt-2 mb-5">
+      {% include 'my_newsapp/snippets/pagination.html' %}
+    </div>
+  {% endif %}
+</div> <!-- main container end -->
   
 {% endblock content %}
 
