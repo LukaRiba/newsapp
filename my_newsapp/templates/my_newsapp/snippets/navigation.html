@@ -1,16 +1,16 @@
 <!-- base nav-bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container center">
-    <button type="button" class="btn btn-success">
-      <a href="{% url 'my_newsapp:create-article' %}">Write something</a>
-    </button>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
       {% comment %} main nav-bar links {% endcomment %}
-      <ul class="custom-nav"> <!-- Link list (<ul>) start -->
-        <li class="nav-item active">
+      <ul class="navbar-nav d-flex justify-content-between custom-nav-spacing"> <!-- Link list (<ul>) start -->
+        <li class="nav-item">
+          <a class="nav-link write-something-link pl-0" href="{% url 'my_newsapp:create-article' %}">Write something</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="/news/home/">Home <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
@@ -34,7 +34,7 @@
                 <ul class="dropdown-menu">
                   {% for article in category.articles.all %}
                     <li>
-                      <a class="dropdown-item" href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+                      <a class="dropdown-item ml-4" href="{{ article.get_absolute_url }}">{{ article.title }}</a>
                     </li>
                   {% endfor %}
                 </ul>
