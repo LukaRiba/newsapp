@@ -5,7 +5,6 @@ nav a {
 }
 
 nav a:hover {
-  color: white;
   text-decoration: none;  
 }
 
@@ -84,19 +83,6 @@ h3 a:hover, h4 a:hover, h5 a:hover, p a:hover  {
   border-bottom: 1px solid #dee2e6;
 }
 /* ++++++++++++++++++++++++++++ */
-
-
-/* Navigation */
-.write-something-link {
-  color: rgb(0, 202, 0) !important;
-  font-weight: 600;
-}
-
-.custom-nav-spacing {
-  width: 120%;
-  margin: 0 auto;
-}
-/* ----------- */
 
 .mt-60px {
   margin-top: 60px;
@@ -315,9 +301,28 @@ input[type='file'] {
 
 /* ---------------------- Bootstrap override ---------------------- */
 
-/* changes color of all nav-links but first - it stays green */
-.nav-link:nth-child(n+2) {
-  color: rgba(255, 255, 255, 0.7) !important;
+/* Navigation */
+/* -------------- */
+.nav-link {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.nav-link:hover {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.write-something-link {
+  color: rgb(0, 202, 0) !important;
+  font-weight: 600;
+}
+
+.write-something-link:hover {
+  color: rgba(0, 202, 0, 0.7) !important;
+}
+
+.custom-nav-spacing {
+  width: 120%;
+  margin: 0 auto;
 }
 
 .dropdown-toggle {
@@ -331,26 +336,79 @@ input[type='file'] {
   background-color: #343a40;
 } 
 
- .dropdown-item {
-  color: white;
+.category-link {
+  padding-right: 0;
+  justify-content: space-between;
+  width: 180px;
+}
+
+.dropdown-item:active {
+  background-color: #343a40;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+  color: #16181b;
+  text-decoration: none;
+  background-color: #f8f9fa;
+}
+
+.dropdown-item, .dropdown-item a {
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 300;
   font-size: 14px;
 }
 
-.dropdown-item.active, .dropdown-item:active {
+.dropdown-item a {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.open-submenu-button {
+  background-color: #343a40;
+  border: none;
+  width: 40px;
+  height: 20px;
+  float: right;
+}
+
+.dropdown-item:hover a, .dropdown-item:hover .open-submenu-button {
   color: #16181b;
   text-decoration: none;
   background-color: #fff;
 }
 
-/* open all dropdown-menus on hover */
-/* .navbar-nav li:hover > ul.dropdown-menu {
-  display: block;
-} */
+.disable-float-right {
+  float: none;
+}
 
-/* opens only dropdown-submenu on hover */
-.dropdown-menu li:hover > ul.dropdown-menu {
-  display: block;
+.open-submenu-button:focus, .dropdown-item:focus {
+  outline: none;
+}
+
+/* carret je div u obliku trokuta */
+.carret {
+  background-color: rgba(255, 255, 255, 0.6);
+  width: 15px;
+  height: 15px;
+  /* mijenja površinu elementa (u ovom slučaju u trokutastu) */
+  clip-path: polygon(0 20%, 50% 50%, 0 80%);
+}
+
+.carret-down {
+  clip-path: polygon(20% 55%, 50% 80%, 80% 55%);
+}
+
+.dropdown-item:hover .carret {
+  background-color: #16181b;
+}
+
+/* rotate caret on hover */
+.dropdown-item .open-submenu-button:after {
+  float: right;
+  margin-top: 9px;
+  text-decoration: underline;
+  transform: rotate(-90deg);
+  width: 30px;
 }
 
 .dropdown-submenu {
@@ -361,21 +419,27 @@ input[type='file'] {
   top:0;
   left:100%;
   margin-top:-6px;
+  max-width: 500px;
 }
 
-/* rotate caret and align it right status */
-.dropdown-menu > li > a:after {
-  float: right;
-  margin-top: 9px;
-  text-decoration: underline;
-  transform: rotate(-90deg);
-} 
+.dropdown-submenu-link {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(255, 255, 255, 0.7);
+}
 
-/* rotate caret on hover */
-/* .dropdown-menu > li > a:hover:after {
-  text-decoration: underline;
-  transform: rotate(-90deg);
-}  */
+/* override hover effects of dropdown menus links for medium and smaller screens (when navbar is collapsed) */
+@media only screen and (max-width: 892px) {
+  .dropdown-item:hover, .dropdown-item:hover a, .dropdown-item:hover .open-submenu-button {
+    color: rgba(255, 255, 255, 0.8);
+    background-color: #343a40;
+  }
+
+  .dropdown-item:hover .carret {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+}
+/* -------------------- */
 
 .jumbotron {
   margin-bottom: 0; 

@@ -13,35 +13,38 @@
         <li class="nav-item">
           <a class="nav-link" href="/news/home/">Home <span class="sr-only">(current)</span></a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">About</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'my_newsapp:latest-articles' %}?page=1">Latest Articles</a>
-        </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Categories
           </a>
-          {% comment %} categories list {% endcomment %}
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"> <!-- Categories list drobdown start -->
           {% for category in categories %}
-            {% comment %} are there articles in a category? If yes, create category submenu {% endcomment %}
             {% if category.articles.all %}
               <li class="dropdown-submenu">
-                <a class="dropdown-item dropdown-toggle" href="{{ category.get_absolute_url }}">{{ category.title }}</a>
-                {% comment %} list of categorie's articles {% endcomment %}
-                <ul class="dropdown-menu">
+                <div class="dropdown-item category-link">
+                  <a href="{{ category.get_absolute_url }}">{{ category.title }}</a>
+                  {% comment %} <div class="ggg pr-3">
+                      <div class="dropdown-toggle carret align-middle"></div>
+                  </div> {% endcomment %}
+                  <button class="open-submenu-button pr-4"><div class="carret"></div></button> <!-- ovaj improvizirani carret zbog float: right; nije vidljiv u collapse modeu -->
+                </div>
+                <ul class="dropdown-menu article-list-submenu"> <!-- Categories list sub-dropright start -->
                   {% for article in category.articles.all %}
                     <li>
-                      <a class="dropdown-item ml-4" href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+                      <a class="dropdown-item dropdown-submenu-link pr-3" href="{{ article.get_absolute_url }}">{{ article.title }}</a>
                     </li>
                   {% endfor %}
-                </ul>
+                </ul> <!-- Categories list sub-dropright start -->
               </li>  
             {% endif %}       
           {% endfor %}
-          </ul>
+          </ul> <!-- Categories list drobdown end -->
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'my_newsapp:latest-articles' %}?page=1">Latest Articles</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">About</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">Contact</a>
@@ -57,3 +60,4 @@
     </div>
   </div>
 </nav>  
+
