@@ -14,7 +14,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User 
         django_get_or_create = ('username', 'password')
 
-    username = factory.Sequence(lambda num: 'user%d' % num)
+    username = factory.Faker('name')
     password = factory.Faker('password', length=10)
 
 class CategoryFactory(factory.django.DjangoModelFactory):
@@ -23,7 +23,7 @@ class CategoryFactory(factory.django.DjangoModelFactory):
         model = Category 
         django_get_or_create = ('title', 'slug', 'image', 'status')
 
-    slug = factory.Sequence(lambda num: 'category-%d' % num)
+    slug = factory.Faker('word')
     title = factory.LazyAttribute(lambda obj: '{0}'.format(obj.slug.title()))
     image = factory.django.ImageField()
     status = None

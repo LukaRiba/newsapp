@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'my_news.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'my_news_db',
+        'NAME': 'my_news_db_test',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': '', # prazan string predstavlja localhost (127.0.0.1)

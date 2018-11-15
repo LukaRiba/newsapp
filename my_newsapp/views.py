@@ -8,10 +8,10 @@ from django.contrib.auth import views as auth_views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
-from django.urls import reverse, reverse_lazy
-from django.shortcuts import render, get_object_or_404
+from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 
-from .models import Article, Category, Image, File
+from .models import Article, Category, File
 from .utils import get_status_none_categories_random_ids
 from .forms import ArticleForm, ImageFormSet, FileFormSet, LoginForm
 
@@ -119,10 +119,10 @@ class CategoryView(NavigationContextMixin, ListView):
 class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView):
     template_name = 'my_newsapp/detail.html'
     model = Article
-    
     # Set href attribute of 'Login' anchor tag which is displayed instead comments if user is not logged in
     # This attribute is defined in comments.views.CommentsContextMixin
     login_url = '/news/login'
+
     # Override to add these variables to request.session, required for comments app
     def get(self, request, *args, **kwargs):
         self.request.session['comments_owner_model_name'] = self.model.__name__
@@ -139,15 +139,22 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsCont
         form = self.form_class(request.POST)
         image_formset = ImageFormSet(request.POST, request.FILES)
         file_formset = FileFormSet(request.POST, request.FILES)
-        if form.is_valid()  and file_formset.is_valid() and image_formset.is_valid():
-            form.save(commit=False)
-            form.instance.author = self.request.user
-            image_formset.instance = file_formset.instance = form.save()
-            image_formset.save()
-            file_formset.save()    
+        if self.are_valid(form, image_formset, file_formset):
+            self.create_article(request, form, image_formset, file_formset)
             messages.info(self.request, self.success_msg)
             return HttpResponseRedirect(form.instance.get_absolute_url())
         return super(CreateArticleView, self).get(request, *args, **kwargs)
+
+    def are_valid(self, *forms):
+        return all([form.is_valid() for form in forms]) 
+
+    def create_article(self, request, form, image_formset, file_formset):
+        form.save(commit=False)
+        form.instance.author = self.request.user
+        image_formset.instance = file_formset.instance = form.save()
+        image_formset.save()
+        file_formset.save() 
+
         
 class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, UpdateView):
     template_name = 'my_newsapp/edit_article.html'
@@ -182,23 +189,26 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
         form = self.form_class(request.POST, instance=instance)
         image_formset = ImageFormSet(request.POST, request.FILES, instance=instance, request=request)
         file_formset = FileFormSet(request.POST, request.FILES, instance=instance)
-        if form.is_valid() and image_formset.is_valid() and file_formset.is_valid():            
-            self.delete_selected_images(request)
-            self.delete_selected_files(request)
-            form.save()
-            image_formset.save()
-            file_formset.save()    
+        if self.are_valid(form, image_formset, file_formset):            
+            self.delete_selected_files_and_images(request)
+            self.update_article(form, image_formset, file_formset)  
             messages.info(self.request, self.success_msg)
             return HttpResponseRedirect(instance.get_absolute_url())
         return super(EditArticleView, self).get(request, *args, **kwargs)
 
-    def delete_selected_images(self, request):
+    def delete_selected_files_and_images(self, request):
         image_ids = request.POST.getlist('image-checkbox[]')
-        self.get_object().images.filter(pk__in=image_ids).delete()
-
-    def delete_selected_files(self, request):
         file_ids = request.POST.getlist('file-checkbox[]')
+        self.get_object().images.filter(pk__in=image_ids).delete()
         self.get_object().files.filter(pk__in=file_ids).delete()
+
+    def are_valid(self, *forms):
+        return all([form.is_valid() for form in forms])
+
+    def update_article(self, form, image_formset, file_formset):
+        form.save()
+        image_formset.save()
+        file_formset.save()  
 
 @method_decorator(require_http_methods(['POST']), name='dispatch')
 class DeleteArticleView(LoginRequiredMixin, DeleteView):
