@@ -1,12 +1,14 @@
+import tempfile
 import io
 from unittest.mock import patch, mock_open
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from my_newsapp.utils import (get_status_none_categories_random_ids, content_type, field_values, 
     get_test_files_dir_path, get_test_file)
 from my_newsapp.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class UtilsTests(TestCase):
 
     def test_get_status_none_categories_random_ids(self):

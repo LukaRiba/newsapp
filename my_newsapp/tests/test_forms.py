@@ -1,10 +1,13 @@
-from django.test import TestCase
+import tempfile
+
+from django.test import TestCase, override_settings
 
 from my_newsapp.forms import ArticleForm, ImageForm, FileForm, ImageFormSet, FileFormSet, LoginForm
 from my_newsapp.models import User
 from my_newsapp.utils import get_test_file
-from my_newsapp.factories import ArticleFactory, ImageFactory, CategoryFactory, remove_auto_generated_example_files
+from my_newsapp.factories import ArticleFactory, ImageFactory, CategoryFactory
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class ArticleFormTests(TestCase):
     
     def setUp(self):
@@ -15,9 +18,6 @@ class ArticleFormTests(TestCase):
             'text': 'This is a text of test article',
             'category': self.category.id
         }
-
-    def tearDown(self):
-        remove_auto_generated_example_files()
 
     def test_empty_fields(self):
         form = ArticleForm(data={})
@@ -113,6 +113,7 @@ class FileFormTests(TestCase):
             ["File extension 'jpg' is not allowed. Allowed extensions are: 'pdf, doc, docx, xls, xlsx, ppt, pptx, zip'."]}
         )
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class ImageInlineFormSetTests(TestCase):
     
     def setUp(self):
@@ -126,9 +127,6 @@ class ImageInlineFormSetTests(TestCase):
             'images-0-description': '', 
         }
         self.files = {}
-
-    def tearDown(self):
-        remove_auto_generated_example_files()
 
     def test_1_form_no_image_no_description(self):
         formset = ImageFormSet(self.data, self.files)
@@ -321,5 +319,3 @@ class LoginFormTests(TestCase):
         self.assertTrue(form.is_valid())
         self.assertEqual(form.errors, {})
     
-
-

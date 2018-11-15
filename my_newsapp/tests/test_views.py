@@ -1,16 +1,16 @@
-from django.test import TestCase, RequestFactory, TransactionTestCase
+import tempfile
+
+from django.test import TestCase, RequestFactory, TransactionTestCase, override_settings
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.db.models.query import QuerySet
 from django.core.paginator import InvalidPage
 from django.contrib.auth.models import User
 from django.contrib.sessions.middleware import SessionMiddleware
-from django.core import serializers
 
-from my_newsapp.views import NavigationContextMixin, HomeViewMixin, HomeView
-from my_newsapp.factories import (UserFactory, CategoryFactory, ArticleFactory, ImageFactory, FileFactory,
-                                  remove_auto_generated_example_files)
-from my_newsapp.models import Category, Article, Image, File
+from my_newsapp.views import NavigationContextMixin, HomeViewMixin
+from my_newsapp.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
+from my_newsapp.models import Category, Article
 from my_newsapp.utils import get_status_none_categories_random_ids, get_test_file, field_values
 from my_newsapp.views import CategoryView, ArticleDetailView
 from my_newsapp.forms import ArticleForm, ImageInlineFormSet, FileInlineFormSet
@@ -30,7 +30,8 @@ def delete_article_test_files(article):
         image.image.delete() 
     for file in article.files.all():
         file.file.delete() 
-    
+
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')    
 class NavigationContextMixinTests(TestCase):
 
     class TestView(NavigationContextMixin, TemplateView):
@@ -52,7 +53,8 @@ class NavigationContextMixinTests(TestCase):
         CategoryFactory.create_batch(size=3)
         context = self.test_view.get_context_data()
         self.assertEqual(list(context['categories']), list(Category.objects.all()))
-        
+
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')       
 class HomeViewMixinTests(TestCase):
 
     class TestView(HomeViewMixin, TemplateView):
@@ -192,6 +194,7 @@ class HomeViewMixinTests(TestCase):
             self.assertNotEqual(article.category, secondary_category)
         self.assertEqual(other_articles.count(), 2) 
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class HomeViewTests(TestCase):
 
     def setUp(self):  
@@ -205,9 +208,6 @@ class HomeViewTests(TestCase):
             ArticleFactory.create_batch(size=4, category=category)
        
         self.response = self.client.get('/news/home/')
-
-    def tearDown(self):
-        remove_auto_generated_example_files()
 
     def test_context_is_in_response(self):
         self.assertTrue('categories' in self.response.context)
@@ -252,13 +252,11 @@ class HomeViewTests(TestCase):
             self.assertNotContains(self.response, article.short_description)
             self.assertContains(self.response, article.pub_date.strftime('%b %d, %Y'))
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class LatestArticlesViewTests(TestCase):
 
     def setUp(self):
         ArticleFactory.create_batch(size=8)
-
-    def tearDown(self):
-        remove_auto_generated_example_files()
         
     def test_response_contents_are_equal(self):
         response = self.client.get('/news/latest-articles/')
@@ -290,15 +288,13 @@ class LatestArticlesViewTests(TestCase):
         self.assertEqual(page_3.status_code, 404)
         self.assertRaises(InvalidPage)
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CategoryViewTests(TestCase):
 
     def setUp(self):
         self.test_category = CategoryFactory(title='Test Category', slug='test-category')
         ArticleFactory.create_batch(size=8, category=self.test_category)
         self.url = reverse('my_newsapp:category', kwargs={'slug': self.test_category.slug})
-
-    def tearDown(self):
-        remove_auto_generated_example_files()
 
     def test_response_contents_are_equal(self):
         response = self.client.get(self.url)
@@ -347,6 +343,7 @@ class CategoryViewTests(TestCase):
 
         self.assertEqual(list(view.get_queryset()), list(Article.objects.filter(category=view.get_category())))
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class ArticleDetailViewTests(TestCase):
     
     def setUp(self):
@@ -356,9 +353,6 @@ class ArticleDetailViewTests(TestCase):
         self.url = reverse('my_newsapp:article-detail', kwargs={'category': self.article.category.slug, 
             'id': self.article.id, 'slug': self.article.slug})
         self.response = self.client.get(self.url)
-
-    def tearDown(self):
-        remove_auto_generated_example_files()
 
     def article_detail_view_loads(self):
         self.assertTrue('article' in self.response.context)
@@ -458,6 +452,7 @@ class ArticleDetailViewTests(TestCase):
         self.assertEqual(session['comments_owner_model_name'], 'Article')
         self.assertEqual(session['comments_owner_id'], str(self.article.id))
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CreateArticleViewTests(TestCase):
 
     def setUp(self):
@@ -489,9 +484,6 @@ class CreateArticleViewTests(TestCase):
         } 
 
         self.category = CategoryFactory(slug='testing')
-
-    def tearDown(self):
-        remove_auto_generated_example_files()
 
     def test_redirects_anonymous_user_to_login_page(self):
         response = self.client.get(self.url)
@@ -715,10 +707,11 @@ class CreateArticleViewTests(TestCase):
             'slug': article.slug
         }))
 
-        # deletes uploaded files from media and media/files folder
+        # deletes uploaded files from tempdir
         article.images.first().image.delete()
         article.files.first().file.delete()
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class EditArticleViewTests(TransactionTestCase):
     
     def setUp(self):
@@ -766,7 +759,6 @@ class EditArticleViewTests(TransactionTestCase):
         # def tearDownClass(cls):
         #     remove_auto_generated_example_files()
     def tearDown(self):
-        remove_auto_generated_example_files()
         delete_article_test_files(self.article)
 
     def test_redirects_anonymous_user_to_login_page(self):
@@ -970,6 +962,7 @@ class EditArticleViewTests(TransactionTestCase):
         self.assertEqual(self.article.images.count(), 1)
         self.assertEqual(self.article.images.first().image, 'test_image.png')
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class DeleteArticleViewTests(TestCase):
 
     def setUp(self):
@@ -1061,6 +1054,7 @@ class MyNewsappLogoutViewTests(TestCase):
 
         self.assertRedirects(response, reverse('my_newsapp:login'))
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class DownloadFileTests(TestCase):
     
     def setUp(self):

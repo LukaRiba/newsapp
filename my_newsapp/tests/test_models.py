@@ -1,21 +1,20 @@
-from django.test import TestCase
+import tempfile
+
+from django.test import TestCase, override_settings
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from my_newsapp.models import Category, Article
-from my_newsapp.factories import (CategoryFactory, ArticleFactory, ImageFactory, FileFactory,
-                                  remove_auto_generated_example_files)
+from my_newsapp.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
 from my_newsapp.utils import get_test_file
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CategoryTests(TestCase):
 
     def setUp(self):
         CategoryFactory(slug='primary', status='P')
         CategoryFactory(slug='secondary', status='S')
         CategoryFactory.create_batch(size=8)
-
-    def tearDown(self):
-        remove_auto_generated_example_files()
 
     def test_category_object_created(self):
         self.assertEqual(Category.objects.count(), 10)
@@ -82,13 +81,11 @@ class CategoryTests(TestCase):
         category = Category.objects.get(title='Primary')
         self.assertEqual(category.__str__(), 'Primary')
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class ArticleTests(TestCase):
 
     def setUp(self):
         ArticleFactory.create_batch(size=5)
-
-    def tearDown(self):
-        remove_auto_generated_example_files()
 
     def test_get_absolute_url_method(self):
         article = Article.objects.all()[0]
@@ -104,16 +101,16 @@ class ArticleTests(TestCase):
         for i in range( 0, articles.count() - 1):
             self.assertTrue(articles[i].pub_date > articles[i+1].pub_date)
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class ImageTests(TestCase):
 
     def setUp(self):
         self.image = ImageFactory(image__filename='test_image.png', image__format='png')
         self.invalid_image = ImageFactory(image__filename='test_image.ico', image__format='ico')
 
-    def tearDown(self): # look FileTests tearDown() for explanation
+    def tearDown(self): 
         self.image.image.delete()
         self.invalid_image.image.delete()
-        remove_auto_generated_example_files() # look factories.ImageFactory for explanation
         
     def test_image_create_with_supported_extension(self):
         # comment
@@ -131,6 +128,7 @@ class ImageTests(TestCase):
         self.assertEqual(self.image.__str__(), self.image.image)
         self.assertEqual(self.image.__str__(), 'test_image.png')
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class FileTests(TestCase):
 
     def setUp(self):
@@ -140,7 +138,7 @@ class FileTests(TestCase):
 
     def tearDown(self):
         # comment
-            # Deletes uploaded test files from MEDIA_ROOT. Here, delete() is called on FileField, not on instance!
+            # Deletes uploaded test files from tempdir. Here, delete() is called on FileField, not on instance!
             # pylint is underlineing but it is correct: "When you access a FileField on a model, you are given an 
             # instance of FieldFile as a proxy for accessing the underlying file."
             #   https://docs.djangoproject.com/en/1.11/ref/models/fields/#filefield-and-fieldfile

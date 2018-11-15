@@ -1,9 +1,5 @@
-import os
-import time
-
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.conf import settings
 
 import factory
 
@@ -11,28 +7,6 @@ from .models import Category, Article, Image, File
 
 def create_slug(sentence):
     return '-'.join(sentence.split(' ')).lower()
-
-# Remove example.jpg and example.dat files created by factory.django.ImageField() and factory.django.FileField()
-def remove_auto_generated_example_files():
-    directories = [images_dir(), files_dir()]
-    for directory in directories:
-        for file in os.listdir(directory):
-            if is_example_file_auto_generated_by_factory(file):
-                os.remove('{0}{1}'.format(directory, file))
-
-def images_dir():
-    return settings.MEDIA_ROOT
-
-def files_dir():
-    return os.path.join(settings.MEDIA_ROOT, 'files/')
-
-def is_example_file_auto_generated_by_factory(file):
-    return file.startswith('example') and (time.time() > os.path.getmtime(media_path(file)) > time.time() - 10) 
-
-def media_path(file):
-    if file.endswith('.dat'):
-        return '{0}{1}'.format(files_dir(), file)
-    return '{0}{1}'.format(images_dir(), file)
 
 class UserFactory(factory.django.DjangoModelFactory):
 
@@ -42,7 +16,6 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     username = factory.Sequence(lambda num: 'user%d' % num)
     password = factory.Faker('password', length=10)
-
 
 class CategoryFactory(factory.django.DjangoModelFactory):
 
@@ -100,12 +73,3 @@ class FileFactory(factory.django.DjangoModelFactory):
 
     file = factory.django.FileField()
     article = factory.SubFactory(ArticleFactory)
-
-
-    
-
-
-    
-
-
-    
