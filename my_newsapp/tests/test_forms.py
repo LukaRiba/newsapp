@@ -5,7 +5,7 @@ from django.test import TestCase, override_settings
 from my_newsapp.forms import ArticleForm, ImageForm, FileForm, ImageFormSet, FileFormSet, LoginForm
 from my_newsapp.models import User
 from my_newsapp.utils import get_test_file
-from my_newsapp.factories import ArticleFactory, ImageFactory, CategoryFactory
+from my_newsapp.tests.factories import ArticleFactory, ImageFactory, CategoryFactory
 
 @override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class ArticleFormTests(TestCase):

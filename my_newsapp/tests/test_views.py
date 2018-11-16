@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.sessions.middleware import SessionMiddleware
 
 from my_newsapp.views import NavigationContextMixin, HomeViewMixin
-from my_newsapp.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
+from my_newsapp.tests.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
 from my_newsapp.models import Category, Article
 from my_newsapp.utils import get_status_none_categories_random_ids, get_test_file, field_values
 from my_newsapp.views import CategoryView, ArticleDetailView
@@ -219,7 +219,6 @@ class HomeViewTests(TestCase):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed('my_newsapp/home.html')
         self.assertTemplateUsed('my_newsapp/navigation.html')
-
 
     # as navbar is shared throughout views via NavigationContextMixin, this is tested for this view only
     def test_navbar_has_login_link_for_anonymous_user(self):

@@ -3,7 +3,7 @@ from django.utils import timezone
 
 import factory
 
-from .models import Category, Article, Image, File
+from my_newsapp.models import Category, Article, Image, File
 
 def create_slug(sentence):
     return '-'.join(sentence.split(' ')).lower()
@@ -23,7 +23,7 @@ class CategoryFactory(factory.django.DjangoModelFactory):
         model = Category 
         django_get_or_create = ('title', 'slug', 'image', 'status')
 
-    slug = factory.Faker('word')
+    slug = factory.Sequence(lambda n: 'category-%d' % n)
     title = factory.LazyAttribute(lambda obj: '{0}'.format(obj.slug.title()))
     image = factory.django.ImageField()
     status = None

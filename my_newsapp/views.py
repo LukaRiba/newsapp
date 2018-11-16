@@ -15,8 +15,6 @@ from .models import Article, Category, File
 from .utils import get_status_none_categories_random_ids
 from .forms import ArticleForm, ImageFormSet, FileFormSet, LoginForm
 
-from comments.views import CommentsContextMixin
-
 # defines context used by navigation which has to be shared between views
 class NavigationContextMixin:
     def get_context_data(self, **kwargs):
@@ -155,7 +153,6 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsCont
         image_formset.save()
         file_formset.save() 
 
-        
 class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, UpdateView):
     template_name = 'my_newsapp/edit_article.html'
     form_class = ArticleForm

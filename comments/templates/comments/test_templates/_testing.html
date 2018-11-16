@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}Comments Testing{% endblock title %}
+
+{% block style %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'comments/css/comments.css' %}">
+{% endblock style %}
+
+{% block content %}
+  <div class="container comments">
+    <p class="mt-4">Comments owner object id is <strong>{{ view.kwargs.id }}</strong></p>
+    <hr>
+    {% include 'comments/base.html' %}
+  </div>
+{% endblock content %}
+
+{% block script %}
+  {{ block.super }}
+  <script type="module" src="{% static 'comments/js/main.js' %}"></script>
+  <!-- if modules are not supported in browser, use this script -->
+  <script nomodule src="{% static 'comments/js/no_module/no_module_main.js' %}"></script>
+{% endblock script %}

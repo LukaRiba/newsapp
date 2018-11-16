@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from my_newsapp.models import Category, Article
-from my_newsapp.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
+from my_newsapp.tests.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
 from my_newsapp.utils import get_test_file
 
 @override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
