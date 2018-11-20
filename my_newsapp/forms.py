@@ -22,7 +22,7 @@ class ArticleForm(ModelForm):
         self.helper = FormHelper()
         self.helper.form_tag = False
         # disables html required attribute in fields
-        self.use_required_attribute =  False
+        # self.use_required_attribute =  False
         
 class ImageForm(ModelForm):
     
@@ -59,9 +59,7 @@ class FileForm(ModelForm):
         model = File
         fields = ('file',)
         widgets = {
-            'file': FileInput(attrs={
-                'accept': '.pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .zip',
-            })
+            'file': FileInput(attrs={'accept': '.pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .zip',})
         }
 
 class ImageInlineFormSet(BaseInlineFormSet):
@@ -91,7 +89,7 @@ class ImageInlineFormSet(BaseInlineFormSet):
             if not self.image_ids(): # if article has no images. Possible case in create-article view.
                 raise ValidationError('You have to upload at least one image.')
             if self.all_images_selected_for_deletion(): # possible case in edit-article view
-                raise ValidationError('Article must have at least one image. Upload new one if deleting all existing ones.')
+                raise ValidationError('Article must have at least one image. Upload new one if deleting all.')
 
         images = []
         for form in self.forms:

@@ -60,8 +60,8 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
-# ROOT_URLCONF = 'my_news.urls'
-ROOT_URLCONF = 'comments.tests.urls'
+ROOT_URLCONF = 'my_news.urls'
+# ROOT_URLCONF = 'comments.tests.urls'
 
 TEMPLATES = [
     {
@@ -150,9 +150,14 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
+LOGIN_URL = '/news/login'
+# LOGIN_URL = '/admin/login'		
+
 LOGIN_REDIRECT_URL = '/news/home'
 
 FILEPROVIDER_NAME = 'python'
 
 INTERNAL_IPS = '127.0.0.1'  # debug_toolbar on/off
+
+
 

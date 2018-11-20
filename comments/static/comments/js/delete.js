@@ -8,8 +8,8 @@ function deleteCommentOrReply(url, id){
         data : {
             id : id,
         },
-        success : function(response) {
-            showResponseMessage(id, response);
+        success : function() {
+            showResponseMessage(id);
             removeCommentOrReplyFromDOM(id);
             $(".modal").modal("hide");
         },
@@ -17,11 +17,16 @@ function deleteCommentOrReply(url, id){
     });
 }
 
-function showResponseMessage(id, response) {
+function showResponseMessage(id) {
     let target = $(getTarget(id));
     target.children().html('');
-    // show() because if edit form opened while deleting, .text element, here response, would remain hidden
-    target.children('.text').show().html(response);
+    if(isComment(id))
+        // show() because if edit form opened while deleting, .text element would remain hidden
+        target.children('.text').show().html(
+            '<div><br><p style="color: rgb(124, 0, 0)"><strong>Comment deleted</strong></p></div>');
+    else 
+        target.children('.text').show().html(
+            '<div><br><p style="color: rgb(124, 0, 0)"><strong>Reply deleted</strong></p></div>');
 }
 
 function getTarget(id) {

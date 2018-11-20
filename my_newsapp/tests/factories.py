@@ -14,7 +14,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User 
         django_get_or_create = ('username', 'password')
 
-    username = factory.Faker('name')
+    username = factory.Sequence(lambda n: 'user-%d' % n)
     password = factory.Faker('password', length=10)
 
 class CategoryFactory(factory.django.DjangoModelFactory):

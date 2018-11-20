@@ -9,7 +9,6 @@ class CommentsOwnerView(CommentsContextMixin, DetailView):
     template_name = 'comments/test_templates/_testing.html'
     model = Article # comments owner
     pk_url_kwarg = 'id' # as default is 'pk'
-    login_url = '/admin/login' 
 
     def get(self, request, *args, **kwargs):
         self.request.session['comments_owner_model_name'] = self.model.__name__

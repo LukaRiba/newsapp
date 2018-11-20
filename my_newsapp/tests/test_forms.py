@@ -220,7 +220,7 @@ class ImageInlineFormSetTests(TestCase):
         self.assertFalse(formset.is_valid())
         self.assertEqual(formset.errors, [{}])
         self.assertEqual(formset.non_form_errors(), [
-            'Article must have at least one image. Upload new one if deleting all existing ones.'
+            'Article must have at least one image. Upload new one if deleting all.'
         ])
 
     def test_no_image_uploaded_when_instance_already_has_two_images_of_which_one_is_selected_for_deletion(self):

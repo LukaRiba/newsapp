@@ -939,8 +939,7 @@ class EditArticleViewTests(TransactionTestCase):
 
         image_formset = response.context['image_formset']
         self.assertFalse(image_formset.is_valid())
-        # everything passes ok, formset is invalid, but message is not shown ??? fix that!
-        self.assertContains(response, 'Article must have at least one image. Upload new one if deleting all existing ones.')
+        self.assertContains(response, 'Article must have at least one image. Upload new one if deleting all.')
 
     def test_post_delete_all_images_and_upload_new_image(self):
         data = self.initial_data

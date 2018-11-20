@@ -1,9 +1,10 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 
 from .models import Comment
 from .forms import CommentForm, ReplyForm, EditForm
@@ -25,8 +26,6 @@ from .decorators import require_ajax
     # pod comment. Zato smo dodali i provjeru content_typea - jer sada reply neće proći pošto je njegov content_type
     # 'comment', a ne 'article'.
 class CommentsContextMixin:
-    login_url = None
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         comments = Comment.objects.filter(
@@ -38,7 +37,7 @@ class CommentsContextMixin:
             'comment_form': CommentForm(),
             'reply_form': ReplyForm(),
             'edit_form': EditForm(),
-            'login_url': self.login_url
+            'login_url': settings.LOGIN_URL
             }
         context.update(data)
         return context
@@ -60,7 +59,6 @@ def create_comment(request):
             # uses forloop tag). First comment in QuerySet is just created one, because of ordering = ['-pub_date'].
             # Probably not good solution because it calls all() on possibly large db table. Maybe is better with filter()
             # against pub_date - Comment.objects.filter(pub_date__lte=timezone.now() - timezone.timedelta(minutes=1) ?
-            # Or maybe Comment.objects.last() is the best solution?
             'comments': Comment.objects.all()[0:1],
             'reply_form': ReplyForm(),
             'edit_form': EditForm()
@@ -89,7 +87,7 @@ def create_reply(request):
 @login_required
 @require_POST
 @require_ajax
-def edit_comment_or_reply(request, pk):
+def edit(request, pk):
     target = get_object_or_404(Comment, pk=pk)
     form = EditForm(request.POST)
     if form.is_valid():
@@ -100,32 +98,31 @@ def edit_comment_or_reply(request, pk):
 @login_required
 @require_POST
 @require_ajax
-def delete_comment_or_reply(request, pk):
+def delete(request, pk):
     target = get_object_or_404(Comment, pk=pk)
     target.delete()
-    if target.is_reply():
-        # vratiti response status code 204 (mislim da je taj)  - response koji znači da je sve ok ali ne salje nikakav 
-        # sadrzaj 
-        return HttpResponse('<div><br><p style="color: rgb(124, 0, 0)"><strong>Reply deleted</strong></p></div>')
-    return HttpResponse('<div><br><p style="color: rgb(124, 0, 0)"><strong>Comment deleted</strong></p></div>')
+    return HttpResponse(status=204)
 
 @require_ajax
 def load_more_comments(request):
     last_visible = request.GET.get('lastVisibleCommentId')
-    num_of_comments_to_load = int(request.GET.get('numOfCommentsToLoad'))
+    comments_to_load = int(request.GET.get('numOfCommentsToLoad'))
     comments_owner_id = request.session['comments_owner_id']
     # How much more comments is in database 
     remaining_comments = Comment.objects.filter(id__lt=last_visible, object_id=comments_owner_id)
-    if remaining_comments.count() >= num_of_comments_to_load:
-        next_comments = remaining_comments[:num_of_comments_to_load]
-    else:
-        next_comments = remaining_comments
-    context = {
-        'load_more': True, # bool for check in template
-        'next_comments': next_comments,
-        'reply_form': ReplyForm(),
-        'edit_form': EditForm()
-        }
-    return render(request, 'comments/comments.html', context)
+
+    if remaining_comments.exists():
+        if remaining_comments.count() >= comments_to_load:
+            next_comments = remaining_comments[:comments_to_load]
+        else:
+            next_comments = remaining_comments
+        context = {
+            'load_more': True, # bool for check in template
+            'next_comments': next_comments,
+            'reply_form': ReplyForm(),
+            'edit_form': EditForm()
+            }
+        return render(request, 'comments/comments.html', context)
+    return HttpResponseBadRequest() # same as HttpResponse(status=400)
     
     

@@ -9,7 +9,7 @@ from .views import CommentsOwnerView
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^owner/(?P<id>\d+)/comments/$', CommentsOwnerView.as_view(), name='comments-test'),
-    url(r'^comments/', include('comments.urls')),
+    url(r'^comments/', include('comments.urls'))
 ]
 
 if settings.DEBUG:

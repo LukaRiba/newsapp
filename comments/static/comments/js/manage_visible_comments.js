@@ -23,7 +23,7 @@ function manageVisibleComments(){
         // this function also removes button if there is no more comments to load from database
         updateLoadMoreCommentsButton();
     } 
-    // executes after deleting comment if conditions are matched, for comment deletion decrements visibleComments number 
+    // executes: after deleting comment if conditions are matched, for comment deletion decrements visibleComments number 
     else if(visibleComments < nextBreakPoint){
         loadMoreComments(getLastVisibleCommentId(), 1); // load 1 more comment
         // this function also removes button if there is no more comments to load from database

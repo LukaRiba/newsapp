@@ -1,25 +1,9 @@
 from django.utils import timezone
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 import factory
 
 from comments.models import Comment
-from my_newsapp.tests.factories import ArticleFactory
-
-class UserFactory(factory.django.DjangoModelFactory):
-
-    class Meta:
-        model = User 
-
-    username = factory.Faker('name')
-    password = factory.Faker('password', length=10)
-
-#comment
-    # Object to use as a GenericForeignKey. With this, content_type is set to 'article_type', and object_id
-    # is comment_owner id. In tests, if we wont to create comments with different owner article, or many 
-    # comments with same owner article, it is enough to create new article (a = ArticleFactory) and then
-    # pass its id to CommentFactory constructor (CommentFactory(object_id=a.id))
-comment_owner = ArticleFactory()
+from my_newsapp.tests.factories import UserFactory
 
 class CommentFactory(factory.django.DjangoModelFactory):
     
@@ -28,9 +12,9 @@ class CommentFactory(factory.django.DjangoModelFactory):
 
     author = factory.SubFactory(UserFactory)
     text = factory.Faker('text', max_nb_chars=50)
-    pub_date = factory.Faker('past_datetime', start_date='-30d', tzinfo=timezone.utc)
+    pub_date = factory.Faker('past_datetime', tzinfo=timezone.utc)
     content_type = ContentType.objects.get(model='article')
-    object_id = comment_owner.id
+    object_id = None # must be set in CommentFactory constructor
     # comment
         # Gets content_object through content_type and object_id after creation of comment (Lazy attribute).
         # This is what GenericForeignKey does (see Comment model). Without setting content_object like this,
@@ -41,7 +25,6 @@ class CommentFactory(factory.django.DjangoModelFactory):
         # assigned to thet field. When working with real model, content_object is assigned because
         # content_object is GenericForeignKey field, so we must also assign it here like this.
     content_object = factory.LazyAttribute(lambda obj: obj.content_type.get_object_for_this_type(pk=obj.object_id))
-
 
 class ReplyFactory(factory.django.DjangoModelFactory):
     
