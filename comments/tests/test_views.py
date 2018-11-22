@@ -1,3 +1,4 @@
+import tempfile
 from urllib.parse import quote_plus
 
 from django.test import TestCase, TransactionTestCase, override_settings
@@ -14,19 +15,20 @@ from my_newsapp.tests.factories import ArticleFactory
 from .factories import CommentFactory, ReplyFactory
 from comments.forms import CommentForm, ReplyForm, EditForm
 
+@override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CommentsContextMixinTests(TestCase):
 
     class TestView(CommentsContextMixin, TemplateView):
         request = MagicMock()
         request.session = {
             'comments_owner_model_name': 'article',
-            'comments_owner_id': 1
+            'comments_owner_id': 100 
         }
 
     def setUp(self):
         self.test_view = self.TestView()
-        self.comment_owner = ArticleFactory()
-        self.comments = CommentFactory.create_batch(size=5, object_id=self.comment_owner.id)
+        self.comments_owner = ArticleFactory(id=100) # it must be the same as in mocked request session
+        CommentFactory.create_batch(size=5, object_id=self.comments_owner.id)
 
     def test_get_context_data(self):
         
@@ -36,12 +38,13 @@ class CommentsContextMixinTests(TestCase):
             self.assertTrue(key in context)
         self.assertIsInstance(context['comments'], QuerySet)
         self.assertIsInstance(context['comments'][0], Comment)
+        self.assertEqual(context['comments'].count(), 5)
         self.assertIsInstance(context['comment_form'], CommentForm)
         self.assertIsInstance(context['reply_form'], ReplyForm)
         self.assertIsInstance(context['edit_form'], EditForm)
         self.assertEqual(context['login_url'], settings.LOGIN_URL)
         
-@override_settings(ROOT_URLCONF = 'comments.tests.urls')
+@override_settings(ROOT_URLCONF = 'comments.tests.urls', MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CommentsOwnerViewAnonymousUserTests(TestCase):
     '''
     Tests comments/base.html rendering for anonymous User
@@ -137,7 +140,7 @@ class CommentsOwnerViewAnonymousUserTests(TestCase):
         self.assertEqual(self.comments_owner.comments.count(), 16)
         self.assertContains(response, 'Load 10 more Comments')
 
-@override_settings(ROOT_URLCONF = 'comments.tests.urls')
+@override_settings(ROOT_URLCONF = 'comments.tests.urls', MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CommentsOwnerViewLoggedUserTests(TestCase):
     '''
     Tests comments/base.html rendering for logged User
@@ -212,7 +215,10 @@ class CommentsOwnerViewLoggedUserTests(TestCase):
         for content in [f'edit-button-{reply.id}', f'edit-form-{reply.id}', f'delete-button-{reply.id}']:
             self.assertNotContains(response, content)
 
-@override_settings(ROOT_URLCONF = 'comments.tests.urls', LOGIN_URL = '/admin/login')
+@override_settings(
+    ROOT_URLCONF = 'comments.tests.urls',
+    LOGIN_URL = '/admin/login',
+    MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CreateCommentTests(TestCase):
     
     def setUp(self):
@@ -288,7 +294,10 @@ class CreateCommentTests(TestCase):
             f'delete-button-{created_comment.id}']:
             self.assertContains(response, content) 
 
-@override_settings(ROOT_URLCONF = 'comments.tests.urls', LOGIN_URL = '/admin/login')
+@override_settings(
+    ROOT_URLCONF = 'comments.tests.urls',
+    LOGIN_URL = '/admin/login',
+    MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CreateReplyTests(TestCase):
     
     def setUp(self):
@@ -355,7 +364,10 @@ class CreateReplyTests(TestCase):
             created_reply.text, f'edit-form-{created_reply.id}', f'delete-button-{created_reply.id}']:
             self.assertContains(response, content)
 
-@override_settings(ROOT_URLCONF = 'comments.tests.urls', LOGIN_URL = '/admin/login')
+@override_settings(
+    ROOT_URLCONF = 'comments.tests.urls',
+    LOGIN_URL = '/admin/login',
+    MEDIA_ROOT=tempfile.gettempdir() + '/')
 class EditTests(TestCase):
     
     def setUp(self):
@@ -396,7 +408,10 @@ class EditTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(comment.text, 'Updated text.')
 
-@override_settings(ROOT_URLCONF = 'comments.tests.urls', LOGIN_URL = '/admin/login')
+@override_settings(
+    ROOT_URLCONF = 'comments.tests.urls',
+    LOGIN_URL = '/admin/login',
+    MEDIA_ROOT=tempfile.gettempdir() + '/')
 class DeleteTests(TestCase):
 
     def setUp(self):
@@ -432,7 +447,7 @@ class DeleteTests(TestCase):
             Comment.objects.get(id=self.comment.id)
             self.assertEqual(context.exception.msg, 'Comment matching query does not exist.')
 
-@override_settings(ROOT_URLCONF = 'comments.tests.urls')
+@override_settings(ROOT_URLCONF = 'comments.tests.urls', MEDIA_ROOT=tempfile.gettempdir() + '/')
 class LoadMoreCommentsTests(TransactionTestCase):
     reset_sequences = True
 
