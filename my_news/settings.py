@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'my_news.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'my_news_db_test',
+        'NAME': 'my_news_db',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': '', # prazan string predstavlja localhost (127.0.0.1)
@@ -157,7 +157,4 @@ LOGIN_REDIRECT_URL = '/news/home'
 
 FILEPROVIDER_NAME = 'python'
 
-INTERNAL_IPS = '127.0.0.1'  # debug_toolbar on/off
-
-
-
+# INTERNAL_IPS = '127.0.0.1'  # debug_toolbar on/off
