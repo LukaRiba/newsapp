@@ -22,7 +22,7 @@ class ArticleForm(ModelForm):
         self.helper = FormHelper()
         self.helper.form_tag = False
         # disables html required attribute in fields
-        self.use_required_attribute =  False
+        # self.use_required_attribute =  False
         
 class ImageForm(ModelForm):
     
@@ -59,17 +59,11 @@ class FileForm(ModelForm):
         model = File
         fields = ('file',)
         widgets = {
-            'file': FileInput(attrs={
-                'accept': '.pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .zip',
-            })
+            'file': FileInput(attrs={'accept': '.pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .zip',})
         }
 
 class ImageInlineFormSet(BaseInlineFormSet):
 
-    # comment important
-        # here self.selected_images is None, that's because __init__() is called from get_context_data() before kwargs 
-        # are updated -> context['image_formset'].selected_images = self.request.POST.getlist('image-checkbox[]'). But,
-        # when calling it in all_images_selected_for_deletion(), we get wanted image ids as by then kwargs are updated.
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None) 
         self.selected_images = kwargs.pop('selected_images', None) 
@@ -82,16 +76,11 @@ class ImageInlineFormSet(BaseInlineFormSet):
         if any(self.errors): 
             return
 
-        # comment
-            # the line: 'if not self.files:' is not good solution because it checks for files in request.FILES for
-            # files, and if we upload files in file_formset, but not in image_formset, this contition will ge false,
-            # because there are self.files as both image_formset and file_formset are passed same file dict (request.POST)
-            # in constructors inside CreateArticleView.
         if not any([ 'image' in key for key in self.files.keys() ]): # if no image has been uploaded.
             if not self.image_ids(): # if article has no images. Possible case in create-article view.
                 raise ValidationError('You have to upload at least one image.')
             if self.all_images_selected_for_deletion(): # possible case in edit-article view
-                raise ValidationError('Article must have at least one image. Upload new one if deleting all existing ones.')
+                raise ValidationError('Article must have at least one image. Upload new one if deleting all.')
 
         images = []
         for form in self.forms:

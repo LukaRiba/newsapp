@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.sessions.middleware import SessionMiddleware
 
 from my_newsapp.views import NavigationContextMixin, HomeViewMixin
-from my_newsapp.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
+from my_newsapp.tests.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
 from my_newsapp.models import Category, Article
 from my_newsapp.utils import get_status_none_categories_random_ids, get_test_file, field_values
 from my_newsapp.views import CategoryView, ArticleDetailView
@@ -42,10 +42,6 @@ class NavigationContextMixinTests(TestCase):
 
     def test_no_category_objects(self):
         context = self.test_view.get_context_data()
-        #comment
-            # The queryset objects will not be identical if they are the result of different queries even if they 
-            # have the same values in their result. If you convert the query set to a list first, you should be able 
-            # to do a normal comparison (assuming they have the same sort order of course).
         self.assertEqual(list(context['categories']), list(Category.objects.all()))
         self.assertEqual(list(context['categories']), [])
 
@@ -219,7 +215,6 @@ class HomeViewTests(TestCase):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed('my_newsapp/home.html')
         self.assertTemplateUsed('my_newsapp/navigation.html')
-
 
     # as navbar is shared throughout views via NavigationContextMixin, this is tested for this view only
     def test_navbar_has_login_link_for_anonymous_user(self):
@@ -749,15 +744,6 @@ class EditArticleViewTests(TransactionTestCase):
             'file-checkbox[]': []
         } 
 
-    # comment
-        # tearDown() runs after every test method, but tearDownClass only after all test methods have been executed.
-        # But for some reason, this class method causes error:
-        #       "django.db.transaction.TransactionManagementError: An error occurred in the current transaction. You can't 
-        #       execute queries until the end of the 'atomic' block", which gets throwned by other classes from this file,
-        # for example HomeViewTests, LatestArticlesViewTests and so on. 
-        # @classmethod
-        # def tearDownClass(cls):
-        #     remove_auto_generated_example_files()
     def tearDown(self):
         delete_article_test_files(self.article)
 
@@ -797,14 +783,7 @@ class EditArticleViewTests(TransactionTestCase):
         self.client.login(username='testuser', password='testpass123')
         response = self.client.post(self.url, self.initial_data)
 
-        # get field values again now the article is updated
-        # comment - important
-            # We must use updated_article here (get article again from db after client.post) because than we are sure
-            # that we get correct updated values, which we will not with field_values(self.article); we would get 
-            # pre-update values (for non relational fields - everyone except images and files -> se comment in
-            # test_post_when_article_form_fields_change). Test will still pass here hovever, because we are checking
-            # that values are not changed if we don't change them in the view, but we would then comparing old values with
-            # old values which is not what is intended, and in next test errors would arise.    
+        # get field values again now the article is updated   
         updated_article = Article.objects.first() 
         updated_values = field_values(updated_article)
 
@@ -833,16 +812,6 @@ class EditArticleViewTests(TransactionTestCase):
         response = self.client.post(self.url, data)
 
         # get field values again now the article is updated
-        # comment - important
-            # If field_values() called with self.article, old values ar getted even after article is updated. So, we get
-            # article again from database (updated_article), and now we get updated values. But images and files fields
-            # are updated if within self.article, probably because in field_values() we get them using all() method, which
-            # queryes db, and other field values are getted from self.article directly without querying database ???
-            # For example, if we don't get updated from db (Article.objects.first() ) article in 
-            # test_post_upload_new_article_images_and_files, and use self.article instead updated_article, test will
-            # pass and field_values(self.article) would have uploaded image and file in article's images and files
-            # fields. ??? 
-            # The same is for deleting files and images - we don't have to use updated_article, we can use self.article.
         updated_article = Article.objects.first() 
         updated_values = field_values(updated_article)
 
@@ -940,8 +909,7 @@ class EditArticleViewTests(TransactionTestCase):
 
         image_formset = response.context['image_formset']
         self.assertFalse(image_formset.is_valid())
-        # everything passes ok, formset is invalid, but message is not shown ??? fix that!
-        self.assertContains(response, 'Article must have at least one image. Upload new one if deleting all existing ones.')
+        self.assertContains(response, 'Article must have at least one image. Upload new one if deleting all.')
 
     def test_post_delete_all_images_and_upload_new_image(self):
         data = self.initial_data
@@ -1016,10 +984,6 @@ class MyNewsappLoginViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '...please login or continue as guest')
-        # comment
-            # two messages, one for every field. Shows up when html required attributes are disabled in fields.
-            # If requred attributes are enabled, page doesn't reload and we se pop ups which say 'Please fill out
-            # this field'. But, test here passes, because these html5 behaviour is built on top (i believe so):
         self.assertContains(response, 'This field is required.', 2) 
 
     def test_post_with_invalid_data(self):
@@ -1031,13 +995,6 @@ class MyNewsappLoginViewTests(TestCase):
             'Please enter a correct username and password. Note that both fields may be case-sensitive.') 
 
     def test_post_with_valid_data(self):
-        # comment
-            # Here we are setting follow=True in post method arguments. That's because if not we get error :
-            # 'AssertionError: 301 != 200 : Couldn't retrieve redirection page '/news/home': response code was 301
-            # (expected 200)'. From django documentation:
-            #       If you set follow to True the client will follow any redirects and a redirect_chain 
-            #       attribute will be set in the response object containing tuples of the intermediate urls and status
-            #       codes.  
         response = self.client.post(self.url, {'username': 'testuser', 'password': 'testpass123'}, follow=True)
 
         self.assertRedirects(response, reverse('my_newsapp:home'))

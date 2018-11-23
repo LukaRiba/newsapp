@@ -8,7 +8,7 @@ import {reportError} from './create_comment.js';
 // ajax for replies
 function createReply(textarea, parentId){
     $.ajax({
-        url : '/comments/create_reply/',
+        url : '/comments/create-reply/',
         type : "POST",
         data : { 
             text: textarea.val(),

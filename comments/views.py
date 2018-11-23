@@ -1,29 +1,34 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 
 from .models import Comment
 from .forms import CommentForm, ReplyForm, EditForm
 from .decorators import require_ajax
 
 class CommentsContextMixin:
-    login_url = None
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        comments = Comment.objects.filter(object_id=self.request.session['comments_owner_id'])
+        comments = Comment.objects.filter(
+            content_type=get_owner_content_type(self.request),
+            object_id=self.request.session['comments_owner_id']
+        )
         data = {
             'comments': comments,
             'comment_form': CommentForm(),
             'reply_form': ReplyForm(),
             'edit_form': EditForm(),
-            'login_url': self.login_url
+            'login_url': settings.LOGIN_URL
             }
         context.update(data)
         return context
+
+def get_owner_content_type(request):
+    return ContentType.objects.get(model=request.session['comments_owner_model_name'])
 
 @login_required
 @require_POST
@@ -31,22 +36,22 @@ class CommentsContextMixin:
 def create_comment(request):    
     form = CommentForm(request.POST)
     if form.is_valid():
-        form.save(commit=False)
-        form.instance.author = request.user
-        form.instance.content_type_id = ContentType.objects.get(
-            model=request.session['comments_owner_model_name']).id
-        form.instance.object_id = request.session['comments_owner_id']
-        form.save()
+        save_comment_form(request, form)
         context = {
-            # Returns created comment in an one-element QuerySet (itterable object is required because template 
+            # Returns created comment in one-element QuerySet (itterable object is required because template 
             # uses forloop tag). First comment in QuerySet is just created one, because of ordering = ['-pub_date'].
-            # Probably not good solution because it calls all() on possibly large db table. Maybe is better with filter()
-            # against pub_date - Comment.objects.filter(pub_date__lte=timezone.now() - timezone.timedelta(minutes=1) ?
             'comments': Comment.objects.all()[0:1],
             'reply_form': ReplyForm(),
             'edit_form': EditForm()
             }
         return render(request, 'comments/comments.html', context)
+
+def save_comment_form(request, form):
+    form.save(commit=False)
+    form.instance.author = request.user
+    form.instance.content_type_id = get_owner_content_type(request).id
+    form.instance.object_id = request.session['comments_owner_id']
+    form.save()
 
 @login_required
 @require_POST
@@ -55,11 +60,7 @@ def create_reply(request):
     form = ReplyForm(request.POST)
     parent_id = request.POST.get('parentId')
     if form.is_valid():
-        form.save(commit=False)
-        form.instance.author = request.user
-        form.instance.content_type_id = ContentType.objects.get(model='comment').id
-        form.instance.object_id = form.instance.parent_id = parent_id
-        form.save()
+        save_reply_form(request, form, parent_id)
         context = {
             'reply': Comment.objects.latest('pub_date'),
             'edit_form': EditForm(),
@@ -67,10 +68,17 @@ def create_reply(request):
             } 
         return render(request, 'comments/replies.html', context)
 
+def save_reply_form(request, form, parent_id):
+    form.save(commit=False)
+    form.instance.author = request.user
+    form.instance.content_type_id = ContentType.objects.get(model='comment').id
+    form.instance.object_id = form.instance.parent_id = parent_id
+    form.save()
+
 @login_required
 @require_POST
 @require_ajax
-def edit_comment_or_reply(request, pk):
+def edit(request, pk):
     target = get_object_or_404(Comment, pk=pk)
     form = EditForm(request.POST)
     if form.is_valid():
@@ -81,30 +89,29 @@ def edit_comment_or_reply(request, pk):
 @login_required
 @require_POST
 @require_ajax
-def delete_comment_or_reply(request, pk):
+def delete(request, pk):
     target = get_object_or_404(Comment, pk=pk)
     target.delete()
-    if target.is_reply():
-        return HttpResponse('<div><br><p style="color: rgb(124, 0, 0)"><strong>Reply deleted</strong></p></div>')
-    return HttpResponse('<div><br><p style="color: rgb(124, 0, 0)"><strong>Comment deleted</strong></p></div>')
+    return HttpResponse(status=204)
 
 @require_ajax
 def load_more_comments(request):
     last_visible = request.GET.get('lastVisibleCommentId')
-    num_of_comments_to_load = int(request.GET.get('numOfCommentsToLoad'))
+    comments_to_load = int(request.GET.get('numOfCommentsToLoad'))
     comments_owner_id = request.session['comments_owner_id']
     # How much more comments is in database 
     remaining_comments = Comment.objects.filter(id__lt=last_visible, object_id=comments_owner_id)
-    if remaining_comments.count() >= num_of_comments_to_load:
-        next_comments = remaining_comments[:num_of_comments_to_load]
-    else:
-        next_comments = remaining_comments
-    context = {
-        'load_more': True, # bool for check in template
-        'next_comments': next_comments,
-        'reply_form': ReplyForm(),
-        'edit_form': EditForm()
-        }
-    return render(request, 'comments/comments.html', context)
+    if remaining_comments.exists():
+        context = {
+            'load_more': True, # bool for check in template
+            'next_comments': get_next_comments(remaining_comments, comments_to_load),
+            'reply_form': ReplyForm(),
+            'edit_form': EditForm()
+            }
+        return render(request, 'comments/comments.html', context)
+    return HttpResponseBadRequest() # same as HttpResponse(status=400)
     
-    
+def get_next_comments(remaining_comments, comments_to_load):
+    if remaining_comments.count() >= comments_to_load:
+        return remaining_comments[:comments_to_load]
+    return remaining_comments

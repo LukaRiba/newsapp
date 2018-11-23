@@ -16,16 +16,22 @@ function manageVisibleComments(){
     //              Condition visibleComments === commentsCount is never reached in this case.  
     if(visibleComments > previousBreakPoint){
         if(visibleComments === commentsCount){ 
-            if(commentsCount === 6){ addLoadMoreCommentsButton(); } // if there were less than 6 comments on page load, no button was rendered
+            // If there were less then 6 comments on page load, button element was not rendered in template. So, if comments are 
+            // created and their num reach 6 AND if there is no button element already (in case there was, and we delete comments so there is
+            // now less then 6 of them, button is hidded, NOT removed. So if we again create comments and reach 6, button will be just shown, not
+            // new one added. Without this check, there will be 2 buttons, first showed, and second added and showed) 
+            if(commentsCount === 6 && !LoadMoreCommentsButtonExists()){ addLoadMoreCommentsButton(); } 
             else { showLoadMoreCommentsButton(); }     
         }
         removeExtraComments(visibleComments, previousBreakPoint);
         // this function also removes button if there is no more comments to load from database
         updateLoadMoreCommentsButton();
     } 
-    // executes after deleting comment if conditions are matched, for comment deletion decrements visibleComments number 
+    // executes: 1. after deleting comment if conditions are matched, for comment deletion decrements visibleComments number
+    //           2. after comment creation if there are less than 6 total comments 
     else if(visibleComments < nextBreakPoint){
-        loadMoreComments(getLastVisibleCommentId(), 1); // load 1 more comment
+        if(commentsCount >= 5) // don't load anything if less than 5 comment in db
+            loadMoreComments(getLastVisibleCommentId(), 1); // load 1 more comment
         // this function also removes button if there is no more comments to load from database
         updateLoadMoreCommentsButton();
     }
@@ -62,6 +68,10 @@ function showLoadMoreCommentsButton(){
     $('.load-more-comments').show();
 }
 
+function LoadMoreCommentsButtonExists(){
+    return $('.load-more-comments').length > 0;
+}
+
 // If there are less than 6 comments for specified owner object, button is not created when page is loaded. 
 // So it has to be added dinamically if comment number reaches 6 while creating them dinamically.
 function addLoadMoreCommentsButton(){
@@ -84,7 +94,7 @@ function removeExtraComments(visibleComments, wantedComments){
 }
 
 function toggleShowLessButton(){
-    if(visibleCommentsCount() > 6) { showShowLessButton() } 
+    if(visibleCommentsCount() >= 6) { showShowLessButton() } 
     else if(visibleCommentsCount() === 5) { hideShowLessButton() } 
 }
 

@@ -9,7 +9,7 @@ import {manageVisibleComments} from './manage_visible_comments.js';
 // ajax for comments
 function createComment(textarea){
     $.ajax({
-        url : '/comments/create_comment/',
+        url : '/comments/create-comment/',
         type : "POST",
         data : { 
             text: textarea.val()

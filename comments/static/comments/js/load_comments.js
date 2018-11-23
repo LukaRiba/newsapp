@@ -19,7 +19,7 @@ function getLastVisibleCommentId(){
 // ajax for loading more comments after last visible (bottom) one
 function loadMoreComments(lastVisibleCommentId, numOfCommentsToLoad){
     $.ajax({
-        url : '/comments/load_more_comments/',
+        url : '/comments/load-more-comments/',
         type : "GET",
         data : { 
             lastVisibleCommentId: lastVisibleCommentId, // used by django to filter comments with ids < lastVisibleCommentId (next ones in db)

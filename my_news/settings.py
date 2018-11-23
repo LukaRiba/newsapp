@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'my_news.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'my_news_db_test',
+        'NAME': 'my_news_db',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': '', # prazan string predstavlja localhost (127.0.0.1)
@@ -122,6 +122,8 @@ TIME_ZONE = 'UTC'
 
 DATE_FORMAT = 'M d, Y' # rendered date format
 
+DATETIME_FORMAT	= 'M j, Y, P'
+
 USE_L10N = False # because it overrides DATE_FORMAT
 
 USE_I18N = True
@@ -147,9 +149,10 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
+LOGIN_URL = '/news/login'
+
 LOGIN_REDIRECT_URL = '/news/home'
 
 FILEPROVIDER_NAME = 'python'
 
 # INTERNAL_IPS = '127.0.0.1'  # debug_toolbar on/off
-

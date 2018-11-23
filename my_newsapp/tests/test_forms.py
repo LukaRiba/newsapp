@@ -5,7 +5,7 @@ from django.test import TestCase, override_settings
 from my_newsapp.forms import ArticleForm, ImageForm, FileForm, ImageFormSet, FileFormSet, LoginForm
 from my_newsapp.models import User
 from my_newsapp.utils import get_test_file
-from my_newsapp.factories import ArticleFactory, ImageFactory, CategoryFactory
+from my_newsapp.tests.factories import ArticleFactory, ImageFactory, CategoryFactory
 
 @override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class ArticleFormTests(TestCase):
@@ -220,7 +220,7 @@ class ImageInlineFormSetTests(TestCase):
         self.assertFalse(formset.is_valid())
         self.assertEqual(formset.errors, [{}])
         self.assertEqual(formset.non_form_errors(), [
-            'Article must have at least one image. Upload new one if deleting all existing ones.'
+            'Article must have at least one image. Upload new one if deleting all.'
         ])
 
     def test_no_image_uploaded_when_instance_already_has_two_images_of_which_one_is_selected_for_deletion(self):

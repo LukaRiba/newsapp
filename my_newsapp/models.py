@@ -55,7 +55,10 @@ class Article(models.Model):
     comments = GenericRelation(Comment)
 
     def get_absolute_url(self):
-        return reverse('my_newsapp:article-detail', kwargs={'category': self.category.slug,'id':self.id, 'slug': self.slug})
+        return reverse(
+            'my_newsapp:article-detail', 
+            kwargs={'category': self.category.slug,'id':self.id, 'slug': self.slug}
+        )
 
     def __str__(self):
         return self.title
@@ -65,17 +68,23 @@ class Article(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(
-        validators=[FileExtensionValidator(['bmp', 'gif', 'png', 'jpg', 'jpeg'])],  blank=True, null=True)
+        validators=[FileExtensionValidator(['bmp', 'gif', 'png', 'jpg', 'jpeg'])], 
+        blank=True, 
+        null=True
+    )
     description = models.CharField(max_length=200, blank=True, null=True)
     article = models.ForeignKey(Article, related_name='images', on_delete=models.CASCADE)
 
     def __str__(self):
-        return '%s' % self.image
+        return f'{self.image}' 
 
 class File(models.Model):
-    file = models.FileField(upload_to='files/', 
-                            validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],  
-                            blank=True, null=True)                            
+    file = models.FileField(
+        upload_to='files/', 
+        validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],  
+        blank=True, 
+        null=True
+    )                            
     article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
 
     CONTENT_TYPE_ICON_PAIRS = (
@@ -93,7 +102,7 @@ class File(models.Model):
         for pair in self.CONTENT_TYPE_ICON_PAIRS:
             content_type, icon = pair
             if content_type == self.content_type():
-                return 'my_newsapp/file_type_icons/' + icon
+                return f'my_newsapp/file_type_icons/{icon}'
 
     def content_type(self):
         from magic import Magic
@@ -101,7 +110,7 @@ class File(models.Model):
         return mime.from_file(self.path())
 
     def path(self):
-        return settings.MEDIA_ROOT + str(self.file)
+        return f'{settings.MEDIA_ROOT}{str(self.file)}'
 
     def name(self):
         return self.__str__()
