@@ -26,7 +26,7 @@ pylint-plugin-utils==0.2.6
 python-dateutil==2.7.3
 python-magic==0.4.15
 pytz==2018.4
-rope==0.10.7
+rope==0.11.0
 six==1.11.0
 sqlparse==0.2.4
 text-unidecode==1.2
