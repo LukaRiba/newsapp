@@ -46,10 +46,10 @@ function newCommentId() {
 
 function resetCommentForm(textarea) {
     textarea.val(''); // remove the value from the input
-    if (isFirstComment()) removeNoCommentsMessage();
+    if (firstCreated()) removeNoCommentsMessage();
 }
 
-function isFirstComment() {
+function firstCreated() {
     return $('.comment').length === 1;
 }
 
@@ -92,32 +92,20 @@ function reportError(xhr,errmsg) {
     console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
 }
 
-// export {
-//     countTotalComments,
-//     createComment,
-//     updateCommentsCounter,
-//     reportError
-// }
-
-function sum(a, b) {
-  return a + b;
-}
-
 export {
     createComment,
     addComment,
     fadeIn,
     newCommentId,
     resetCommentForm,
-    isFirstComment,
+    firstCreated,
     removeNoCommentsMessage,
     incrementCommentsCount,
     updateCommentsCounter,
     countTotalComments,
     addCommentsCounterToDOM,
     getCommentsCounter,
-    reportError,
-    sum
+    reportError
 }
 
 
