@@ -1,4 +1,4 @@
-import {countTotalComments} from './create_comment.js';
+import {getCommentsCount} from './utils.js';
 import {addLoadMoreCommentsButtonListener,
         updateLoadMoreCommentsButton,
         getLastVisibleCommentId,
@@ -6,7 +6,7 @@ import {addLoadMoreCommentsButtonListener,
         loadMoreComments} from './load_comments.js';
 
 function manageVisibleComments(){
-    let commentsCount = countTotalComments();
+    let commentsCount = getCommentsCount();
     let visibleComments = visibleCommentsCount();
     let previousBreakPoint = getPreviousBreakpoint(visibleComments);
     let nextBreakPoint = getNextBreakPoint(visibleComments);

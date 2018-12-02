@@ -3,7 +3,7 @@ import {addShowRepliesButtonListener,
        addEditButtonListener,
        addEditFormListeners,
        addDeleteFormSubmitListener} from './main.js';
-import {reportError} from './create_comment.js';
+import {reportError} from './utils.js';
 
 // ajax for replies
 function createReply(textarea, parentId){

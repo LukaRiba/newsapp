@@ -1,4 +1,4 @@
-import {reportError} from './create_comment.js';
+import {reportError} from './utils.js';
 
 function editCommentOrReply(url, textarea, id){
     $.ajax({

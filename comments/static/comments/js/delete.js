@@ -1,5 +1,5 @@
-import {countTotalComments, updateCommentsCounter, reportError} from './create_comment.js';
 import {manageVisibleComments} from './manage_visible_comments.js';
+import {getCommentsCount, updateCommentsCounter, reportError} from './utils.js'
 
 function deleteCommentOrReply(url, id){
     $.ajax({
@@ -85,7 +85,7 @@ function isComment(id){
 }
 
 function decrementCommentsCount(){
-    $('#comments-count').text(countTotalComments() - 1);
+    $('#comments-count').text(getCommentsCount() - 1);
 }
 
 function displayNoCommentsYetMessage(){

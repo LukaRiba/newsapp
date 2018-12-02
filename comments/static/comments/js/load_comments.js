@@ -1,6 +1,6 @@
 import {addShowRepliesButtonListener, addEditButtonListener, addReplyButtonListener,
     addReplyFormSubmitListener, addEditFormListeners, addDeleteFormSubmitListener} from './main.js';
-import {countTotalComments, reportError} from './create_comment.js';
+import {getCommentsCount, reportError} from './utils.js';
 import {toggleShowLessButton} from './manage_visible_comments.js';
 
 
@@ -73,7 +73,7 @@ function getloadedComments(lastVisibleCommentId){
 
 function updateLoadMoreCommentsButton(){
     let button = $('.load-more-comments');
-    let remainingComments = countTotalComments() - visibleCommentsCount(); 
+    let remainingComments = getCommentsCount() - visibleCommentsCount(); 
     if (remainingComments === 0) {
         button.hide();
     } else if(remainingComments === 1) {
