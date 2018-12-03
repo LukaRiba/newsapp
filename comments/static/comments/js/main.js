@@ -124,10 +124,10 @@ function toggleEditForm(id){
     let currentTextElement = editForm.siblings('.text'); // select <p> element which holds comment/reply text
     currentTextElement.animate({ height: 'toggle', opacity: 'toggle' }, 'fast'); // hides/shows comment/reply text
     editForm.animate({ height: 'toggle', opacity: 'toggle' }, 'fast'); // shows/hides edit-form
-    setFormTextArealdInitialValue(editForm, currentTextElement.text()) // sets current comment/reply text as edit-form's initial value
+    setFormTextAreaInitialValue(editForm, currentTextElement.text()) // sets current comment/reply text as edit-form's initial value
 }
 
-function setFormTextArealdInitialValue(form, text){
+function setFormTextAreaInitialValue(form, text){
     form.find('textarea').val(text);
 }
 

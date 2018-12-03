@@ -27,10 +27,9 @@ function createComment(textarea){
 }
 
 function addComment(comment){
-    let id = newCommentId();
     $('#comments').prepend(comment);
     fadeInComment(); 
-    addEventListenersToComment(id);
+    addEventListenersToComment(newCommentId());
 }
 
 function addEventListenersToComment(id){

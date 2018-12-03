@@ -9,26 +9,37 @@ import {
     removeNoCommentsMessage,
     incrementCommentsCount,
     addCommentsCounterToDOM,
-    __RewireAPI__ as rewire 
+    __RewireAPI__ as RewireAPI 
 } from '../create_comment';
 
-import * as main from '../main';
 
-//#region comment
-// As addEventListenersToComment function from create_comment module, whose functions we are testing here,
-// calls these 5 functions from main module,so we mock these main module functions, because here in tests, we just want to 
-// check if addEventListenersToComment calls these functions. addEventListenersToComment is not mocked (no function
-// from create_comment is).
-//#endregion 
-jest.mock('../main', () => ({
-    addReplyButtonListener: jest.fn(),
-    addEditButtonListener: jest.fn(),
-    addEditFormListeners: jest.fn(),
-    addReplyFormSubmitListener: jest.fn(),
-    addDeleteFormSubmitListener: jest.fn()
-}))
+//#region
+// this import and jest.mock are not necessary because we can mock these functions with RewireAPI. But, I will keep it for
+// now for example of use. I've tested addEventListenersToComment in both ways for demonstration
+//#endregion
+    import * as main from '../main';
+    // #region comment
+    // As addEventListenersToComment function from create_comment module, whose functions we are testing here,
+    // calls these 5 functions from main module,so we mock these main module functions, because here in tests, we just want to 
+    // check if addEventListenersToComment calls these functions. addEventListenersToComment is not mocked (no function
+    // from create_comment is).
+    // #endregion 
+    jest.mock('../main', () => ({
+        addReplyButtonListener: jest.fn(),
+        addEditButtonListener: jest.fn(),
+        addEditFormListeners: jest.fn(),
+        addReplyFormSubmitListener: jest.fn(),
+        addDeleteFormSubmitListener: jest.fn()
+    }))
+    
+    // import $ from './jquery-3.3.1';
+    // import {textarea} from './util.js'
+    // jest.mock('./jquery-3.3.1');
 
-// "use strict";
+
+
+
+"use strict";
 
 //#region comment
 // For some reason, probably because of jQuery fadeIn implementation, jest time mocking (jest.UseFakeTimers, jest.runAllTimers...)
@@ -37,7 +48,7 @@ jest.mock('../main', () => ({
 // it should (then opacity will be close to 1 and test will pass). So, here I use setTimeout and call checkOpacityIsCloseTo and
 // checkOpacityBetweenOneAndZero  as callbacks.
 //#endregion
-xtest('fadeIn hides first comment, and then fades it in 1000ms', (done) => {
+test.skip('fadeInComment hides first comment, and then fades it in 1000ms', (done) => {
     // Set up our document body
     document.body.innerHTML =
         `<div id="3" class="comment">third comment</div> 
@@ -117,12 +128,12 @@ test('fadeInComment hides first comment, and then fades it in 1000ms', () => {
     }
 })
 
-test('newCommentId returns id attr value of first comment', () => {
+test('newCommentId returns id attr value of last created comment', () => {
     // Set up our document body
     document.body.innerHTML =
-        `<div id="3" class="comment">third comment</div>
-         <div id="2" class="comment">second comment</div>
-         <div id="1" class="comment">first comment</div>`;
+        `<div id="3" class="comment">third created</div>
+         <div id="2" class="comment">second created</div>
+         <div id="1" class="comment">first created</div>`;
     expect(newCommentId()).toBe('3');
 })
 
@@ -204,50 +215,128 @@ describe('addEventListenersToComment', () => {
     })
 })
 
-describe.only('addComment', () => {
-    it.only('calls newCommentId functioon', () => {
-        // Here, we change newCommentId function to be mock function
-        rewire.__set__('newCommentId', jest.fn())
-        // Then, here, when we call addComment, which calls newCommentId internally
-        addComment();
-        //#region check that newCommentId was called by addComment.
-        // And here, we can check that addComment calls newCommentId, as we set it to be mock function.
-        // This is important bacause we can check if function has been called (toBeCalled and similar matchers)
-        // only in mocked functions. If we call expect(newCommentId).toBeCalledTimes(1) after running addComment,
-        // without previously set newCommentId  to be mock function, addComment will call actual newCommentId, and our
-        // test will fail: 
-        //      jest.fn() value must be a mock function or spy. -> jest.fn() was expected to be passed to expect().
-        //      Received:
-        //          function: [Function newCommentId] -> this was recieved.
-        //#endregion
-        expect(rewire.__get__('newCommentId')).toBeCalledTimes(1);
-        // reset rewireing, restore original newCommentId implementation.
-        rewire.__ResetDependency__('newCommentId'); 
-    })
-
-    it('prepends created comment inside #comments div element', () => {
-
-    })
-
-    it('calls fadeInComment function', () => {
-        
-    })
-
-    it('calls addEventListenersToComment', () => {
-
+// Implementation with Rewire. This way we don't need to import and mock functions from main.js module, as
+// addEventListenersToComment which calls these functions internally.
+test('addEventListenersToComment', () => {
+    // Test that addEventListenersToComment calls this five functions.
+    RewireAPI.__with__({
+        addReplyButtonListener: jest.fn(),
+        addEditButtonListener: jest.fn(),
+        addEditFormListeners: jest.fn(),
+        addReplyFormSubmitListener: jest.fn(),
+        addDeleteFormSubmitListener: jest.fn()
+    })( () => {
+        addEventListenersToComment();
+        expect(RewireAPI.__get__('addReplyButtonListener')).toBeCalledTimes(1);
+        expect(RewireAPI.__get__('addEditButtonListener')).toBeCalledTimes(1);
+        expect(RewireAPI.__get__('addEditFormListeners')).toBeCalledTimes(1);
+        expect(RewireAPI.__get__('addReplyFormSubmitListener')).toBeCalledTimes(1);
+        expect(RewireAPI.__get__('addDeleteFormSubmitListener')).toBeCalledTimes(1);
     })
 })
 
+describe('addComment', () => {
+    it('prepends created comment (passed as argument) inside #comments div element', () => {
+        document.body.innerHTML = '<div id="comments"></div>';
 
+        addComment('<div>This is newly created comment</div>');
+
+        expect(document.body.innerHTML).toEqual(
+            '<div id="comments">' +
+                '<div>This is newly created comment</div>' +
+            '</div>'
+        )
+    })
+
+    it('calls fadeInComment function', () => {
+        // RewireAPI is explained in next test
+        RewireAPI.__set__('fadeInComment', jest.fn());
+        addComment();
+        expect(RewireAPI.__get__('fadeInComment')).toBeCalledTimes(1);
+        RewireAPI.__ResetDependency__('fadeInComment');
+    })
+
+    it('calls newCommentId functioon', () => {
+        // Here, we use rewire to change newCommentId function to be mock function
+        RewireAPI.__set__('newCommentId', jest.fn());
+        //#region Then, here, when we call addComment, which calls newCommentId internally
+        // addComment accepts argument, but it is irrelevant for this test, so we don't pass it.
+        // If a function is called with missing arguments (less than declared), the missing values are set to: undefined.
+        //#endregion
+        addComment(); 
+        //#region check that newCommentId was called by addComment.
+        // And now here, we CAN check that addComment calls newCommentId.
+        // IMPORTANT: We can check if function B has been called, within function A only if function B is mock function, 
+        // as toBeCalled and similar matchers work only on mock functions. If we call expect(newCommentId).toBeCalledTimes(1) 
+        // after running addComment, without previously set newCommentId  to be mock function, addComment will call actual 
+        //newCommentId, and our test will fail: 
+        //      jest.fn() value must be a mock function or spy.   // jest.fn() was expected to be passed to expect().
+        //      Received:
+        //          function: [Function newCommentId]   // this was recieved.
+        //#endregion
+        expect(RewireAPI.__get__('newCommentId')).toBeCalledTimes(1);
+        // reset rewireing, restore original newCommentId implementation.
+        RewireAPI.__ResetDependency__('newCommentId'); 
+
+        // implementation using __with__. This way, we don't have to call __RestsDependency__.
+        RewireAPI.__with__({
+            newCommentId: jest.fn()
+        })( () => {
+            // within this function newCommentId is mocked
+            addComment(); 
+            expect(RewireAPI.__get__('newCommentId')).toBeCalledTimes(1);
+        })
+        // here newCommentId has is original one.
+    })
+
+    it('calls addEventListenersToComment', () => {
+        //#region 
+        // As addEventListenersToComment is passed newCommentId() as argument, here we mock nowCommentId and set
+        // its return value to be 111 -> and than we check with expect that it was called with this value.
+        //#endregion
+        RewireAPI.__with__({
+            newCommentId: jest.fn( () => 111), 
+            addEventListenersToComment: jest.fn()
+        })( () => {
+            addComment();
+            expect(RewireAPI.__get__('addEventListenersToComment')).toBeCalledTimes(1);
+            expect(RewireAPI.__get__('addEventListenersToComment')).toBeCalledWith(111);
+        })
+    })
+})
+
+describe('createComment', () => {
+
+    it.only('calls $.ajax and passes argument to it', () => {
+        // create textarea jquery object to pass as an argument to createComment
+        const textarea = $('<textarea>Text of the Comment.</textarea>');
+        jest.spyOn($, 'ajax');
+        
+        createComment(textarea);
+
+        expect($.ajax).toBeCalledWith({
+            url : '/comments/create-comment/',
+            type : "POST",
+            data : { 
+                text: 'Text of the Comment.' // textarea.val()
+            }, 
+            success : expect.any(Function),
+            error : expect.any(Function)
+        })
+    })
     
+    describe('success', () => {
+        
+        it("calls $.ajax's success function", () => {
+            
+        })
+    })
+
+    describe('error'), () => {
+        it("calls $.ajax's error function"), () => {
+
+        }
+    }
+})
 
 
-    // createComment
-    
-    // function addComment(comment){
-    //     let id = newCommentId();
-    //     $('#comments').prepend(comment);
-    //     fadeInComment(); 
-    //     addEventListenersToComment(id);
-    // }
-    
