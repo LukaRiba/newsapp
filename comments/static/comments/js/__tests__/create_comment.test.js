@@ -12,6 +12,7 @@ import {
     __RewireAPI__ as RewireAPI 
 } from '../create_comment';
 
+require('jquery-mockjax')($, window);
 
 //#region
 // this import and jest.mock are not necessary because we can mock these functions with RewireAPI. But, I will keep it for
@@ -31,13 +32,6 @@ import {
         addReplyFormSubmitListener: jest.fn(),
         addDeleteFormSubmitListener: jest.fn()
     }))
-    
-    // import $ from './jquery-3.3.1';
-    // import {textarea} from './util.js'
-    // jest.mock('./jquery-3.3.1');
-
-
-
 
 "use strict";
 
@@ -215,9 +209,9 @@ describe('addEventListenersToComment', () => {
     })
 })
 
-// Implementation with Rewire. This way we don't need to import and mock functions from main.js module, as
-// addEventListenersToComment which calls these functions internally.
+// Implementation with Rewire. This way we don't need to import and mock functions from main.js module.
 test('addEventListenersToComment', () => {
+    let id = 1;
     // Test that addEventListenersToComment calls this five functions.
     RewireAPI.__with__({
         addReplyButtonListener: jest.fn(),
@@ -226,12 +220,12 @@ test('addEventListenersToComment', () => {
         addReplyFormSubmitListener: jest.fn(),
         addDeleteFormSubmitListener: jest.fn()
     })( () => {
-        addEventListenersToComment();
-        expect(RewireAPI.__get__('addReplyButtonListener')).toBeCalledTimes(1);
-        expect(RewireAPI.__get__('addEditButtonListener')).toBeCalledTimes(1);
-        expect(RewireAPI.__get__('addEditFormListeners')).toBeCalledTimes(1);
-        expect(RewireAPI.__get__('addReplyFormSubmitListener')).toBeCalledTimes(1);
-        expect(RewireAPI.__get__('addDeleteFormSubmitListener')).toBeCalledTimes(1);
+        addEventListenersToComment(id);
+        expect(RewireAPI.__get__('addReplyButtonListener')).toBeCalledWith(id);
+        expect(RewireAPI.__get__('addEditButtonListener')).toBeCalledWith(id);
+        expect(RewireAPI.__get__('addEditFormListeners')).toBeCalledWith('#edit-form-' + id);
+        expect(RewireAPI.__get__('addReplyFormSubmitListener')).toBeCalledWith('#reply-form-' + id);
+        expect(RewireAPI.__get__('addDeleteFormSubmitListener')).toBeCalledWith('#delete-form-' + id);
     })
 })
 
@@ -306,37 +300,138 @@ describe('addComment', () => {
 })
 
 describe('createComment', () => {
+    // create textarea jquery object to pass as an argument to createComment
+    const textarea = $('<textarea>Text of the Comment.</textarea>');
+    // display only warning mesages
+    $.mockjaxSettings.logging = 1;
 
-    it.only('calls $.ajax and passes argument to it', () => {
-        // create textarea jquery object to pass as an argument to createComment
-        const textarea = $('<textarea>Text of the Comment.</textarea>');
-        jest.spyOn($, 'ajax');
+    it('calls $.ajax', () => {
+        // mock $.ajax (if not mocked, it tries to send request to server, 
+        // and error is thrown as there is no server listening).
+        $.mockjax({
+            url: '/comments/create-comment/',
+        })
         
         createComment(textarea);
 
-        expect($.ajax).toBeCalledWith({
-            url : '/comments/create-comment/',
-            type : "POST",
-            data : { 
-                text: 'Text of the Comment.' // textarea.val()
-            }, 
-            success : expect.any(Function),
-            error : expect.any(Function)
-        })
+        // $.mockjax.mockedAjaxCalls() returns array of mocked ajax calls. Here, length should be 1
+        // as createComment makes 1 call to $.ajax. 
+        expect($.mockjax.mockedAjaxCalls().length).toEqual(1);
+        // assert that ajax was called with coresponding url
+        expect($.mockjax.mockedAjaxCalls()[0]['url']).toEqual('/comments/create-comment/')
+
+        $.mockjax.clear()        
     })
     
-    describe('success', () => {
-        
-        it("calls $.ajax's success function", () => {
+    describe('successful request', () => {
+        afterEach( () => {
+            $.mockjax.clear();
+        })
+        // we must use done argument as ajax call is asynchronous
+        test("that ajax\'s success callback is called", done => {
+            // bool to check of ajax's success callback was called
+            let successCalled = false;
+
+            $.mockjax({
+                url: '/comments/create-comment/',
+                responseTime: 10, // default is 500 ms
+                responseText: 'response is successful',
+                onAfterSuccess: function(){ // this function run after ajax's success callback
+                    successCalled = true;
+                }
+            })
+ 
+            // call function which calls ajax
+            createComment(textarea);
+
+            // as response takes 10 ms to be returned, assert after 20 ms
+            setTimeout( () => {
+                expect(successCalled).toEqual(true); // of success callback was called, this should pass
+                done();
+            }, 20); 
+        })
+
+        test('which functions success callback calls when first comment created', done => {
+            // functions which are called by ajax's success callback
+            let functions = ['addComment', 'firstCreated', 'removeNoCommentsMessage', 'addCommentsCounterToDOM',
+                'resetCommentForm', 'incrementCommentsCount', 'updateCommentsCounter', 'manageVisibleComments'];
             
+            // mock these functions so it can be asserted if they were called. Set firstCreated to return true, 
+            // so removeNoCommentsMessage and addCommentsCounterToDOM should be called.
+            for (let func of functions) {
+                if(func === 'firstCreated'){
+                    RewireAPI.__set__(func, jest.fn( () => true));
+                } else RewireAPI.__set__(func, jest.fn());
+            }
+            
+            $.mockjax({
+                url: '/comments/create-comment/',
+                responseTime: 10,
+                responseText: 'response is successful',
+            })
+
+            createComment(textarea);
+
+            // wait for ajax call return response and call callback, then call done()
+            setTimeout( () => {
+                for (let func of functions) {
+                    expect(RewireAPI.__get__(func)).toBeCalledTimes(1);
+                }
+                done();
+            }, 50); 
+        })
+
+        test('which functions success callback calls if created comment is not the first one', done => {
+
+            let functions = ['addComment', 'firstCreated', 'removeNoCommentsMessage', 'addCommentsCounterToDOM',
+                'resetCommentForm', 'incrementCommentsCount', 'updateCommentsCounter', 'manageVisibleComments'];
+            
+            // mock functions so it can be asserted if they were called. firstCreated returns undefined (falsy), so
+            // removeNoCommentsMessage and addCommentsCounterToDOM should not be called.
+            for (let func of functions) {
+                RewireAPI.__set__(func, jest.fn())
+            }
+            
+            $.mockjax({
+                url: '/comments/create-comment/',
+                responseTime: 10,
+                responseText: 'response is successful',
+            })
+
+            createComment(textarea);
+
+            // wait for ajax call return response and call callback, then call done()
+            setTimeout( () => {
+                for (let func of functions) {
+                    if (func === 'removeNoCommentsMessage' || func === 'addCommentsCounterToDOM'){
+                        expect(RewireAPI.__get__(func)).not.toBeCalled()
+                    } else expect(RewireAPI.__get__(func)).toBeCalledTimes(1);
+                }
+                done();
+            }, 50);   
         })
     })
 
-    describe('error'), () => {
-        it("calls $.ajax's error function"), () => {
+    describe('request error', () => {
+        it('calls $.ajax\'s error function', done => {
+            let errorCalled = false;
 
-        }
-    }
+            $.mockjax({
+                url: '/comments/create-comment/',
+                responseTime: 10,
+                status: 500,
+                reaponseText: 'Internal Server Error',
+                onAfterError: function(){ // this function run after ajax's error callback
+                    errorCalled = true;
+                }
+            })
+
+            createComment(textarea);
+
+            setTimeout( () => {
+                expect(errorCalled).toEqual(true);
+                done();
+            }, 20)
+        })
+    })
 })
-
-
