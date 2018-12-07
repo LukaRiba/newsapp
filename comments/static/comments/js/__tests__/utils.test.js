@@ -1,16 +1,21 @@
-import * as fn from '../utils.js'
+import {
+    updateCommentsCounter,
+    getCommentsCount,
+    getCommentsCounter,
+    reportError
+} from '../utils'
 
 test("getCommentsCount returns '#comments-count' element's text as a Number", () => {
     document.body.innerHTML = '<span id="comments-count">12</span>';
-    expect(fn.getCommentsCount()).toBe(12);
+    expect(getCommentsCount()).toBe(12);
 })
 
 test('getCommentsCounter returns element with id="comments-counter wrapped in jQuery object"', () => {
     document.body.innerHTML = '<p id="comments-counter">5 comments</p>';
     
-    expect(fn.getCommentsCounter()).toBeInstanceOf(jQuery);
-    expect(fn.getCommentsCounter().attr('id')).toBe('comments-counter');
-    expect(fn.getCommentsCounter().text()).toBe('5 comments');
+    expect(getCommentsCounter()).toBeInstanceOf(jQuery);
+    expect(getCommentsCounter().attr('id')).toBe('comments-counter');
+    expect(getCommentsCounter().text()).toBe('5 comments');
 })
 
 describe('updateCommentsCounter tests', () => {
@@ -28,7 +33,7 @@ describe('updateCommentsCounter tests', () => {
         $('body').add('<div id="1" class="comment">first comment</div>');
         $('#comments-count').text('1');
 
-        fn.updateCommentsCounter();
+        updateCommentsCounter();
 
         expect($('#comments-counter').html()).toEqual('<strong>1 comment</strong>')
 
@@ -36,7 +41,7 @@ describe('updateCommentsCounter tests', () => {
         $('#1').before('<div id="2" class="comment">second comment</div>');
         $('#comments-count').text('2');
         
-        fn.updateCommentsCounter();
+        updateCommentsCounter();
 
         expect($('#comments-counter').html()).toEqual('<strong>2 comments</strong>')
     })
@@ -56,7 +61,7 @@ describe('updateCommentsCounter tests', () => {
         $('#3').remove();
         $('#comments-count').text('2');
 
-        fn.updateCommentsCounter();
+        updateCommentsCounter();
 
         expect($('#comments-counter').html()).toEqual('<strong>2 comments</strong>');
 
@@ -64,9 +69,33 @@ describe('updateCommentsCounter tests', () => {
         $('#2').remove();
         $('#comments-count').text('1');
 
-        fn.updateCommentsCounter();
+        updateCommentsCounter();
 
         expect($('#comments-counter').html()).toEqual('<strong>1 comment</strong>');
 
     })
+})
+
+test('reportError displays error message in the DOM and logs jqXHR status and responseText', () => {
+    document.body.innerHTML = '<div id="error-log"></div>';
+    // set up jqXHR object
+    let jqXHR = $.ajax();
+    jqXHR.status = 500;
+    jqXHR.responseText = 'Internal server error';
+    // set up errmsg 
+    let errmsg = 'error';
+    
+    console.log = jest.fn();
+
+    reportError(jqXHR, errmsg);
+
+    expect(document.body.innerHTML).toEqual(
+        "<div id=\"error-log\">" + 
+            "<div class=\"alert-box alert radius data-alert\">" + 
+                "Oops! We have encountered an error: error <a href=\"#\" class=\"close\">×</a>" + 
+            "</div>" + 
+        "</div>"
+    )
+    // The first argument of the first call to the function
+    expect(console.log.mock.calls[0][0]).toBe(jqXHR.status + ": " + jqXHR.responseText);
 })
