@@ -2,7 +2,8 @@ import {
     updateCommentsCounter,
     getCommentsCount,
     getCommentsCounter,
-    reportError
+    reportError,
+    getShowRepliesButton
 } from '../utils'
 
 test("getCommentsCount returns '#comments-count' element's text as a Number", () => {
@@ -98,4 +99,14 @@ test('reportError displays error message in the DOM and logs jqXHR status and re
     )
     // The first argument of the first call to the function
     expect(console.log.mock.calls[0][0]).toBe(jqXHR.status + ": " + jqXHR.responseText);
+})
+
+test('getShowRepliesButton returns #show-replies-{parentId} element', () => {
+    let parentId = 111;
+    document.body.innerHTML = '<button id="show-replies-111"></button>';
+
+    let button = getShowRepliesButton(parentId);
+
+    expect(button).toBeInstanceOf(jQuery);
+    expect(button.attr('id')).toEqual('show-replies-111');
 })
