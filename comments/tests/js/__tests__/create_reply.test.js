@@ -8,7 +8,7 @@ import {
     newReplyId,
     fadeInReply,
     __RewireAPI__ as RewireAPI
-} from '../create_reply'
+} from '../../../static/comments/js/create_reply'
 
 // use as id of fictive parent comment, as functions use it as argument
 const parentId = 111;

@@ -4,7 +4,7 @@ import {
     getCommentsCounter,
     reportError,
     getShowRepliesButton
-} from '../utils'
+} from '../../../static/comments/js/utils'
 
 test("getCommentsCount returns '#comments-count' element's text as a Number", () => {
     document.body.innerHTML = '<span id="comments-count">12</span>';

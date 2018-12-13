@@ -10,7 +10,7 @@ import {
     incrementCommentsCount,
     addCommentsCounterToDOM,
     __RewireAPI__ as RewireAPI 
-} from '../create_comment';
+} from '../../../static/comments/js/create_comment';
 
 // require('jquery-mockjax')($, window);
 
@@ -18,14 +18,14 @@ import {
 // this import and jest.mock are not necessary because we can mock these functions with RewireAPI. But, I will keep it for
 // now for example of use. I've tested addEventListenersToComment in both ways for demonstration
 //#endregion
-    import * as main from '../main';
+    import * as main from '../../../static/comments/js/main';
     // #region comment
     // As addEventListenersToComment function from create_comment module, whose functions we are testing here,
     // calls these 5 functions from main module,so we mock these main module functions, because here in tests, we just want to 
     // check if addEventListenersToComment calls these functions. addEventListenersToComment is not mocked (no function
     // from create_comment is).
     // #endregion 
-    jest.mock('../main', () => ({
+    jest.mock('../../../static/comments/js/main', () => ({
         addReplyButtonListener: jest.fn(),
         addEditButtonListener: jest.fn(),
         addEditFormListeners: jest.fn(),

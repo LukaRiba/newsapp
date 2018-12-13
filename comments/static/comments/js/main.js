@@ -2,7 +2,7 @@ import './csrf.js'; // Import an entire module for side effects only, without im
 import {createComment} from './create_comment.js';
 import {createReply} from './create_reply.js';
 import updateCommentOrReply from './edit.js';
-import deleteCommentOrReply from './delete.js';
+import {deleteCommentOrReply} from './delete.js';
 import {addLoadMoreCommentsButtonListener, visibleCommentsCount, updateLoadMoreCommentsButton} from './load_comments.js';
 import {getPreviousBreakpoint, removeExtraComments, hideShowLessButton, showLoadMoreCommentsButton} from './manage_visible_comments.js';
 import {getShowRepliesButton} from './utils.js'
@@ -72,10 +72,6 @@ function addShowRepliesButtonListener(id){
         toggleReplies(id);
     });
 }
-
-// function getShowRepliesButton(id){
-//     return $('#show-replies-' + id);
-// }
 
 function toggleReplies(id){
     $('#replies-' + id ).animate({ height: 'toggle', opacity: 'toggle' }, 'fast'); 
