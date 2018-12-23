@@ -14,11 +14,13 @@ class CommentsContextMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         comments = Comment.objects.filter(
-            content_type=get_owner_content_type(self.request),
-            object_id=self.request.session['comments_owner_id']
+            content_type=ContentType.objects.get(model=self.model.__name__),
+            object_id=self.kwargs['id'] 
         )
         data = {
             'comments': comments,
+            'owner_id': self.kwargs['id'],
+            'owner_model': self.model.__name__,
             'comment_form': CommentForm(),
             'reply_form': ReplyForm(),
             'edit_form': EditForm(),
@@ -27,13 +29,10 @@ class CommentsContextMixin:
         context.update(data)
         return context
 
-def get_owner_content_type(request):
-    return ContentType.objects.get(model=request.session['comments_owner_model_name'])
-
 @login_required
 @require_POST
 @require_ajax
-def create_comment(request):    
+def create_comment(request):
     form = CommentForm(request.POST)
     if form.is_valid():
         save_comment_form(request, form)
@@ -49,8 +48,8 @@ def create_comment(request):
 def save_comment_form(request, form):
     form.save(commit=False)
     form.instance.author = request.user
-    form.instance.content_type_id = get_owner_content_type(request).id
-    form.instance.object_id = request.session['comments_owner_id']
+    form.instance.content_type_id = ContentType.objects.get(model=request.POST['owner_model']).id
+    form.instance.object_id = request.POST['owner_id']
     form.save()
 
 @login_required

@@ -1,4 +1,5 @@
 import tempfile
+from unittest import skip
 
 from django.test import TestCase, RequestFactory, TransactionTestCase, override_settings
 from django.urls import reverse
@@ -422,6 +423,8 @@ class ArticleDetailViewTests(TestCase):
         self.assertTemplateNotUsed('my_newsapp/snippets/article_delete_modal.html')
 
     # if session isn't addedv-> AttributeError: 'WSGIRequest' object has no attribute 'session'
+    @skip("passing variables through request session in get method is no longer used, but this test \
+        is not deleted as it is an example how to test view\'s method is isolation")
     def test_get_method(self):
         request = RequestFactory().get('/')
         
@@ -440,12 +443,6 @@ class ArticleDetailViewTests(TestCase):
         # check
         self.assertTrue('comments_owner_model_name' in request.session)
         self.assertTrue('comments_owner_id' in request.session)
-
-    def test_request_session_variables(self):
-        session = self.client.session
-        
-        self.assertEqual(session['comments_owner_model_name'], 'Article')
-        self.assertEqual(session['comments_owner_id'], str(self.article.id))
 
 @override_settings(MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CreateArticleViewTests(TestCase):

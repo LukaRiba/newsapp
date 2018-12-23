@@ -2,7 +2,6 @@ import tempfile
 from urllib.parse import quote_plus
 
 from django.test import TestCase, TransactionTestCase, override_settings
-from unittest.mock import MagicMock
 from django.views.generic import TemplateView
 from django.db.models.query import QuerySet
 from django.contrib.auth.models import User
@@ -11,6 +10,7 @@ from django.conf import settings
 
 from comments.views import CommentsContextMixin
 from comments.models import Comment
+from my_newsapp.models import Article
 from my_newsapp.tests.factories import ArticleFactory
 from .factories import CommentFactory, ReplyFactory
 from comments.forms import CommentForm, ReplyForm, EditForm
@@ -19,26 +19,30 @@ from comments.forms import CommentForm, ReplyForm, EditForm
 class CommentsContextMixinTests(TestCase):
 
     class TestView(CommentsContextMixin, TemplateView):
-        request = MagicMock()
-        request.session = {
-            'comments_owner_model_name': 'article',
-            'comments_owner_id': 100 
-        }
+        model = Article
+
+        #region comment
+            # We must set kwargs like this, as if not AttributeError: 'TestView' object has no attribute 'kwargs' is
+            # thrown. Kwargs are used in get_context_data to get comments_owner_id
+        def __init__(self, **kwargs):
+            self.kwargs = {'id': kwargs['id']}
 
     def setUp(self):
-        self.test_view = self.TestView()
-        self.comments_owner = ArticleFactory(id=100) # it must be the same as in mocked request session
+        self.comments_owner = ArticleFactory() # it must be the same as in mocked request session
+        self.test_view = self.TestView(id=self.comments_owner.id)
         CommentFactory.create_batch(size=5, object_id=self.comments_owner.id)
 
     def test_get_context_data(self):
         
         context = self.test_view.get_context_data()
 
-        for key in ['comments', 'comment_form', 'reply_form', 'edit_form', 'login_url']:
+        for key in ['comments', 'owner_id', 'owner_model', 'comment_form', 'reply_form', 'edit_form', 'login_url']:
             self.assertTrue(key in context)
         self.assertIsInstance(context['comments'], QuerySet)
         self.assertIsInstance(context['comments'][0], Comment)
         self.assertEqual(context['comments'].count(), 5)
+        self.assertEqual(context['owner_id'], self.comments_owner.id)
+        self.assertEqual(context['owner_model'], 'Article')
         self.assertIsInstance(context['comment_form'], CommentForm)
         self.assertIsInstance(context['reply_form'], ReplyForm)
         self.assertIsInstance(context['edit_form'], EditForm)
@@ -227,13 +231,10 @@ class CreateCommentTests(TestCase):
         self.url = reverse('comments:create-comment')
         self.comment_owner = ArticleFactory()
         self.data = {
-            'text': 'comment text.'
+            'text': 'comment text.',
+            'owner_model': self.comment_owner.__class__.__name__, # == 'Article'
+            'owner_id': self.comment_owner.id
         }
-
-        session = self.client.session
-        session['comments_owner_model_name'] = type(self.comment_owner).__name__
-        session['comments_owner_id'] = self.comment_owner.id
-        session.save()
 
     def test_redirects_amonymous_user_to_login_url(self):
         self.client.logout()

@@ -9,7 +9,9 @@ function createComment(textarea){
         url : '/comments/create-comment/',
         type : "POST",
         data : { 
-            text: textarea.val()
+            text: textarea.val(),
+            owner_id: window.comments.owner_id,
+            owner_model: window.comments.owner_model,
         }, 
         success : function(newComment) {
             addComment(newComment);

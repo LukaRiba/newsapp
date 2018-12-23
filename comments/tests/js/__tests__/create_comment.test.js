@@ -12,8 +12,6 @@ import {
     __RewireAPI__ as RewireAPI 
 } from '../../../static/comments/js/create_comment';
 
-// require('jquery-mockjax')($, window);
-
 //#region
 // this import and jest.mock are not necessary because we can mock these functions with RewireAPI. But, I will keep it for
 // now for example of use. I've tested addEventListenersToComment in both ways for demonstration

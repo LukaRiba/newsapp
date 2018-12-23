@@ -12,11 +12,6 @@ class CommentTests(TestCase):
     def setUp(self):
         self.comment_owner = ArticleFactory()
 
-    def test_is_reply_method(self):
-        comment = CommentFactory(object_id=self.comment_owner.id)
-        reply = ReplyFactory(parent=comment)
-        self.assertTrue(reply.is_reply())
-
     def test__str__method(self):
         comment = CommentFactory(object_id=self.comment_owner.id)
         self.assertEqual(comment.__str__(), comment.text)

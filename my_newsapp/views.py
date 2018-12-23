@@ -96,12 +96,6 @@ class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView
     template_name = 'my_newsapp/detail.html'
     model = Article
     
-    # Override to add these variables to request.session, required for comments app
-    def get(self, request, *args, **kwargs):
-        self.request.session['comments_owner_model_name'] = self.model.__name__
-        self.request.session['comments_owner_id'] = self.kwargs['id']
-        return super(ArticleDetailView, self).get(request, *args, **kwargs)
-
 class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'
     form_class = ArticleForm
@@ -150,7 +144,6 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
         form = self.form_class(request.POST, instance=instance)
         image_formset = ImageFormSet(request.POST, request.FILES, instance=instance, request=request)
         file_formset = FileFormSet(request.POST, request.FILES, instance=instance)
-
         if self.are_valid(form, image_formset, file_formset):            
             self.delete_selected_files_and_images(request)
             self.update_article(form, image_formset, file_formset)  
