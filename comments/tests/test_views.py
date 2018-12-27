@@ -174,7 +174,7 @@ class CommentsOwnerViewLoggedUserTests(TestCase):
         comment = CommentFactory(object_id=self.comments_owner.id, author=self.user)
         response = self.client.get(self.url)
 
-        self.assertEqual(self.user.comment_set.count(), 1) # self.user is author of comment
+        self.assertEqual(self.user.comments.count(), 1) # self.user is author of comment
         self.assertContains(response, '<strong>1 comment</strong>')
         for content in [
             comment.author, comment.pub_date.date().strftime('%b %d, %Y'), comment.text, 'No replies yet',
@@ -476,9 +476,6 @@ class LoadMoreCommentsTests(TransactionTestCase):
             # defined in Comment model. So, comment which is last created is the first one in table.
         self.comments = Comment.objects.all()
         self.url = reverse('comments:load-more-comments')
-        session = self.client.session
-        session['comments_owner_id'] = self.comments_owner.id
-        session.save()
 
     def test_error_403_if_post_request_not_ajax(self):
         response = self.client.post(self.url)
@@ -487,7 +484,8 @@ class LoadMoreCommentsTests(TransactionTestCase):
     def test_2_visible_2_to_load(self):
         data = {
             'lastVisibleCommentId': self.comments[1].id,
-            'numOfCommentsToLoad': 2
+            'numOfCommentsToLoad': 2,
+            'owner_id': self.comments_owner.id
         }
         response = self.client.get(self.url, data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         for key in ['next_comments', 'reply_form', 'edit_form']:
@@ -500,7 +498,8 @@ class LoadMoreCommentsTests(TransactionTestCase):
         # It is requested for 6 to load, but there are only 4 left to load
         data = {
             'lastVisibleCommentId': self.comments[1].id,
-            'numOfCommentsToLoad': 6
+            'numOfCommentsToLoad': 6,
+            'owner_id': self.comments_owner.id
         }
         response = self.client.get(self.url, data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         for key in ['next_comments', 'reply_form', 'edit_form']:
@@ -513,7 +512,8 @@ class LoadMoreCommentsTests(TransactionTestCase):
     def test_no_comments_in_db(self):
         data = {
             'lastVisibleCommentId': self.comments[5].id,
-            'numOfCommentsToLoad': 4
+            'numOfCommentsToLoad': 4,
+            'owner_id': self.comments_owner.id
         }
         self.comments.delete()
         response = self.client.get(self.url, data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')

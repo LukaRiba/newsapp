@@ -47,7 +47,7 @@ function removeCommentOrReplyFromDOM(id) {
                 // This is because then visibleCommentsCount() returns exact num of visible comments remained after deletion.
                 $(this).remove(); // comment is removed.
                 // Calls loadMoreComments() from 'else if' block (visibleComments < previousBreakPoint) which sends ajax request.
-                // Ajax is send from ajax.
+                // Ajax is sent from ajax.
                 manageVisibleComments();
                 if (lastCommentDeleted()){
                     displayNoCommentsYetMessage();

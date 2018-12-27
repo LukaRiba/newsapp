@@ -24,6 +24,7 @@ function loadMoreComments(lastVisibleCommentId, numOfCommentsToLoad){
         data : { 
             lastVisibleCommentId: lastVisibleCommentId, // used by django to filter comments with ids < lastVisibleCommentId (next ones in db)
             numOfCommentsToLoad: numOfCommentsToLoad, // num of comments to return from database
+            owner_id: window.comments.owner_id
         }, 
         success : function(loadedComments) {
             addloadedComments(lastVisibleCommentId, loadedComments);

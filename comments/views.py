@@ -100,7 +100,7 @@ def delete(request, pk):
 def load_more_comments(request):
     last_visible = request.GET.get('lastVisibleCommentId')
     comments_to_load = int(request.GET.get('numOfCommentsToLoad'))
-    comments_owner_id = request.session['comments_owner_id']
+    comments_owner_id = request.GET.get('owner_id')
     # How much more comments is in database 
     remaining_comments = Comment.objects.filter(id__lt=last_visible, object_id=comments_owner_id)
     if remaining_comments.exists():

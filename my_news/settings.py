@@ -123,7 +123,7 @@ TIME_ZONE = 'UTC'
 
 DATE_FORMAT = 'M d, Y' # rendered date format
 
-DATETIME_FORMAT	= 'M j, Y, P'
+DATETIME_FORMAT	= 'M d, Y, P'
 
 USE_L10N = False # because it overrides DATE_FORMAT
 
