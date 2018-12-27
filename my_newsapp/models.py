@@ -57,7 +57,7 @@ class Article(models.Model):
     def get_absolute_url(self):
         return reverse(
             'my_newsapp:article-detail', 
-            kwargs={'category': self.category.slug,'id':self.id, 'slug': self.slug}
+            kwargs={'category': self.category.slug, 'id':self.id, 'slug': self.slug}
         )
 
     def __str__(self):

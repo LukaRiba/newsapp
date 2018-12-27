@@ -1,10 +1,11 @@
 import './csrf.js'; // Import an entire module for side effects only, without importing anything. This runs the module's global code, but doesn't actually import any values.
 import {createComment} from './create_comment.js';
-import createReply from './create_reply.js';
+import {createReply} from './create_reply.js';
 import updateCommentOrReply from './edit.js';
-import deleteCommentOrReply from './delete.js';
+import {deleteCommentOrReply} from './delete.js';
 import {addLoadMoreCommentsButtonListener, visibleCommentsCount, updateLoadMoreCommentsButton} from './load_comments.js';
 import {getPreviousBreakpoint, removeExtraComments, hideShowLessButton, showLoadMoreCommentsButton} from './manage_visible_comments.js';
+import {getShowRepliesButton} from './utils.js'
 
 $(function(){
     
@@ -72,10 +73,6 @@ function addShowRepliesButtonListener(id){
     });
 }
 
-function getShowRepliesButton(id){
-    return $('#show-replies-' + id);
-}
-
 function toggleReplies(id){
     $('#replies-' + id ).animate({ height: 'toggle', opacity: 'toggle' }, 'fast'); 
     toggleShowRepliesButtonText(id);
@@ -124,10 +121,10 @@ function toggleEditForm(id){
     let currentTextElement = editForm.siblings('.text'); // select <p> element which holds comment/reply text
     currentTextElement.animate({ height: 'toggle', opacity: 'toggle' }, 'fast'); // hides/shows comment/reply text
     editForm.animate({ height: 'toggle', opacity: 'toggle' }, 'fast'); // shows/hides edit-form
-    setFormTextArealdInitialValue(editForm, currentTextElement.text()) // sets current comment/reply text as edit-form's initial value
+    setFormTextAreaInitialValue(editForm, currentTextElement.text()) // sets current comment/reply text as edit-form's initial value
 }
 
-function setFormTextArealdInitialValue(form, text){
+function setFormTextAreaInitialValue(form, text){
     form.find('textarea').val(text);
 }
 

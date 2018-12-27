@@ -1,5 +1,5 @@
-import {countTotalComments, updateCommentsCounter, reportError} from './create_comment.js';
 import {manageVisibleComments} from './manage_visible_comments.js';
+import {getCommentsCount, updateCommentsCounter, reportError} from './utils.js'
 
 function deleteCommentOrReply(url, id){
     $.ajax({
@@ -9,17 +9,17 @@ function deleteCommentOrReply(url, id){
             id : id,
         },
         success : function() {
-            showResponseMessage(id);
+            showIsDeletedMessage(id);
             removeCommentOrReplyFromDOM(id);
-            $(".modal").modal("hide");
+            hideDeleteModal();
         },
         error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
 }
 
-function showResponseMessage(id) {
+function showIsDeletedMessage(id) {
     let target = $(getTarget(id));
-    target.children().html('');
+    target.children().text('');
     if(isComment(id))
         // show() because if edit form opened while deleting, .text element would remain hidden
         target.children('.text').show().html(
@@ -33,16 +33,14 @@ function getTarget(id) {
     return $('#delete-button-' + id).parent() //find target comment/reply through delete-button
 }
 
+function isComment(id){
+    return getTarget(id).hasClass('comment');
+}
+
 function removeCommentOrReplyFromDOM(id) {
     $(getTarget(id)).fadeTo(700, 0.00, function(){ 
         $(this).slideUp(500, function() {
-            if (isLastReply($(this))){
-                let parentComment = getParentComment($(this));
-                removeShowRepliesButton(parentComment); 
-                displayNoRepliesYetMessage(parentComment); 
-            }
-            
-            if(isComment(id)){
+            if (isComment(id)){
                 decrementCommentsCount();
                 updateCommentsCounter();
                 // Deletes comment. It's important to call it here because manageVisibleComments(); has to be called after comment removal.
@@ -50,13 +48,19 @@ function removeCommentOrReplyFromDOM(id) {
                 $(this).remove(); // comment is removed.
                 // Calls loadMoreComments() from 'else if' block (visibleComments < previousBreakPoint) which sends ajax request.
                 // Ajax is send from ajax.
-                manageVisibleComments(); 
+                manageVisibleComments();
+                if (lastCommentDeleted()){
+                    displayNoCommentsYetMessage();
+                    $('#comments-counter').remove();
+                }
             } 
-            else $(this).remove(); // It is reply -> reply is removed.
-    
-            if (lastCommentDeleted()){
-                displayNoCommentsYetMessage();
-                $('#comments-counter').remove();
+            else { // It is reply
+                if (isLastReply($(this))){
+                    let parentComment = getParentComment($(this));
+                    removeShowRepliesButton(parentComment); 
+                    displayNoRepliesYetMessage(parentComment); 
+                }
+                $(this).remove();
             }
         });
     });
@@ -77,15 +81,11 @@ function removeShowRepliesButton(comment){
 function displayNoRepliesYetMessage(comment){
     let commentId = comment.attr('id');
     let message = '<span class="no-replies-message" id="no-replies-message-' + commentId + '">No replies yet</span>'
-    comment.find('.text').after(message)
-}
-
-function isComment(id){
-    return getTarget(id).hasClass('comment');
+    comment.find('.edit-form').after(message);
 }
 
 function decrementCommentsCount(){
-    $('#comments-count').text(countTotalComments() - 1);
+    $('#comments-count').text(getCommentsCount() - 1);
 }
 
 function displayNoCommentsYetMessage(){
@@ -96,4 +96,21 @@ function lastCommentDeleted(){
     return $('.comment').length === 0;
 }
 
-export default deleteCommentOrReply;
+function hideDeleteModal(){
+    $(".modal").modal("hide");
+}
+
+export {
+    deleteCommentOrReply,
+    showIsDeletedMessage,
+    getTarget,
+    removeCommentOrReplyFromDOM,
+    isLastReply,
+    getParentComment,
+    removeShowRepliesButton,
+    displayNoRepliesYetMessage,
+    isComment,
+    decrementCommentsCount,
+    displayNoCommentsYetMessage,
+    lastCommentDeleted
+}

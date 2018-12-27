@@ -1,9 +1,6 @@
-import {addReplyButtonListener,
-        addReplyFormSubmitListener, 
-        addEditButtonListener,
-        addEditFormListeners,
-        addDeleteFormSubmitListener,
-        } from './main.js';
+import {addReplyButtonListener, addReplyFormSubmitListener, addEditButtonListener, addEditFormListeners,
+    addDeleteFormSubmitListener} from './main.js';
+import {updateCommentsCounter, getCommentsCount, reportError} from './utils.js'
 import {manageVisibleComments} from './manage_visible_comments.js';
 
 // ajax for comments
@@ -12,10 +9,16 @@ function createComment(textarea){
         url : '/comments/create-comment/',
         type : "POST",
         data : { 
-            text: textarea.val()
+            text: textarea.val(),
+            owner_id: window.comments.owner_id,
+            owner_model: window.comments.owner_model,
         }, 
         success : function(newComment) {
             addComment(newComment);
+            if(firstCreated()){
+                removeNoCommentsMessage();
+                addCommentsCounterToDOM();
+            }   
             resetCommentForm(textarea);
             incrementCommentsCount();
             updateCommentsCounter();
@@ -27,15 +30,19 @@ function createComment(textarea){
 
 function addComment(comment){
     $('#comments').prepend(comment);
-    fadeIn(); 
-    addReplyButtonListener(newCommentId());
-    addEditButtonListener(newCommentId());
-    addEditFormListeners('#edit-form-' + newCommentId());
-    addReplyFormSubmitListener('#reply-form-' + newCommentId());
-    addDeleteFormSubmitListener('#delete-form-' + newCommentId());
+    fadeInComment(); 
+    addEventListenersToComment(newCommentId());
 }
 
-function fadeIn(){
+function addEventListenersToComment(id){
+    addReplyButtonListener(id);
+    addEditButtonListener(id);
+    addEditFormListeners('#edit-form-' + id);
+    addReplyFormSubmitListener('#reply-form-' + id);
+    addDeleteFormSubmitListener('#delete-form-' + id);
+}
+
+function fadeInComment(){
     $('.comment').first().hide().fadeIn(1000)
 }
 
@@ -45,11 +52,10 @@ function newCommentId() {
 }
 
 function resetCommentForm(textarea) {
-    textarea.val(''); // remove the value from the input
-    if (isFirstComment()) removeNoCommentsMessage();
+    textarea.val('');
 }
 
-function isFirstComment() {
+function firstCreated() {
     return $('.comment').length === 1;
 }
 
@@ -58,43 +64,23 @@ function removeNoCommentsMessage() {
 }
 
 function incrementCommentsCount(){
-    $('#comments-count').text(countTotalComments() + 1);
-}
-
-function updateCommentsCounter(){
-    let commentsCount = countTotalComments();
-    let text = ' comments';
-    if(commentsCount === 1) { //commentsCount is global variable defined in base.html
-        text = ' comment';
-        if(getCommentsCounter().length === 0){ // check if comment-counter is in the DOM,
-            addCommentsCounterToDOM(); 
-        }
-    }
-    getCommentsCounter().html('<strong>' + commentsCount + text + '</strong>');
-}
-
-function countTotalComments(){
-    return Number($('#comments-count').text());
+    $('#comments-count').text(getCommentsCount() + 1);
 }
 
 function addCommentsCounterToDOM(){
-    let commentCounter = '<p id="comments-counter"><strong>1 comment</strong></p>'
-    $('#title').after(commentCounter);
-}
-
-function getCommentsCounter(){
-    return $('#comments-counter');
-}
-
-function reportError(xhr,errmsg) {
-    $('#error-log').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
-        " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
-    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+    let commentsCounter = '<p id="comments-counter"><strong>1 comment</strong></p>'
+    $('#title').after(commentsCounter);
 }
 
 export {
-    countTotalComments,
     createComment,
-    updateCommentsCounter,
-    reportError
+    addComment,
+    addEventListenersToComment,
+    fadeInComment,
+    newCommentId,
+    resetCommentForm,
+    firstCreated,
+    removeNoCommentsMessage,
+    incrementCommentsCount,
+    addCommentsCounterToDOM,
 }

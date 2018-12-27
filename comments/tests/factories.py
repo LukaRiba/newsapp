@@ -15,7 +15,7 @@ class CommentFactory(factory.django.DjangoModelFactory):
     pub_date = factory.Faker('past_datetime', tzinfo=timezone.utc)
     content_type = ContentType.objects.get(model='article')
     object_id = None # must be set in CommentFactory constructor
-    # comment
+    # region comment
         # Gets content_object through content_type and object_id after creation of comment (Lazy attribute).
         # This is what GenericForeignKey does (see Comment model). Without setting content_object like this,
         # if we create comment passing some article id as object_id:

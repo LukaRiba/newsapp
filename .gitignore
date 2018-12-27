@@ -3,10 +3,15 @@
 __pycache__/
 
 /media/*
-!media/.gitkeep
+!/media/.gitkeep
+!/media/files/
+/media/files/*
+!/media/files/.gitkeep
 
 node_modules/
 package-lock.json
+package.json
+jest-config.js
 
 htmlcov/ 
 .coverage

@@ -3,9 +3,8 @@ import {addShowRepliesButtonListener,
        addEditButtonListener,
        addEditFormListeners,
        addDeleteFormSubmitListener} from './main.js';
-import {reportError} from './create_comment.js';
+import {reportError} from './utils.js';
 
-// ajax for replies
 function createReply(textarea, parentId){
     $.ajax({
         url : '/comments/create-reply/',
@@ -17,7 +16,7 @@ function createReply(textarea, parentId){
         success : function(newReply) {
             hideReplyForm(textarea, parentId);
             addReply(newReply, parentId);
-            fadeIn(parentId);
+            fadeInReply(parentId);
         },
         error : function(xhr,errmsg) { reportError(xhr,errmsg); }
     });
@@ -28,7 +27,6 @@ function hideReplyForm(textarea, parentId) {
     $('#reply-form-' + parentId).hide();
 }
 
-// Add new reply to DOM and show replies if hidden
 function addReply(reply, parentId){
     $('#replies-' + parentId).prepend(reply).show();
     addShowRepliesButtonOrChangeItsText(parentId);
@@ -37,21 +35,21 @@ function addReply(reply, parentId){
     addDeleteFormSubmitListener('#delete-form-' + newReplyId(parentId))
 }
 
-function addShowRepliesButtonOrChangeItsText(id) {
-    if (isFirstReply(id)) {
-        addShowRepliesButton(id); 
-        addShowRepliesButtonListener(id);
-    } else getShowRepliesButton(id).text('Hide replies'); 
+function addShowRepliesButtonOrChangeItsText(parentId) {
+    if (isFirstReply(parentId)) {
+        addShowRepliesButton(parentId); 
+    } else getShowRepliesButton(parentId).text('Hide replies'); 
 }
 
-function isFirstReply(id) {
-    return $('#replies-' + id + ' > .reply').length === 1;
+function isFirstReply(parentId) {
+    return $('#replies-' + parentId + ' > .reply').length === 1;
 }
 
 function addShowRepliesButton(parentId) {
     let showRepliesbutton = $('<button class="show-replies" id="show-replies-' + 
         parentId + '">Hide replies</button>')
-    $('#no-replies-message-' + parentId).after(showRepliesbutton).remove() 
+    $('#no-replies-message-' + parentId).after(showRepliesbutton).remove();
+    addShowRepliesButtonListener(parentId); 
 }
 
 function newReplyId(parentId) {
@@ -59,8 +57,17 @@ function newReplyId(parentId) {
     return newReply.attr('id');
 }
 
-function fadeIn(parentId){
+function fadeInReply(parentId){
     $('#replies-' + parentId + ' .reply').first().hide().fadeIn(1000)
 }
 
-export default createReply;
+export {
+    createReply,
+    hideReplyForm,
+    addReply,
+    addShowRepliesButtonOrChangeItsText,
+    isFirstReply,
+    addShowRepliesButton,
+    newReplyId,
+    fadeInReply
+}

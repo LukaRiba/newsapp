@@ -97,5 +97,9 @@
   {{ block.super }}
   <script type="module" src="{% static 'comments/js/main.js' %}"></script>
   <!-- if modules are not supported in browser, use this script -->
+  <script>
+    // If variable is not a string, like owner_id, we don't have to use quotation marks
+    window.comments = { owner_id: {{ owner_id }}, owner_model: '{{ owner_model }}' }
+  </script>
   <script nomodule src="{% static 'comments/js/no_module/no_module_main.js' %}"></script>
 {% endblock script %}

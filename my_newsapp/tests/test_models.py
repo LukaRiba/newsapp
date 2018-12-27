@@ -24,10 +24,6 @@ class CategoryTests(TestCase):
         category.title = 'Changed'
         category.save()    
         self.assertEqual(category.title, 'Changed')
-        # comment
-            # When used as a context manager, assertRaises() accepts the additional keyword argument msg.
-            # The context manager will store the caught exception object in its exception attribute. 
-            # This can be useful if the intention is to perform additional checks on the exception raised.
         with self.assertRaises(Category.DoesNotExist) as cm: 
             Category.objects.get(title='Primary')
             self.assertEqual(cm.exception.msg, 'Category matching query does not exist.')
@@ -113,9 +109,6 @@ class ImageTests(TestCase):
         self.invalid_image.image.delete()
         
     def test_image_create_with_supported_extension(self):
-        # comment
-            # Here we assert that AssertionError will be raised by self.assertRaises(ValidationError, image.full_clean),
-            # for in this case image.full_clean doesn't raise ValidationError because file extension is valid.
         with self.assertRaises(AssertionError) as raised:
             self.assertRaises(ValidationError, self.image.full_clean)
             self.assertEqual(raised.exception.msg, 'ValidationError not raised by full_clean')
@@ -137,12 +130,6 @@ class FileTests(TestCase):
         self.unsupported_file = FileFactory(file=get_test_file('test_file.txt'))
 
     def tearDown(self):
-        # comment
-            # Deletes uploaded test files from tempdir. Here, delete() is called on FileField, not on instance!
-            # pylint is underlineing but it is correct: "When you access a FileField on a model, you are given an 
-            # instance of FieldFile as a proxy for accessing the underlying file."
-            #   https://docs.djangoproject.com/en/1.11/ref/models/fields/#filefield-and-fieldfile
-            # -> linting was disabled for this in seetings.json: "python.linting.pylintArgs": [ "--disable=E1101" ]
         self.doc_file.file.delete()
         self.pdf_file.file.delete()
         self.unsupported_file.file.delete()

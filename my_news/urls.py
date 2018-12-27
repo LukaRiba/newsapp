@@ -24,11 +24,6 @@ urlpatterns = [
     url(r'^comments/', include('comments.urls')),
 ]
 
-#comment
-    # Za uploadane fileove - media - moramo definirati url na ovaj način; + dodamo if statement za DEBUG 
-    # https://docs.djangoproject.com/en/2.0/howto/static-files/#serving-files-uploaded-by-a-user-during-development
-    # https://stackoverflow.com/questions/49096239/django-imagefield-not-uploading-the-image?rq=1
-    # dobro objašnjeno: https://overiq.com/django/1.10/handling-media-files-in-django/
 if settings.DEBUG:
     import debug_toolbar
     # because url() instances must be in one list

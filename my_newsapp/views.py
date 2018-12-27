@@ -56,9 +56,6 @@ class HomeViewMixin:
             return other_articles[:6]
         
 class FormsetsContextMixin:
-    # comment
-        # Without context defined in 'if self.request.POST:' block, error messages won't be
-        # displayed on page in case of invalid formset, when post() method returns get() method.
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
@@ -94,37 +91,11 @@ class CategoryView(NavigationContextMixin, ListView):
     def get_queryset(self):
         return self.get_category().articles.all()
 
-# comment
-    # obavezno dekorirati metodu dispatch sa never_cache -> bez ovoga, browser sprema posjećene ArticleDetail stranice
-    # u cache, te ih učitava iz cache-a ukoliko im pristupimo tako da stisnemo BACK ili FORWARD button na browseru.
-    # To znači da se stranica ne load-a sa servera i samim time ne pokreće se dispatch() metoda, koja poziva get(). 
-    # To znači da se request.session['comments_owner_id'] ne update-a, dakle vratili smo se na stranicu
-    # article-a čiji je id npr 13, a request.session['comments_owner_id'] je ostao 25, od zadnje loadane stranice.
-    # Zbog toga, ako kliknemo 'Load 10 more comments' button, ovaj će poslati ajax request load_more_comments funkciji
-    # iz comments.views, koja će vratiti 10 komentara za article čiji je id 25, ali mi se nalazimo na stranici od
-    # articlea čiji je id 13!! never_cache decorator osigurava da browser  ArticleDetail stranicu nikad ne sprema u 
-    # cache, tako da kada kliknemo na BACK ili FORWARD button u browser-u, i promijenimo ArticleDetail stranicu, 
-    # ona se mora uvijek učitati sa servera, i tako update-ati request.session['comments_owner_id']!.
-    # Isto se moglo riješiti i na drugi način, tako da u urls.py, tako da as_view() metodu wrappamo u dekorator:
-    #       from django.views.decorators.cache import never_cache
-    #
-    #       urlpatterns = [
-    #       ...
-    #       url(r'^(?P<category>[\w-]+)/(?P<id>\d+)/(?P<slug>[\w-]+)/$',
-    #           never_cache(views.ArticleDetailView.as_view()), name='article-detail')
-    #       ...
-    #      ]
 @method_decorator(never_cache, name='dispatch')
 class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView):
     template_name = 'my_newsapp/detail.html'
     model = Article
     
-    # Override to add these variables to request.session, required for comments app
-    def get(self, request, *args, **kwargs):
-        self.request.session['comments_owner_model_name'] = self.model.__name__
-        self.request.session['comments_owner_id'] = self.kwargs['id']
-        return super(ArticleDetailView, self).get(request, *args, **kwargs)
-
 class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'
     form_class = ArticleForm
@@ -159,18 +130,6 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
     success_msg = 'Article updated'
     login_url = 'my_newsapp:login'
     
-    # comment 
-        # image_formset.selected_images contain ids of images that have been selected for deletion before posting.
-        # As post() method returns get() method in case of invalid image_formset (or others), ImageInlineFormSet
-        # clean() is called again (why? - probbably because then context is updated with form/formset errors which than
-        # can be accessed in template) and then, for Validation error to be properly raised for case when all images
-        # are selected for deletion and none is uploaded, we must pass ids of selected_images to clean(). We can do
-        # that here in line 'context['image_formset'].selected_images = self.request.POST.getlist('image-checkbox[]')'
-        # because request.POST is not empty in that case, as get_context_data() is called from post() (via get()). Then
-        # we can access selected_images in clean() method, popping them from kwargs in ImageInlineFormSet __init__()
-        # method (so **kwargs contain image_formset attributes). When we go to edit article view by clicking 'Edit
-        # Article' button in detail view, then that is normal get request, so selected_images is None, as request.POST
-        # is empty dict. But in that case, clean() is not even called.
     def get_context_data(self, **kwargs):
         context = super(EditArticleView, self).get_context_data(**kwargs)
         context['image_formset'].instance = self.get_object()

@@ -50,17 +50,6 @@ class ImageFactory(factory.django.DjangoModelFactory):
         model = Image 
         django_get_or_create = ('image', 'description', 'article') # image field is not included here
 
-    #comment
-        # for some reason, for model's image field (even when it is not included in django_get_or_create), factory
-        # creates example.jpg image file and saves it to MEDIA_ROOT, even if in ImageFactory constructor arguments
-        # are passed for different name and format of the image - and that different image is created too and used in tests!
-        # So, two files are created - default arguments create example.jpg and provided ones another image which is
-        # actually image of the image field. It must be a bug of some kind - default arguments are overriden, but 
-        # image file is still created from default arguments and saved in MEDIA_ROOT folder, even if it is not
-        # value of ImageField and so has nothing to do with created Image instance !!!?? So, when in test's tearDown()
-        # method self.image.image.delete() and self.invalid_image.image.delete() are called, image files binded to
-        # ImageField are deleted (we want that), but those default example.jpg-s are left in MEDIA_ROOT, so obvious
-        # solution is to find them through os and remove them manually, also in tearDown().
     image = factory.django.ImageField()
     description = factory.Faker('text', max_nb_chars=30)
     article = factory.SubFactory(ArticleFactory)

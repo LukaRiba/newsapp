@@ -10,30 +10,17 @@ from .models import Comment
 from .forms import CommentForm, ReplyForm, EditForm
 from .decorators import require_ajax
 
-# comment
-    # Prije pisanja testova, nije postojalo
-    # 'content_type=ContentType.objects.get(model=self.request.session['comments_owner_model_name'])' u
-    # Comment.objects.filter(). No prilikom testiranja, imao sam situaciju gdje sam u testu kreirao 1 comment i 1
-    # reply, pomoću CommentFactory-ja ondosno ReplyFactory-ja. Pošto se koristi testna baza, to su bila prva 2 Comment
-    # objekta (reply je Comment objekt, postoji samo Comment model) u bazi, uz 1 Article objekt kojeg sam kreirao da
-    # bude comment owner. E sad, Article objekt je prvi, dakle ima id=1. Comment objekt koji je prvi kreiran ima isto
-    # id=1, i njegov content_object je article, prema tome Comment-ov object_id=article.id=1. Drugi Comment objekt je
-    # reply, čiji je content_object prvi Comment. Kako je id prvog commenta 1, znači da je object_id replyja (drugi
-    # comment object) = 1. I evo problema, imamo 2 Comment objekta sa istim object_id-om, iako je jedan od njih reply i
-    # nebi trebao proći kroz filter, međutim kako mi filtriramo sve comment objekte čiji je object_id jednak
-    # articleovom, a ovdje je i replijev object_id jednak articleovomm, reply prolazi filter i postaje comment, te test
-    # ne prolazi zato jer testi- da response sadrži '1 comment', a on u biti sadrži '2 comments' jer je reply prošao
-    # pod comment. Zato smo dodali i provjeru content_typea - jer sada reply neće proći pošto je njegov content_type
-    # 'comment', a ne 'article'.
 class CommentsContextMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         comments = Comment.objects.filter(
-            content_type=get_owner_content_type(self.request),
-            object_id=self.request.session['comments_owner_id']
+            content_type=ContentType.objects.get(model=self.model.__name__),
+            object_id=self.kwargs['id'] 
         )
         data = {
             'comments': comments,
+            'owner_id': self.kwargs['id'],
+            'owner_model': self.model.__name__,
             'comment_form': CommentForm(),
             'reply_form': ReplyForm(),
             'edit_form': EditForm(),
@@ -48,7 +35,7 @@ def get_owner_content_type(request):
 @login_required
 @require_POST
 @require_ajax
-def create_comment(request):    
+def create_comment(request):
     form = CommentForm(request.POST)
     if form.is_valid():
         save_comment_form(request, form)
@@ -64,8 +51,8 @@ def create_comment(request):
 def save_comment_form(request, form):
     form.save(commit=False)
     form.instance.author = request.user
-    form.instance.content_type_id = get_owner_content_type(request).id
-    form.instance.object_id = request.session['comments_owner_id']
+    form.instance.content_type_id = ContentType.objects.get(model=request.POST['owner_model']).id
+    form.instance.object_id = request.POST['owner_id']
     form.save()
 
 @login_required
