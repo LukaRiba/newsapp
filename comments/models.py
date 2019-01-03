@@ -12,9 +12,6 @@ class Comment(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 
-    def is_reply(self):
-        return self.parent != None
-
     def __str__(self):
         return self.text
 

@@ -84,25 +84,25 @@ class CommentsOwnerViewAnonymousUserTests(TestCase):
             self.assertNotContains(response, content) 
 
     def test_one_comment_with_one_reply(self):
-        comment = CommentFactory(object_id=self.comments_owner.id)
-        reply = ReplyFactory(parent=comment)
+        parent = CommentFactory(object_id=self.comments_owner.id)
+        reply = ReplyFactory(object_id=self.comments_owner.id, parent=parent)
         response = self.client.get(self.url)
 
         self.assertContains(response, '<strong>1 comment</strong>') 
         self.assertNotContains(response, 'No replies yet.')
-        self.assertEqual(comment.replies.count(), 1)
+        self.assertEqual(parent.replies.count(), 1)
         for content in ['Show 1 reply', reply.author, reply.pub_date.date().strftime('%b %d, %Y'), reply.text]:
             self.assertContains(response, content)
         for content in ['reply-button', 'reply-form', 'edit-button', 'edit-form' 'delete-button']:
             self.assertNotContains(response, content) 
 
     def test_one_comment_with_2_replies(self):
-        comment = CommentFactory(object_id=self.comments_owner.id)
-        ReplyFactory.create_batch(size=2, parent=comment)
+        parent = CommentFactory(object_id=self.comments_owner.id)
+        ReplyFactory.create_batch(size=2, object_id=self.comments_owner.id, parent=parent)
         response = self.client.get(self.url)
         
         self.assertContains(response, '<strong>1 comment</strong>')
-        self.assertEqual(comment.replies.count(), 2)
+        self.assertEqual(parent.replies.count(), 2)
         self.assertContains(response, 'Show 2 replies')
 
     # Next tests are not affected by user authenticification; outcome is the same 
@@ -195,25 +195,25 @@ class CommentsOwnerViewLoggedUserTests(TestCase):
             self.assertNotContains(response, content)
 
     def test_one_comment_with_one_reply_user_is_reply_author(self):
-        comment = CommentFactory(object_id=self.comments_owner.id)
-        reply = ReplyFactory(parent=comment, author=self.user)
+        parent = CommentFactory(object_id=self.comments_owner.id, text='Parent Comment')
+        reply = ReplyFactory(object_id=self.comments_owner.id, parent=parent, author=self.user)
         response = self.client.get(self.url)
 
-        self.assertContains(response, '<strong>1 comment</strong>') 
+        self.assertContains(response, '<strong>1 comment</strong>') # created reply doesn't count as comment. Only parent does.
         self.assertNotContains(response, 'No replies yet.')
-        self.assertEqual(comment.replies.count(), 1)
+        self.assertEqual(parent.replies.count(), 1)
         for content in ['Show 1 reply', reply.author, reply.pub_date.date().strftime('%b %d, %Y'), reply.text,
             f'edit-button-{reply.id}', f'edit-form-{reply.id}', f'delete-button-{reply.id}']:
             self.assertContains(response, content)
 
     def test_one_comment_with_one_reply_user_is_not_reply_author(self):
-        comment = CommentFactory(object_id=self.comments_owner.id)
-        reply = ReplyFactory(parent=comment)
+        parent = CommentFactory(object_id=self.comments_owner.id, text='Parent Comment')
+        reply = ReplyFactory(object_id=self.comments_owner.id, parent=parent)
         response = self.client.get(self.url)
 
         self.assertContains(response, '<strong>1 comment</strong>') 
         self.assertNotContains(response, 'No replies yet.')
-        self.assertEqual(comment.replies.count(), 1)
+        self.assertEqual(parent.replies.count(), 1)
         for content in ['Show 1 reply', reply.author, reply.pub_date.date().strftime('%b %d, %Y'), reply.text]:
             self.assertContains(response, content)
         for content in [f'edit-button-{reply.id}', f'edit-form-{reply.id}', f'delete-button-{reply.id}']:
@@ -263,6 +263,7 @@ class CreateCommentTests(TestCase):
         #     HTTP response codes. In these cases, you can check response.status_code in your test. 
         # Thats why test fails if we assert that self.client.post(self.url) raises PermissionDenied. Instead, we have 
         # to check response.status_code which is 403 (Forbidden).
+    # endregion
     def test_error_403_if_post_request_not_ajax(self):
         response = self.client.post(self.url, data=self.data)
         self.assertEqual(response.status_code, 403)
@@ -300,16 +301,17 @@ class CreateCommentTests(TestCase):
     LOGIN_URL = '/admin/login',
     MEDIA_ROOT=tempfile.gettempdir() + '/')
 class CreateReplyTests(TestCase):
-    
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='testpass123')
         self.client.login(username='testuser', password='testpass123')     
         self.url = reverse('comments:create-reply')
         self.comment_owner = ArticleFactory()
-        self.reply_owner = CommentFactory(object_id=self.comment_owner.id)
+        self.reply_parent = CommentFactory(object_id=self.comment_owner.id)
         self.data = {
             'text': 'reply text.',
-            'parentId': self.reply_owner.id
+            'owner_model': 'article',
+            'owner_id': self.comment_owner.id,
+            'parent_id': self.reply_parent.id
         }
 
     def test_redirects_amonymous_user_to_login_url(self):
@@ -321,7 +323,7 @@ class CreateReplyTests(TestCase):
         ]
         for response in responses:
             self.assertRedirects(response, f'{settings.LOGIN_URL}/?next={quote_plus(self.url)}')
-        self.assertEqual(Comment.objects.count(), 1) # only reply_owner, no reply created
+        self.assertEqual(Comment.objects.count(), 1) # only reply_parent, no reply created
             
     def test_error_405_if_request_method_not_POST(self):
         response = self.client.get(self.url)
@@ -341,11 +343,11 @@ class CreateReplyTests(TestCase):
                 "The view comments.decorators.create_reply didn't return an HttpResponse object. It returned None instead.")
 
     def test_invalid_POST_data_no_parentId(self):
-        self.data.update({'parentId': ''})
+        self.data.update({'parent_id': ''})
         with self.assertRaises(ValueError) as context:
             self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
             self.assertEqual(context.exception.msg,
-                "The view comments.decorators.create_reply didn't return an HttpResponse object. It returned None instead.")
+                '"parent_id" is required for creating reply. It has to be an id of a valid Comment object.')
 
     def test_reply_created_with_valid_request(self):
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
@@ -354,7 +356,8 @@ class CreateReplyTests(TestCase):
         self.assertEqual(Comment.objects.count(), 2)
 
         created_reply = Comment.objects.first() # last created, as ordering is -pub_date
-        self.assertEqual(created_reply.object_id, self.reply_owner.id)
+        self.assertEqual(created_reply.object_id, self.comment_owner.id)
+        self.assertEqual(created_reply.parent_id, self.reply_parent.id)
         
         for key in ['reply', 'edit_form', 'create_reply']:
             self.assertTrue(key in response.context)

@@ -11,7 +11,9 @@ function createReply(textarea, parentId){
         type : "POST",
         data : { 
             text: textarea.val(),
-            parentId: parentId
+            owner_model: window.comments.owner_model,
+            owner_id: window.comments.owner_id,
+            parent_id: parentId
         }, 
         success : function(newReply) {
             hideReplyForm(textarea, parentId);

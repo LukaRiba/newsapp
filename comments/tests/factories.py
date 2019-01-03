@@ -24,6 +24,7 @@ class CommentFactory(factory.django.DjangoModelFactory):
         # we get empty queryset! If we print comment.content_object we get 'log entry' -> so we se that no object is 
         # assigned to thet field. When working with real model, content_object is assigned because
         # content_object is GenericForeignKey field, so we must also assign it here like this.
+    # endregion
     content_object = factory.LazyAttribute(lambda obj: obj.content_type.get_object_for_this_type(pk=obj.object_id))
 
 class ReplyFactory(factory.django.DjangoModelFactory):
@@ -34,7 +35,7 @@ class ReplyFactory(factory.django.DjangoModelFactory):
     author = factory.SubFactory(UserFactory)
     text = factory.Faker('text', max_nb_chars=50)
     pub_date = factory.Faker('past_datetime', start_date='-30d', tzinfo=timezone.utc)
-    content_type = ContentType.objects.get(model='comment')
-    object_id = factory.LazyAttribute(lambda obj: obj.parent.id)
+    content_type = ContentType.objects.get(model='article')
+    object_id = None # must be set in ReplyFactory constructor
     content_object = factory.LazyAttribute(lambda obj: obj.content_type.get_object_for_this_type(pk=obj.object_id))
     parent = factory.SubFactory(CommentFactory)

@@ -17,7 +17,7 @@ class CommentsTagsTests(TestCase):
         first = CommentFactory(text='First comment', object_id=self.comments_owner.id)
         second = CommentFactory(text='Second comment', object_id=self.comments_owner.id)
         for comment in [first, second]:
-            ReplyFactory.create_batch(size=2, parent=comment)
+            ReplyFactory.create_batch(size=2, object_id=self.comments_owner.id, parent=comment)
         replies = Comment.objects.filter(parent_id__isnull=False) # if parent_id is not None, it is reply
         filtered = comments_tags.for_comment(replies, first.id)
         self.assertEqual(list(filtered), list(first.replies.all()))

@@ -15,7 +15,8 @@ class CommentsContextMixin:
         context = super().get_context_data(**kwargs)
         comments = Comment.objects.filter(
             content_type=ContentType.objects.get(model=self.model.__name__),
-            object_id=self.kwargs['id'] 
+            object_id=self.kwargs['id'],
+            parent=None 
         )
         data = {
             'comments': comments,
@@ -28,9 +29,6 @@ class CommentsContextMixin:
             }
         context.update(data)
         return context
-
-def get_owner_content_type(request):
-    return ContentType.objects.get(model=request.session['comments_owner_model_name'])
 
 @login_required
 @require_POST
@@ -59,10 +57,12 @@ def save_comment_form(request, form):
 @require_POST
 @require_ajax
 def create_reply(request):
+    if request.POST['parent_id'] == '':
+        raise ValueError('"parent_id" is required for creating reply. It has to be an id of a valid Comment object.')
+
     form = ReplyForm(request.POST)
-    parent_id = request.POST.get('parentId')
     if form.is_valid():
-        save_reply_form(request, form, parent_id)
+        save_reply_form(request, form)
         context = {
             'reply': Comment.objects.latest('pub_date'),
             'edit_form': EditForm(),
@@ -70,11 +70,14 @@ def create_reply(request):
             } 
         return render(request, 'comments/replies.html', context)
 
-def save_reply_form(request, form, parent_id):
+def save_reply_form(request, form):
     form.save(commit=False)
     form.instance.author = request.user
-    form.instance.content_type_id = ContentType.objects.get(model='comment').id
-    form.instance.object_id = form.instance.parent_id = parent_id
+    # owner of a reply is object which is owner of replie's parent comment
+    form.instance.content_type_id = ContentType.objects.get(model=request.POST['owner_model']).id
+    form.instance.object_id = request.POST['owner_id']
+    # assing parent_id to reply
+    form.instance.parent_id = request.POST['parent_id']
     form.save()
 
 @login_required
