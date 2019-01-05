@@ -44,7 +44,7 @@ function removeCommentOrReplyFromDOM(id) {
                 decrementCommentsCount();
                 updateCommentsCounter();
                 // Deletes comment. It's important to call it here because manageVisibleComments(); has to be called after comment removal.
-                // This is because then visibleCommentsCount() returns exact num of visible comments remained after deletion.
+                // This is because then renderedCommentsCount() returns exact num of visible comments remained after deletion.
                 $(this).remove(); // comment is removed.
                 // Calls loadMoreComments() from 'else if' block (visibleComments < previousBreakPoint) which sends ajax request.
                 // Ajax is sent from ajax.

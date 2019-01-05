@@ -3,7 +3,11 @@ import {
     getCommentsCount,
     getCommentsCounter,
     reportError,
-    getShowRepliesButton
+    getShowRepliesButton,
+
+    getLastRenderedCommentId,
+    updateLoadMoreCommentsButton,
+    renderedCommentsCount,
 } from '../../../static/comments/js/utils'
 
 test("getCommentsCount returns '#comments-count' element's text as a Number", () => {
@@ -110,3 +114,73 @@ test('getShowRepliesButton returns #show-replies-{parentId} element', () => {
     expect(button).toBeInstanceOf(jQuery);
     expect(button.attr('id')).toEqual('show-replies-111');
 })
+
+test('getLastRenderedCommentId', () => {
+    document.body.innerHTML = `
+        <div>
+          <div class="comment" id="6"></div>        
+          <div class="comment" id="5"></div>        
+          <div class="comment" id="4"></div>        
+          <div class="comment" id="3"></div>        
+          <div class="comment" id="2"></div>        
+          <div class="comment" id="1"></div>        
+        </div>`
+    expect(getLastRenderedCommentId()).toEqual('1');
+})
+
+test('renderedCommentsCount', () => {
+    document.body.innerHTML = `
+            <div class="comment"></div>        
+            <div class="comment"></div>        
+            <div class="comment"></div>`
+            
+    expect(renderedCommentsCount()).toEqual(3);
+})
+
+describe('updateLoadMoreCommentsButton', () => {
+    beforeAll( () => {
+        document.body.innerHTML = `
+        <p id="comments-count">20</p>
+          <div>
+            <div class="comment"></div>        
+            <div class="comment"></div>        
+            <div class="comment"></div>        
+            <div class="comment"></div>        
+            <div class="comment"></div>        
+          </div>
+        <button class="load-more-comments"></button>`
+    })
+
+    it('displays "Load 10 more Comments" if there is 10 or more remaining comments', () => {
+        // state: 20 total - 5 rendered = 15 comments remaining
+        updateLoadMoreCommentsButton();
+        expect($('.load-more-comments').text()).toEqual('Load 10 more Comments');
+
+        $('#comments-count').text(15);
+        // state: 15 total - 5 rendered = 10 comments remaining
+        updateLoadMoreCommentsButton();
+        expect($('.load-more-comments').text()).toEqual('Load 10 more Comments');
+
+    })
+
+    it('displays "Load (2-9) more comments" if there is 2 to 9 remaining comments', () => {
+        for (let totalComments = 14; totalComments >= 7; totalComments--) {
+            let remaining = totalComments - 5; // 5 rendered comments
+            $('#comments-count').text(totalComments);
+            // state: totalComments - 5 rendered = remaining comments
+            // 1st iteration: 14 - 5 = 9 remaining
+            // 2nd iteration: 13 - 5 = 8 remaining
+            // ... last iter:  7 - 5 = 2 remaining
+            updateLoadMoreCommentsButton();
+            expect($('.load-more-comments').text()).toEqual(`Load ${remaining} more Comments`);
+        }
+    })
+
+    it('displays "Load 1 more Comment" if there is 1 remaining comment', () => {
+        $('#comments-count').text(6);
+        // state: 6 total - 5 rendered = 1 comment remaining
+        updateLoadMoreCommentsButton();
+        expect($('.load-more-comments').text()).toEqual('Load 1 more Comment');
+    })
+})
+

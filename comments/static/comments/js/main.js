@@ -3,9 +3,9 @@ import {createComment} from './create_comment.js';
 import {createReply} from './create_reply.js';
 import updateCommentOrReply from './edit.js';
 import {deleteCommentOrReply} from './delete.js';
-import {addLoadMoreCommentsButtonListener, visibleCommentsCount, updateLoadMoreCommentsButton} from './load_comments.js';
+import {addLoadMoreCommentsButtonListener} from './load_comments.js';
 import {getPreviousBreakpoint, removeExtraComments, hideShowLessButton, showLoadMoreCommentsButton} from './manage_visible_comments.js';
-import {getShowRepliesButton} from './utils.js'
+import {getShowRepliesButton, renderedCommentsCount, updateLoadMoreCommentsButton} from './utils.js'
 
 $(function(){
     
@@ -164,7 +164,8 @@ function addDeleteFormSubmitListener(form) {
 function addShowLessCommentsButtonListener(){
     $('.show-less-comments').click(function(event){
         event.preventDefault();
-        let visibleComments = visibleCommentsCount(); // visible comments before removing
+        let visibleComments = renderedCommentsCount(); // visible comments before removing
+        //#region
         // visibleComments - 1 instead of visibleComments, forces to remove more comments, till next previousBreakpoint after every click.
         // That's because removeExtraComments() has configured not to remove anything if when called, visible comments equal breakpoint number
         // (only while visible comments num is greater than breakpoint number).
@@ -175,9 +176,10 @@ function addShowLessCommentsButtonListener(){
         // again returns 15, so removeExtraComments does nothing -> thats the reason we pass 'visibleComments - 1' to getPreviousBreakpoint().
         // Now it returns next (lower) previous breakpoint (because visibleComments - 1 is 14, so it calculates previous breakpoint which is 10), 
         // and removeExtraComments() removes 5 more comments.
+        //#endregion
         removeExtraComments(visibleComments, getPreviousBreakpoint(visibleComments - 1));
-        // After removing extra comments, num of visible comments has changed, so we call again visibleCommentsCount().
-        if(visibleCommentsCount() < 6) { $(this).hide() }
+        // After removing extra comments, num of visible comments has changed, so we call again renderedCommentsCount().
+        if(renderedCommentsCount() < 6) { $(this).hide() }
         showLoadMoreCommentsButton();
         updateLoadMoreCommentsButton();
     });

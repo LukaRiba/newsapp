@@ -486,7 +486,7 @@ class LoadMoreCommentsTests(TransactionTestCase):
 
     def test_2_visible_2_to_load(self):
         data = {
-            'lastVisibleCommentId': self.comments[1].id,
+            'lastRenderedCommentId': self.comments[1].id,
             'numOfCommentsToLoad': 2,
             'owner_id': self.comments_owner.id
         }
@@ -500,7 +500,7 @@ class LoadMoreCommentsTests(TransactionTestCase):
     def test_2_visible_6_to_load(self):
         # It is requested for 6 to load, but there are only 4 left to load
         data = {
-            'lastVisibleCommentId': self.comments[1].id,
+            'lastRenderedCommentId': self.comments[1].id,
             'numOfCommentsToLoad': 6,
             'owner_id': self.comments_owner.id
         }
@@ -514,7 +514,7 @@ class LoadMoreCommentsTests(TransactionTestCase):
 
     def test_no_comments_in_db(self):
         data = {
-            'lastVisibleCommentId': self.comments[5].id,
+            'lastRenderedCommentId': self.comments[5].id,
             'numOfCommentsToLoad': 4,
             'owner_id': self.comments_owner.id
         }

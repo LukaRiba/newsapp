@@ -76,7 +76,7 @@ def save_reply_form(request, form):
     # owner of a reply is object which is owner of replie's parent comment
     form.instance.content_type_id = ContentType.objects.get(model=request.POST['owner_model']).id
     form.instance.object_id = request.POST['owner_id']
-    # assing parent_id to reply
+    # assign parent_id to reply
     form.instance.parent_id = request.POST['parent_id']
     form.save()
 
@@ -101,9 +101,9 @@ def delete(request, pk):
 
 @require_ajax
 def load_more_comments(request):
-    last_visible = request.GET.get('lastVisibleCommentId')
-    comments_to_load = int(request.GET.get('numOfCommentsToLoad'))
-    comments_owner_id = request.GET.get('owner_id')
+    last_visible = request.GET['lastRenderedCommentId']
+    comments_to_load = int(request.GET['numOfCommentsToLoad'])
+    comments_owner_id = request.GET['owner_id']
     # How much more comments is in database 
     remaining_comments = Comment.objects.filter(id__lt=last_visible, object_id=comments_owner_id)
     if remaining_comments.exists():

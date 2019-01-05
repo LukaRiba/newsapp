@@ -1,3 +1,9 @@
+//functions for adding listeners (testing no needed)
+
+
+
+//other functions (tested)
+
 function updateCommentsCounter(){
     let commentsCount = getCommentsCount();
     let text;
@@ -23,11 +29,35 @@ function getShowRepliesButton(parentId){
     return $('#show-replies-' + parentId);
 }
 
+function getLastRenderedCommentId(){
+    return ($('.comment').last().attr('id'));
+}
+
+function updateLoadMoreCommentsButton(){
+    let button = $('.load-more-comments');
+    let remainingComments = getCommentsCount() - renderedCommentsCount(); 
+    if (remainingComments === 0) {
+        button.hide();
+    } else if(remainingComments === 1) {
+        button.text('Load 1 more Comment');
+    } else if(remainingComments < 10) {        
+        button.text('Load ' + remainingComments + ' more Comments');
+    } else if(remainingComments >= 10) {
+        button.text('Load ' + 10 + ' more Comments');
+    }  
+}
+
+function renderedCommentsCount(){
+    return $('.comment').length;
+}
+
 export {
     updateCommentsCounter,
     getCommentsCount,
     getCommentsCounter,
     reportError,
-
-    getShowRepliesButton
+    getShowRepliesButton,
+    getLastRenderedCommentId,
+    updateLoadMoreCommentsButton,
+    renderedCommentsCount,
 };
