@@ -16,8 +16,7 @@
  *    content-type, HTTP status code, content of the response (body), and
  *    whatever we want (see in documentation for more):
  *     https://tech.namshi.io/blog/2014/06/13/mockserver-effortless-api-mocking-library-in-node-js/
- *    https://github.com/namshi/mockserver 
- * 5. Here i wrapped everithing in a function so i can export it and use in tests
+ *     https://github.com/namshi/mockserver 
  */ 
 
 const http    =  require('http');
@@ -38,7 +37,7 @@ const path = require('path');
  * and mockserver works in tests
  */
 //#endregion
-const _path = path.resolve('./comments/tests/js/__tests__/server_mock');
+const _path = './comments/tests/js/__tests__/server_mock';
 const server = http.createServer(mockserver(_path));
 
 export function runMockServer(){

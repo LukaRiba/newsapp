@@ -22,7 +22,7 @@ function loadMoreComments(lastRenderedCommentId, numOfCommentsToLoad){
             owner_id: window.comments.owner_id
         }, 
         success : function(loadedComments) {
-            console.log(loadedComments);
+            console.log('RESPONSE:\n', loadedComments);
             addloadedComments(lastRenderedCommentId, loadedComments);
             //#region
             /**
