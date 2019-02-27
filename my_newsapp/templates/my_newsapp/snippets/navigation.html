@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <!-- base nav-bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container center">
@@ -8,14 +10,14 @@
       {% comment %} main nav-bar links {% endcomment %}
       <ul class="navbar-nav d-flex justify-content-between custom-nav-spacing"> <!-- Link list (<ul>) start -->
         <li class="nav-item">
-          <a class="nav-link write-something-link pl-0" href="{% url 'my_newsapp:create-article' %}">Write something</a>
+          <a class="nav-link write-something-link pl-0" href="{% url 'my_newsapp:create-article' %}">{% trans "Write Something" %}</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/news/home/">Home <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Categories
+            {% trans "Categories" %}
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"> <!-- Categories list drobdown start -->
           {% for category in categories %}
@@ -38,19 +40,19 @@
           </ul> <!-- Categories list drobdown end -->
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'my_newsapp:latest-articles' %}?page=1">Latest Articles</a>
+          <a class="nav-link" href="{% url 'my_newsapp:latest-articles' %}?page=1">{% trans "Latest Articles" %}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">About</a>
+          <a class="nav-link" href="#">{% trans "About" %}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Contact</a>
+          <a class="nav-link" href="#">{% trans "Contact" %}</a>
         </li>
         <li class="nav-item">
           {% if user.is_authenticated %}
-            <a class="nav-link" href="{% url 'my_newsapp:logout' %}">Logout</a>
+            <a class="nav-link" href="{% url 'my_newsapp:logout' %}">{% trans "Logout" %}</a>
           {% else %}
-            <a class="nav-link" href="{% url 'my_newsapp:login' %}?next={{request.path}}">Login</a>
+            <a class="nav-link" href="{% url 'my_newsapp:login' %}?next={{request.path}}">{% trans "Login" %}</a>
           {% endif %}   
         </li>
       </ul> <!-- Link list (<ul>) end -->

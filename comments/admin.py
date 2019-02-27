@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ugettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.db.models import Count, IntegerField, ExpressionWrapper

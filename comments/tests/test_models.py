@@ -21,3 +21,4 @@ class CommentTests(TestCase):
         comments = Comment.objects.all() # for ordering to take place, we have to query db
         for i in range( 0, comments.count() - 1):
             self.assertTrue(comments[i].pub_date > comments[i+1].pub_date)
+

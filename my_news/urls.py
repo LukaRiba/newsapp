@@ -17,12 +17,18 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+from django.conf.urls.i18n import i18n_patterns
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^news/', include('my_newsapp.urls')),
+    url(r'^rosetta/', include('rosetta.urls')),
     url(r'^comments/', include('comments.urls')),
 ]
+   
+# 'django.middleware.locale.LocaleMiddleware' must be in settings.MIDDLEWARE
+urlpatterns += i18n_patterns(
+    url(r'^admin/', admin.site.urls),
+    url(r'^news/', include('my_newsapp.urls')),
+)
 
 if settings.DEBUG:
     import debug_toolbar

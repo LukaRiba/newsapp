@@ -11,10 +11,10 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from django.utils.translation import ugettext as _
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 # Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation', # for integraton of modeltranslation with admin to work, modeltranslation must be placed before admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +43,8 @@ INSTALLED_APPS = [
     'easy_thumbnails',
     'crispy_forms',
     'django_unused_media', # usage: python manage.py cleanup_unused_media
+    
+    'rosetta',
     'betterforms', # is it used?
     'fileprovider', # is it used?
     'my_newsapp',
@@ -58,6 +61,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'fileprovider.middleware.FileProviderMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.middleware.locale.LocaleMiddleware' #for determining the current language
 ]
 
 ROOT_URLCONF = 'my_news.urls'
@@ -117,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 
@@ -125,7 +129,7 @@ DATE_FORMAT = 'M d, Y' # rendered date format
 
 DATETIME_FORMAT	= 'M d, Y, P'
 
-USE_L10N = False # because it overrides DATE_FORMAT
+USE_L10N = False # because it overrides DATE_FORMAT (Possible problems as is somehow related to i18n ??)
 
 USE_I18N = True
 
@@ -158,3 +162,10 @@ LOGIN_REDIRECT_URL = '/news/home'
 FILEPROVIDER_NAME = 'python'
 
 # INTERNAL_IPS = '127.0.0.1'  # debug_toolbar on/off
+
+LANGUAGES = (
+    ('en', _('English')),
+    ('hr', _('Croatian')),
+)
+
+LOCALE_PATHS = (BASE_DIR + '/locale/',)

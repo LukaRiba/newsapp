@@ -2,11 +2,16 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 from django.db.models import Count, IntegerField, ExpressionWrapper
+from modeltranslation.admin import TranslationAdmin
 
 from .models import Category, Article, Image, File
 
-@admin.register(Article)
-class ArticleAdmin(admin.ModelAdmin):
+# IMPORTANT:
+# 1. For modeltranslation integration with admin to work, we must put 'modeltranslation' before 'django.contrib.admin'
+#    in settings.INSTALLED_APPS 
+# 2. We cannot use @admin.register decorator on ArticleAdmin class when inheriting from TranslationAdmin Both Article
+#    and ArticleAdmin have to be registered with admin.site.register(Article, ArticleAdmin) - see below
+class ArticleAdmin(TranslationAdmin): # inheriting from Translation Admin for adding translation fields in Article change views
     # Field order in detail (change) view
     fields =  ('author', 'category', 'title', 'short_description', 'text')
     # Fields shown in list view
@@ -14,6 +19,7 @@ class ArticleAdmin(admin.ModelAdmin):
 
     def pub_date_reformated(self, obj):
         return obj.pub_date.strftime('%b %d, %Y')
+
     pub_date_reformated.short_description = 'published'
     pub_date_reformated.admin_order_field = 'pub_date'
 
@@ -22,6 +28,7 @@ class ArticleAdmin(admin.ModelAdmin):
             reverse('admin:auth_user_change', args=(obj.author.pk,)),
             obj.author
         ))
+        
     #region    
      # without this in admin list view will be AUTHOR_LINK instead AUTHOR, because we passed method author_link in
      # list_diplay. With this column name is set to AUTHOR. MUST be set above method definition, or
@@ -72,6 +79,7 @@ class ArticleAdmin(admin.ModelAdmin):
         )
         return qs.order_by('pub_date')
 
+admin.site.register(Article, ArticleAdmin)
 admin.site.register(Category)
 admin.site.register(Image)
 admin.site.register(File)
