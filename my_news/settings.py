@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +25,7 @@ SECRET_KEY = '8_8)^_q#dt@5mzf%@q&&20dyze47nx^6ptwu7cxc)$m_-6uzjk'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# when using tests.Client - without this host provided (ALLOWED_HOSTS = []) it throws error: 
+# when using tests.Client - without this host provided (ALLOWED_HOSTS = []) it throws error:
 #   Invalid HTTP_HOST header: 'testserver'. You may need to add 'testserver' to ALLOWED_HOSTS.
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'easy_thumbnails',
     'crispy_forms',
     'django_unused_media', # usage: python manage.py cleanup_unused_media
-    
+
     'rosetta',
     'betterforms', # is it used?
     'fileprovider', # is it used?
@@ -55,13 +55,14 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'fileprovider.middleware.FileProviderMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'django.middleware.locale.LocaleMiddleware' #for determining the current language
+
 ]
 
 ROOT_URLCONF = 'my_news.urls'
@@ -95,8 +96,8 @@ DATABASES = {
         'NAME': 'my_news_db',
         'USER': 'root',
         'PASSWORD': '',
-        'HOST': '', # prazan string predstavlja localhost (127.0.0.1)
-        'PORT': '' # pranan str predstavlja default port
+        'HOST': '127.0.0.1', # prazan string predstavlja localhost (127.0.0.1)
+        'PORT': '3357' # pranan str predstavlja default port
     }
 }
 
@@ -154,10 +155,10 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-LOGIN_URL = '/news/login'
-# LOGIN_URL = '/admin/login'		
+LOGIN_URL = 'my_newsapp:login'
+# LOGIN_URL = '/admin/login'
 
-LOGIN_REDIRECT_URL = '/news/home'
+LOGIN_REDIRECT_URL = 'my_newsapp:home'
 
 FILEPROVIDER_NAME = 'python'
 

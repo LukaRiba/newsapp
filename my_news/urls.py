@@ -23,11 +23,11 @@ urlpatterns = [
     url(r'^rosetta/', include('rosetta.urls')),
     url(r'^comments/', include('comments.urls')),
 ]
-   
+
 # 'django.middleware.locale.LocaleMiddleware' must be in settings.MIDDLEWARE
 urlpatterns += i18n_patterns(
     url(r'^admin/', admin.site.urls),
-    url(r'^news/', include('my_newsapp.urls')),
+    url(r'^', include('my_newsapp.urls')),
 )
 
 if settings.DEBUG:
