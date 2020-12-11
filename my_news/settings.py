@@ -13,21 +13,31 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 from django.utils.translation import ugettext_lazy as _
 
+import environ
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+env = environ.Env()
+
+READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=True)
+if READ_DOT_ENV_FILE:
+    # OS environment variables take precedence over variables from .env
+    env.read_env(str(BASE_DIR + '/.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '8_8)^_q#dt@5mzf%@q&&20dyze47nx^6ptwu7cxc)$m_-6uzjk'
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DJANGO_DEBUG', default=True)
 
 # when using tests.Client - without this host provided (ALLOWED_HOSTS = []) it throws error:
 #   Invalid HTTP_HOST header: 'testserver'. You may need to add 'testserver' to ALLOWED_HOSTS.
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', 'testserver'])
 
 # Application definition
 
@@ -93,11 +103,11 @@ WSGI_APPLICATION = 'my_news.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'my_news_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1', # prazan string predstavlja localhost (127.0.0.1)
-        'PORT': '3357' # pranan str predstavlja default port
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST'), # prazan string predstavlja localhost (127.0.0.1)
+        'PORT': env('DATABASE_PORT', default=3306) # pranan str predstavlja default port
     }
 }
 
