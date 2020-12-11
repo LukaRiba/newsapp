@@ -24,7 +24,7 @@ env = environ.Env()
 READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=True)
 if READ_DOT_ENV_FILE:
     # OS environment variables take precedence over variables from .env
-    env.read_env(str(BASE_DIR + '/.env'))
+    env.read_env(str(os.path.join(BASE_DIR, '.env')))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -156,6 +156,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'my_newsapp/static/'),
     os.path.join(BASE_DIR, 'comments/static/'),
 ]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
