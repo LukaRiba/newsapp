@@ -11,3 +11,9 @@ blocks:
         - name: 'Job #1'
           commands:
             - checkout
+  - name: Tests
+    task:
+      jobs:
+        - name: 'Job #1'
+          commands:
+            - python manage.py test
