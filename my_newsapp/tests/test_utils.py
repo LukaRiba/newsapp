@@ -64,24 +64,3 @@ class UtilsTests(TestCase):
         m_open.assert_called_with(file_path, 'rb')
         m_content_type.assert_called_with(file_path)
         m_get_test_files_dir_path.assert_called_with()
-
-    def test_field_values(self):
-        article = ArticleFactory()
-        ImageFactory.create_batch(size=2, article=article)
-        FileFactory.create_batch(size=2, article=article)
-        field_value_dict = field_values(article)
-
-        self.maxDiff = None
-        self.assertEqual(field_value_dict, {
-            'images': str(article.images.all()),
-            'files': str(article.files.all()),
-            'id': article.id,
-            'title': article.title,
-            'slug': article.slug,
-            'text': article.text,
-            'short_description': article.short_description,
-            'pub_date': article.pub_date,
-            'author': article.author,
-            'category': article.category,
-            'comments': str(article.comments.all())        
-        })
