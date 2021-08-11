@@ -23,14 +23,14 @@ global_job_config:
       value: requirements_production.txt
     - name: DJANGO_SECRET_KEY
       value: 5!xnz8s(8sdyzhtq9paveh+zsis^gfe$7c%-h)5iee0e%tpurz
-    - name: DATABASE_NAME
-      value: my_news_db
-    - name: DATABASE_USER
-      value: root
-    - name: DATABASE_PASSWORD
-      value: ""
-    - name: DATABASE_HOST
-      value: ""
+    # - name: DATABASE_NAME
+    #   value: my_news_db
+    # - name: DATABASE_USER
+    #   value: root
+    # - name: DATABASE_PASSWORD
+    #   value: ""
+    # - name: DATABASE_HOST
+    #   value: ""
 
 # Blocks are the heart of a pipeline and are executed sequentially.
 # Each block has a task that defines one or more jobs. Jobs define the
