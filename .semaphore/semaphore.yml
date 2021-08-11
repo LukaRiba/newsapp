@@ -8,6 +8,8 @@ global_job_config:
   env_vars:
     - name: REQUIREMENTS_FILE
       value: requirements_production.txt
+    - name: DJANGO_SECRET_KEY
+      value: 5!xnz8s(8sdyzhtq9paveh+zsis^gfe$7c%-h)5iee0e%tpurz
 blocks:
   - name: Install Dependencies
     task:
@@ -30,7 +32,6 @@ blocks:
           - sem-service start mysql
           - checkout
           - cache restore
-          - 'pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache'
       jobs:
         - name: Comments Test
           commands:
