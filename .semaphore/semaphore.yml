@@ -4,6 +4,10 @@ agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu1804
+global_job_config:
+  env_vars:
+    - name: REQUIREMENTS_FILE
+      value: requirements_production.txt
 blocks:
   - name: Install Dependencies
     task:
@@ -18,9 +22,6 @@ blocks:
             - cache restore
             - 'pip download --cache-dir .pip_cache -r ${REQUIREMENTS_FILE}'
             - cache store
-      env_vars:
-        - name: REQUIREMENTS_FILE
-          value: requirements_production.txt
   - name: Run Unit Tests
     task:
       prologue:
