@@ -23,14 +23,14 @@ global_job_config:
       value: requirements_production.txt
     - name: DJANGO_SECRET_KEY
       value: 5!xnz8s(8sdyzhtq9paveh+zsis^gfe$7c%-h)5iee0e%tpurz
-    # - name: DATABASE_NAME
-    #   value: my_news_db
-    # - name: DATABASE_USER
-    #   value: root
-    # - name: DATABASE_PASSWORD
-    #   value: ""
-    # - name: DATABASE_HOST
-    #   value: ""
+    - name: DATABASE_NAME
+      value: mysql
+    - name: DATABASE_USER
+      value: root
+    - name: DATABASE_PASSWORD
+      value: ""
+    - name: DATABASE_HOST
+      value: 0.0.0.0
 
 # Blocks are the heart of a pipeline and are executed sequentially.
 # Each block has a task that defines one or more jobs. Jobs define the
@@ -103,9 +103,9 @@ blocks:
           # See https://docs.semaphoreci.com/ci-cd-environment/ubuntu-18.04-image/#databases-and-services
           # Also https://docs.semaphoreci.com/reference/toolbox-reference/#sem-service
           - sem-service start mysql
-          - checkout  # TODO: Why is this here again when we have it in 'Install Dependencies' Task ????
-          - cache restore  # TODO: Why is this here again when we have it in 'Install Dependencies' Task ????
-          - pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache # TODO: Why is this here again when we have it in 'Install Dependencies' Task ????
+          - checkout 
+          - cache restore 
+          - pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache
       # Two parallel test jobs are executed.
       jobs:
         - name: Comments Test
