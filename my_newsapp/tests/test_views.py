@@ -204,7 +204,7 @@ class HomeViewTests(TestCase):
         for category in Category.objects.all():
             ArticleFactory.create_batch(size=4, category=category)
        
-        self.response = self.client.get('/news/home/')
+        self.response = self.client.get(reverse('my_newsapp:home'))
 
     def test_context_is_in_response(self):
         self.assertTrue('categories' in self.response.context)
@@ -219,13 +219,13 @@ class HomeViewTests(TestCase):
 
     # as navbar is shared throughout views via NavigationContextMixin, this is tested for this view only
     def test_navbar_has_login_link_for_anonymous_user(self):
-        self.assertContains(self.response, '<a class="nav-link" href="/news/login/?next=/news/home/">Login</a>')
+        self.assertContains(self.response, '<a class="nav-link" href="{}?next={}">Login</a>'.format(reverse('my_newsapp:login'), reverse('my_newsapp:home')))
 
     # as navbar is shared throughout views via NavigationContextMixin, this is tested for this view only
     def test_navbar_has_logout_link_for_logged_user(self):
         self.client.login(username='testuser', password='testpass123') # login client as created user
-        response = self.client.get('/news/home/') # self.response in setUp is made with unlogged client
-        self.assertContains(response, '<a class="nav-link" href="/news/logout/">Logout</a>')
+        response = self.client.get(reverse('my_newsapp:home')) # self.response in setUp is made with unlogged client
+        self.assertContains(response, '<a class="nav-link" href="{}">Logout</a>'.format(reverse('my_newsapp:logout')))
 
     def test_contains_primary_category_articles(self):
         self.assertContains(self.response, self.response.context['primary_category'].title)
@@ -255,12 +255,12 @@ class LatestArticlesViewTests(TestCase):
         ArticleFactory.create_batch(size=8)
         
     def test_response_contents_are_equal(self):
-        response = self.client.get('/news/latest-articles/')
-        response_page_one_querystring = self.client.get('/news/latest-articles/?page=1')
+        response = self.client.get(reverse('my_newsapp:latest-articles'))
+        response_page_one_querystring = self.client.get(reverse('my_newsapp:latest-articles') + '?page=1')
         self.assertEqual(response.content, response_page_one_querystring.content)
 
     def test_paginator_page_1(self):
-        page_1 = self.client.get('/news/latest-articles/?page=1')
+        page_1 = self.client.get(reverse('my_newsapp:latest-articles') + '?page=1')
         self.assertEqual(page_1.status_code, 200)
         self.assertTemplateUsed('my_newsapp/latest_articles.html')
         self.assertTemplateUsed('my_newsapp/navigation.html')
@@ -269,7 +269,7 @@ class LatestArticlesViewTests(TestCase):
         self.assertEqual(len(page_1.context['articles']), 5)
 
     def test_paginator_page_2(self):
-        page_2 = self.client.get('/news/latest-articles/?page=2')
+        page_2 = self.client.get(reverse('my_newsapp:latest-articles') + '?page=2')
         self.assertEqual(page_2.status_code, 200)
         self.assertTemplateUsed('my_newsapp/latest_articles.html')
         self.assertTemplateUsed('my_newsapp/navigation.html')
@@ -278,7 +278,7 @@ class LatestArticlesViewTests(TestCase):
         self.assertEqual(len(page_2.context['articles']), 3) # as paginate_by = 5, 3 articles are left for 3rd page.
     
     def test_paginator_non_existing_page(self):
-        page_3 = self.client.get('/news/latest-articles/?page=3')
+        page_3 = self.client.get(reverse('my_newsapp:latest-articles') + '?page=3')
         self.assertTemplateNotUsed('my_newsapp/latest_articles.html')
         self.assertTemplateUsed('my_newsapp/navigation.html')
         self.assertEqual(page_3.status_code, 404)
@@ -404,13 +404,13 @@ class ArticleDetailViewTests(TestCase):
         self.client.login(username='testuser', password='testpass123')
         response = self.client.get(self.url)
 
-        self.assertContains(response, '<a href="/news/edit-article/{}/">Edit Article</a>'.format(self.article.id))
+        self.assertContains(response, '<a href="{}">Edit Article</a>'.format(reverse('my_newsapp:edit-article', kwargs={'id': self.article.id})))
         self.assertContains(response, 'article-delete-button')
         self.assertTemplateUsed('my_newsapp/snippets/article_delete_modal.html')
 
     def test_EditArticle_and_Delete_buttons_not_shown_when_user_not_author_of_the_article(self):
         # not logged in
-        self.assertNotContains(self.response, '<a href="/news/edit-article/{}/">Edit Article</a>'.format(self.article.id))
+        self.assertNotContains(self.response, '<a href="{}">Edit Article</a>'.format(reverse('my_newsapp:edit-article', kwargs={'id': self.article.id})))
         self.assertNotContains(self.response, 'article-delete-button')
         self.assertTemplateNotUsed('my_newsapp/snippets/article_delete_modal.html')
 
@@ -418,7 +418,7 @@ class ArticleDetailViewTests(TestCase):
         response = self.client.get(self.url)
         
         # logged in
-        self.assertNotContains(response, '<a href="/news/edit-article/{}/">Edit Article</a>'.format(self.article.id))
+        self.assertNotContains(response, '<a href="{}">Edit Article</a>'.format(reverse('my_newsapp:edit-article', kwargs={'id': self.article.id})))
         self.assertNotContains(response, 'article-delete-button')
         self.assertTemplateNotUsed('my_newsapp/snippets/article_delete_modal.html')
 
@@ -948,8 +948,8 @@ class DeleteArticleViewTests(TestCase):
         response = self.client.post(self.url)
 
         # redirect to login page
-        self.assertRedirects(response, '{}{}{}{}'.format(
-            reverse('my_newsapp:login'), '?next=/news/delete-article/', self.article.id, '/')
+        self.assertRedirects(response, '{}{}'.format(
+            reverse('my_newsapp:login'), '?next={}'.format(reverse('my_newsapp:delete-article', kwargs={'id': self.article.id})))
         )
 
     def test_article_deletion_with_logged_user(self):

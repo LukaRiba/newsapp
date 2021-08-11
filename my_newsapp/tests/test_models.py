@@ -3,6 +3,7 @@ import tempfile
 from django.test import TestCase, override_settings
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 
 from my_newsapp.models import Category, Article
 from my_newsapp.tests.factories import CategoryFactory, ArticleFactory, ImageFactory, FileFactory
@@ -69,9 +70,7 @@ class CategoryTests(TestCase):
 
     def test_get_absolute_url_method(self):
         category = Category.objects.get(title='Primary')
-        another_category = Category.objects.filter(status=None)[0]
-        self.assertEqual(category.get_absolute_url(), '/news/primary/' )
-        self.assertEqual(another_category.get_absolute_url(), another_category.slug.join(['/news/', '/']) )
+        self.assertEqual(category.get_absolute_url(), reverse('my_newsapp:category', kwargs={'slug': 'primary'}))
 
     def test__str__method(self):
         category = Category.objects.get(title='Primary')
@@ -86,7 +85,8 @@ class ArticleTests(TestCase):
     def test_get_absolute_url_method(self):
         article = Article.objects.all()[0]
         self.assertEqual(article.get_absolute_url(), 
-            '/news/{0}/{1}/{2}/'.format(article.category.slug, article.id, article.slug))
+            reverse('my_newsapp:article-detail', kwargs={'category': article.category.slug, 'id': article.id, 'slug': article.slug})
+        )
 
     def test__str__method(self):
         article = Article.objects.all()[0]
