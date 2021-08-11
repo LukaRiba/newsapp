@@ -10,6 +10,14 @@ global_job_config:
       value: requirements_production.txt
     - name: DJANGO_SECRET_KEY
       value: 5!xnz8s(8sdyzhtq9paveh+zsis^gfe$7c%-h)5iee0e%tpurz
+    - name: DATABASE_NAME
+      value: my_news_db
+    - name: DATABASE_USER
+      value: root
+    - name: DATABASE_PASSWORD
+      value: ''
+    - name: DATABASE_HOST
+      value: ''
 blocks:
   - name: Install Dependencies
     task:
