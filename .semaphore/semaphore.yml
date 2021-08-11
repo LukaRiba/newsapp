@@ -18,6 +18,19 @@ blocks:
             - cache restore
             - 'pip download --cache-dir .pip_cache -r ${REQUIREMENTS_FILE}'
             - cache store
-      env_vars:
-        - name: REQUIREMENTS_FILE
-          value: requirements_production.txt
+  - name: Run Unit Tests
+    task:
+      prologue:
+        commands:
+          - sem-version python 3.7
+          - sem-service start mysql
+          - checkout
+          - cache restore
+          - 'pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache'
+      jobs:
+        - name: Comments Test
+          commands:
+            - python manage.py test comments.tests
+        - name: NewsApp Test
+          commands:
+            - python manage.py test my_newsapp.tests
