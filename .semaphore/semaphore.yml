@@ -23,8 +23,6 @@ global_job_config:
       value: requirements_production.txt
     - name: DJANGO_SECRET_KEY
       value: 5!xnz8s(8sdyzhtq9paveh+zsis^gfe$7c%-h)5iee0e%tpurz
-    - name: DATABASE_NAME
-      value: mysql
     - name: DATABASE_USER
       value: root
     - name: DATABASE_PASSWORD
@@ -95,6 +93,9 @@ blocks:
       # This block runs the unit tests.
       # Since the test require a database, we start the database here.
       # Django automatically creates a test database schema.
+      env_vars:
+        - name: DATABASE_NAME
+          value: mysql
       prologue:
         commands:
           - sem-version python 3.7
