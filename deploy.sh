@@ -25,4 +25,3 @@ python manage.py makemessages --all
 
 # restart web application
 touch /etc/uwsgi-emperor/vassals/$DEPLOY_UWSGI_INI_FILE
-#
