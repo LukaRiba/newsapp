@@ -16,6 +16,8 @@ global_job_config:
       value: ''
     - name: DATABASE_HOST
       value: 0.0.0.0
+    - name: DATABASE_NAME
+      value: my_newsapp_db
 blocks:
   - name: Install Dependencies
     task:
@@ -46,9 +48,6 @@ blocks:
         - name: NewsApp Test
           commands:
             - python manage.py test my_newsapp.tests
-      env_vars:
-        - name: DATABASE_NAME
-          value: my_newsapp_db
   - name: "Run Security Tests"
     task:
       # This block runs through the security checklist for the project.
