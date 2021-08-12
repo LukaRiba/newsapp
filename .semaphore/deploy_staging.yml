@@ -17,7 +17,7 @@ blocks:
             - chmod 0600 ~/.ssh/id_rsa_deploy_server
             - ssh-keyscan -H $HOST_NAME >> ~/.ssh/known_hosts
             - ssh-add ~/.ssh/id_rsa_deploy_server
-            - ssh $SSH_USER@$HOST_NAME 'ls -l /home/my-newsapp/djangosites/my-newsapp'
+            - ssh $SSH_USER@$HOST_NAME 'export $(grep -e 'DEPLOY' .env | xargs)'
       env_vars:
         - name: HOST_NAME
           value: 85.90.247.113
