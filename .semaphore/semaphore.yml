@@ -57,6 +57,9 @@ blocks:
            - checkout
            - sem-version python 3.7
            - sem-service start mysql  # as manage.py will fail if it cannot connect to mysql server
+           # Create an empty database.
+           # We can connect to the db with root and a blank password.
+           - mysql --host=0.0.0.0 -uroot -e "create database $DATABASE_NAME"
            - cache restore
            - pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache
            # Test if project can be deployed securely.
