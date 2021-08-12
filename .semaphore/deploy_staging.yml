@@ -1,0 +1,25 @@
+version: v1.0
+name: Deploy to Staging
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+global_job_config:
+  secrets:
+    - name: newsapp-ssh-key
+blocks:
+  - name: Deploy to Nanode
+    task:
+      jobs:
+        - name: Deploy
+          commands:
+            - checkout
+            - chmod 0600 ~/.ssh/id_rsa_deploy_server
+            - ssh-keyscan -H $HOST_NAME >> ~/.ssh/known_hosts
+            - ssh-add ~/.ssh/id_rsa_deploy_server
+            - ssh -oBatchMode=yes $SSH_USER@$HOST_NAME bash echo "It works!"
+      env_vars:
+        - name: HOST_NAME
+          value: 85.90.247.113
+        - name: SSH_USER
+          value: root
