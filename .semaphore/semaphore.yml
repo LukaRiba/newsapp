@@ -30,16 +30,13 @@ blocks:
             - cache restore
             - 'pip download --cache-dir .pip_cache -r ${REQUIREMENTS_FILE}'
             - cache store
+
   - name: Run Unit Tests
     task:
-      env_vars:
-        - name: DATABASE_NAME
-          value: _newsapp_db # needed because django settings expect env variable for db name
       prologue:
         commands:
           - sem-version python 3.7
           - sem-service start mysql
-          - mysql --host=0.0.0.0 -uroot -e "create database $DATABASE_NAME"
           - checkout
           - cache restore
           - 'pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache'
