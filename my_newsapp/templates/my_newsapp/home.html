@@ -15,7 +15,7 @@
         {% if user.is_authenticated %}
           Welcome to Newsapp {{ request.user }}
         {% else %}
-          Welcome to Newsapp guest
+          Welcome to Newsapp guest my friend
         {% endif %}
       </h1>
       <p class="lead">Everything you need to share your knowledge...</p>
@@ -40,7 +40,7 @@
                 <!-- image container -->
                 <div class="article-thumbnail-image" style="background-image: url('{{ article.images.first.image.url }}');"></div>
               </div>
-              <div class="col-xl-9 col-lg-8 col-md-12"> 
+              <div class="col-xl-9 col-lg-8 col-md-12">
                 <div class="row pl-3">
                   <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
                 </div>
@@ -49,8 +49,8 @@
                 </div>
                 <div class="row pl-3">
                   <p style="color: rgb(63, 63, 63)">{{ article.short_description }}</p>
-                </div>                                              
-              </div> 
+                </div>
+              </div>
             </div>
           {% endfor %}
         </div> <!-- Left main column end - Primary category articles -->
@@ -63,7 +63,7 @@
               </h2>
             </div>
             {% for article in secondary_category.articles.all|slice:':2'  %}
-            <div class="row padding-right-20">                    
+            <div class="row padding-right-20">
               <div class="col-md-12">
                 <div class="row">
                   <h4><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h4>
@@ -73,8 +73,8 @@
                 </div>
                 <div class="row" style="color: rgb(63, 63, 63); font-size: 14px;">
                   <p>{{ article.short_description }}</p>
-                </div>                                              
-              </div>            
+                </div>
+              </div>
             </div>
             {% endfor %}
           </div> <!-- Secondary articles end -->
@@ -86,21 +86,20 @@
                   <div id=otherArticlesLeftColumn class="col-6 border-right"> <!-- left column start  -->
                   {% include 'my_newsapp/snippets/other_article.html' %}
                 {% elif forloop.counter == 2 or forloop.counter == 3 %}
-                  {% include 'my_newsapp/snippets/other_article.html' %}  
+                  {% include 'my_newsapp/snippets/other_article.html' %}
                 {% elif forloop.counter == 4 %}
                   </div>   <!-- left column end  -->
                   <div id=otherArticlesRightColumn class="col-6 pl-4"> <!-- right column start  -->
                   {% include 'my_newsapp/snippets/other_article.html' %}
-                {% elif forloop.counter == 5 %} 
-                  {% include 'my_newsapp/snippets/other_article.html' %}  
-                {% elif forloop.counter == 6 %} 
-                  {% include 'my_newsapp/snippets/other_article.html' %}  
+                {% elif forloop.counter == 5 %}
+                  {% include 'my_newsapp/snippets/other_article.html' %}
+                {% elif forloop.counter == 6 %}
+                  {% include 'my_newsapp/snippets/other_article.html' %}
                   </div> <!-- right column end  -->
-                {% endif %}  
+                {% endif %}
               {% endfor %}
           </div> <!-- other articles start  -->
         </div> <!-- Right main column end  -->
       </div>
   </div>
 {% endblock content %}
-
