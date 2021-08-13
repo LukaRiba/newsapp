@@ -14,10 +14,10 @@ blocks:
         - name: Deploy
           commands:
             - checkout
-            - chmod 0600 newsapp-ssh-key
+            - chmod 0600 ~/.ssh/id_rsa_newsapp_staging
             - ssh-keyscan -H $HOST_NAME >> ~/.ssh/known_hosts
-            - ssh-add newsapp-ssh-key
-            - ansible-playbook --inventory $ANSIBLE_DIR/inventory.ini --key-file newsapp-ssh-key $ANSIBLE_DIR/update_staging.yml
+            - ssh-add ~/.ssh/id_rsa_newsapp_staging
+            - ansible-playbook --inventory $ANSIBLE_DIR/inventory.ini --key-file ~/.ssh/id_rsa_newsapp_staging $ANSIBLE_DIR/update_staging.yml
       env_vars:
         - name: HOST_NAME
           value: 85.90.247.113
@@ -33,5 +33,3 @@ blocks:
           value: my-newsapp.ini
         - name: REQUIREMENTS_FILE
           value: requirements_production.txt
-      secrets:
-        - name: newsapp-ssh-key
