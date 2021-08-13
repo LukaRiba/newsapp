@@ -17,7 +17,7 @@ blocks:
             - chmod 0600 ~/.ssh/id_rsa_newsapp_staging
             - ssh-keyscan -H $HOST_NAME >> ~/.ssh/known_hosts
             - ssh-add ~/.ssh/id_rsa_newsapp_staging
-            - ansible-playbook --inventory $ANSIBLE_DIR/inventory.ini --key-file ~/.ssh/id_rsa_newsapp_staging $ANSIBLE_DIR/update_staging.yml
+            - ansible-playbook --inventory ~/$SEMAPHORE_GIT_DIR/.ansible/inventory.ini --key-file ~/.ssh/id_rsa_newsapp_staging ~/$SEMAPHORE_GIT_DIR/.ansible/update_staging.yml
       env_vars:
         - name: HOST_NAME
           value: 85.90.247.113
@@ -27,8 +27,6 @@ blocks:
           value: /home/my-newsapp/djangosites/my-newsapp
         - name: VENV_DIR
           value: /home/my-newsapp/djangosites/my-newsapp-env
-        - name: ANSIBLE_DIR
-          value: ~/$SEMAPHORE_GIT_DIR/.ansible
         - name: UWSGI_INI_FILENAME
           value: my-newsapp.ini
         - name: REQUIREMENTS_FILE
