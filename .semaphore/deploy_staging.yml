@@ -14,10 +14,10 @@ blocks:
         - name: Deploy
           commands:
             - checkout
-            - chmod 0600 ~/.ssh/id_rsa_deploy_server
+            - chmod 0600 newsapp-ssh-key
             - ssh-keyscan -H $HOST_NAME >> ~/.ssh/known_hosts
-            - ssh-add ~/.ssh/id_rsa_deploy_server
-            - ssh -oBatchMode=yes $SSH_USER@$HOST_NAME bash $PROJECT_DIR/deploy.sh $PROJECT_DIR/$ENV_FILE
+            - ssh-add newsapp-ssh-key
+            - ansible-playbook --inventory $ANSIBLE_DIR/inventory.ini --key-file newsapp-ssh-key $ANSIBLE_DIR/update_staging.yml
       env_vars:
         - name: HOST_NAME
           value: 85.90.247.113
@@ -25,7 +25,13 @@ blocks:
           value: root
         - name: PROJECT_DIR
           value: /home/my-newsapp/djangosites/my-newsapp
-        - name: ENV_FILE
-          value: .env
+        - name: VENV_DIR
+          value: /home/my-newsapp/djangosites/my-newsapp-env
+        - name: ANSIBLE_DIR
+          value: /home/my-newsapp/djangosites/my-newsapp/.ansible
+        - name: UWSGI_INI_FILENAME
+          value: my-newsapp.ini
+        - name: REQUIREMENTS_FILE
+          value: requirements_production.txt
       secrets:
         - name: newsapp-ssh-key
