@@ -27,3 +27,5 @@ blocks:
           value: /home/my-newsapp/djangosites/my-newsapp
         - name: ENV_FILE
           value: .env
+      secrets:
+        - name: newsapp-ssh-key
