@@ -1,0 +1,51 @@
+---
+
+
+# ansible-playbook --inventory $ANSIBLE_DIR/inventory.ini --key-file newsapp-ssh-key $ANSIBLE_DIR/update_staging.yml
+- name: Django Staging Update
+  hosts: production_server
+  # remote_user: root
+
+  vars:
+    git_url: '{{ lookup("env", "SEMAPHORE_GIT_URL") }}'
+    requirements: '{{ lookup("env", "REQUIREMENTS_FILE") }}'
+    app_path: '{{ lookup("env", "PROJECT_DIR") }}'
+    virtualenv: '{{ lookup("env", "VENV_DIR") }}'
+    settings_module: '{{ lookup("env", "SETTINGS_MODULE") }}'
+    uwsgi_file: '{{ lookup("env", "UWSGI_INI_FILENAME") }}'
+
+  tasks:
+    - name: Update code
+      git:
+        repo: "{{ git_url }}"
+        dest: "{{ app_path }}"
+        update: yes
+
+    - name: Update requirements
+      pip:
+        virtualenv: "{{ virtualenv }}"
+        requirements: "{{ app_path }}{{ requirements }}"
+
+    - name: Run Mirations
+      django_manage:
+        command: migrate
+        settings: '{{ settings_module }}'
+        app_path: "{{ app_path }}"
+        virtualenv: "{{ virtualenv }}"
+
+    - name: Collect staticfiles
+      django_manage:
+        command: collectstatic --link --noinput
+        settings: '{{ settings_module }}'
+        app_path: "{{ app_path }}"
+        virtualenv: "{{ virtualenv }}"
+
+    - name: Makemessages
+      django_manage:
+        command: makemessages --all
+        settings: '{{ settings_module }}'
+        app_path: "{{ app_path }}"
+        virtualenv: "{{ virtualenv }}"
+
+    - name: Restart app
+      command: "touch /etc/uwsgi-emperor/vassals/{{ uwsgi_file }}"
