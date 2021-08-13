@@ -13,13 +13,16 @@
 
   tasks:
     - name: Update code
-      # https://stackoverflow.com/questions/41178361/how-to-use-ansible-git-module-pull-a-branch-with-local-changes
-      # https://discourse.roots.io/t/deployment-failure-due-to-local-modifications-on-production-server/5568
+      # We have to use command module instead of git:
+      #   https://stackoverflow.com/questions/41178361/how-to-use-ansible-git-module-pull-a-branch-with-local-changes
+      #   https://discourse.roots.io/t/deployment-failure-due-to-local-modifications-on-production-server/5568
       # git:
       #   repo: "{{ git_url }}"
       #   dest: "{{ app_path }}"
       #   update: yes
-      command: git pull origin master
+      command:
+        chdir: "{{ app_path }}"
+        cmd: git pull origin master
 
     - name: Update requirements
       pip:
