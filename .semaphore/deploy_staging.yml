@@ -28,7 +28,7 @@ blocks:
         - name: VENV_DIR
           value: /home/my-newsapp/djangosites/my-newsapp-env
         - name: ANSIBLE_DIR
-          value: /home/my-newsapp/djangosites/my-newsapp/.ansible
+          value: ~/$SEMAPHORE_GIT_DIR/.ansible
         - name: UWSGI_INI_FILENAME
           value: my-newsapp.ini
         - name: REQUIREMENTS_FILE
