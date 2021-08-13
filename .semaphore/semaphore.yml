@@ -65,3 +65,4 @@ promotions:
     pipeline_file: deploy_staging.yml
     auto_promote:
       when: branch = 'master' AND result = 'passed'
+##
