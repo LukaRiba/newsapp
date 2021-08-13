@@ -1,7 +1,6 @@
 ---
 - name: Django Staging Update
   hosts: production_server
-  # remote_user: root
 
   vars:
     git_url: '{{ lookup("env", "SEMAPHORE_GIT_URL") }}'
@@ -29,7 +28,7 @@
         virtualenv: "{{ virtualenv }}"
         requirements: "{{ app_path }}/{{ requirements }}"
 
-    - name: Run Mirations
+    - name: Run Migrations
       django_manage:
         command: migrate
         settings: '{{ settings_module }}'
