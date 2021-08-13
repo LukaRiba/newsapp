@@ -1,7 +1,4 @@
 ---
-
-
-# ansible-playbook --inventory $ANSIBLE_DIR/inventory.ini --key-file newsapp-ssh-key $ANSIBLE_DIR/update_staging.yml
 - name: Django Staging Update
   hosts: production_server
   # remote_user: root
@@ -24,7 +21,7 @@
     - name: Update requirements
       pip:
         virtualenv: "{{ virtualenv }}"
-        requirements: "{{ app_path }}{{ requirements }}"
+        requirements: "{{ app_path }}/{{ requirements }}"
 
     - name: Run Mirations
       django_manage:
