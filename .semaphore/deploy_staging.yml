@@ -17,7 +17,7 @@ blocks:
             - chmod 0600 ~/.ssh/id_rsa_deploy_server
             - ssh-keyscan -H $HOST_NAME >> ~/.ssh/known_hosts
             - ssh-add ~/.ssh/id_rsa_deploy_server
-            - ssh $SSH_USER@$HOST_NAME bash deploy.sh $PROJECT_DIR/$ENV_FILE
+            - ssh -oBatchMode=yes $SSH_USER@$HOST_NAME bash $PROJECT_DIR/deploy.sh $PROJECT_DIR/$ENV_FILE
       env_vars:
         - name: HOST_NAME
           value: 85.90.247.113
