@@ -17,11 +17,13 @@ blocks:
             - chmod 0600 ~/.ssh/id_rsa_deploy_server
             - ssh-keyscan -H $HOST_NAME >> ~/.ssh/known_hosts
             - ssh-add ~/.ssh/id_rsa_deploy_server
-            - ssh $SSH_USER@$HOST_NAME bash deploy.sh $ENV_FILE
+            - ssh $SSH_USER@$HOST_NAME bash deploy.sh $PROJECT_DIR/$ENV_FILE
       env_vars:
         - name: HOST_NAME
           value: 85.90.247.113
         - name: SSH_USER
           value: root
+        - name: PROJECT_DIR
+          value: /home/my-newsapp/djangosites/my-newsapp
         - name: ENV_FILE
-          value: /home/my-newsapp/djangosites/my-newsapp/.env
+          value: .env
