@@ -45,4 +45,5 @@
         virtualenv: "{{ virtualenv }}"
 
     - name: Restart app
-      command: "touch /etc/uwsgi-emperor/vassals/{{ uwsgi_file }}"
+      file:
+        state: /etc/uwsgi-emperor/vassals/{{ uwsgi_file }}
