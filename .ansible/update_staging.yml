@@ -46,4 +46,5 @@
 
     - name: Restart app
       file:
-        state: /etc/uwsgi-emperor/vassals/{{ uwsgi_file }}
+        path: /etc/uwsgi-emperor/vassals/{{ uwsgi_file }}
+        state: touch
