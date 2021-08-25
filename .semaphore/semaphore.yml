@@ -34,11 +34,7 @@ blocks:
     task:
       prologue:
         commands:
-          - sem-version python 3.7
           - sem-service start mysql
-          - checkout
-          - cache restore
-          - 'pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache'
       jobs:
         - name: Comments Test
           commands:
