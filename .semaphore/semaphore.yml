@@ -19,46 +19,19 @@ global_job_config:
     - name: DATABASE_NAME
       value: my_newsapp_db
 blocks:
-  - name: Install Dependencies
-    task:
-      prologue:
-        commands:
-          - sem-version python 3.7
-          - sudo apt-get update && sudo apt-get install -y python3-dev && sudo apt-get install default-libmysqlclient-dev
-      jobs:
-        - name: pip
-          commands:
-            - checkout
-            - cache restore
-            - 'pip download --cache-dir .pip_cache -r ${REQUIREMENTS_FILE}'
-            - cache store
-  - name: Run Unit Tests
-    task:
-      prologue:
-        commands:
-          - sem-version python 3.7
-          - sem-service start mysql
-          - checkout
-          - cache restore
-          - 'pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache'
-      jobs:
-        - name: Comments Test
-          commands:
-            - python manage.py test comments.tests
-        - name: NewsApp Test
-          commands:
-            - python manage.py test my_newsapp.tests
-  - name: Run Security Tests
+  - name: Dependencies and Checks
     task:
       jobs:
-        - name: Deployment Checklist
+        - name: Dependencies and Checks
           commands:
-            - checkout
             - sem-version python 3.7
+            - sudo apt-get update && sudo apt-get install -y python3-dev && sudo apt-get install default-libmysqlclient-dev
+            - checkout
             - sem-service start mysql
             - mysql --host=0.0.0.0 -uroot -e "create database $DATABASE_NAME"
-            - cache restore
-            - 'pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache'
+            - 'pip install -r ${REQUIREMENTS_FILE}'
+            - python manage.py test comments.tests --keepdb
+            - python manage.py test my_newsapp.tests --keepdb
             - python manage.py check --deploy --fail-level ERROR
 promotions:
   - name: Deploy to staging
