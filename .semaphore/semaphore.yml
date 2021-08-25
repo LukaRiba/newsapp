@@ -29,12 +29,9 @@ blocks:
             - checkout
             - sem-service start mysql
             - mysql --host=0.0.0.0 -uroot -e "create database $DATABASE_NAME"
-            - cache restore
-            - 'pip download --cache-dir .pip_cache -r ${REQUIREMENTS_FILE}'
-            - 'pip install -r ${REQUIREMENTS_FILE} --cache-dir .pip_cache'
-            - cache store
-            - python manage.py test comments.tests
-            - python manage.py test my_newsapp.tests
+            - 'pip install -r ${REQUIREMENTS_FILE}'
+            - python manage.py test comments.tests --keepdb
+            - python manage.py test my_newsapp.tests --keepdb
             - python manage.py check --deploy --fail-level ERROR
 promotions:
   - name: Deploy to staging
