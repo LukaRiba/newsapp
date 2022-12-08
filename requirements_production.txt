@@ -8,7 +8,7 @@ attrs==19.1.0
 backcall==0.1.0
 billiard==3.5.0.5
 celery==4.2.1
-certifi==2018.11.29
+certifi==2022.12.7
 cffi==1.13.0
 chardet==3.0.4
 coreapi==2.3.3
