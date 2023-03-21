@@ -118,3 +118,16 @@ class File(models.Model):
 
     def __str__(self):
         return str(self.file).split('/')[-1]
+
+
+class Audio(models.Model):
+    audio = models.FileField(
+        upload_to='audios/',
+        validators=[FileExtensionValidator(['mp3', 'wav'])],
+        blank=True,
+        null=True
+    )
+    article = models.ForeignKey(Article, related_name='audios', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.audio).split('/')[-1]
