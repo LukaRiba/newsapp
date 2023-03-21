@@ -1,6 +1,6 @@
 import os
 
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -54,18 +54,18 @@ class HomeViewMixin:
             return other_articles
         else:
             return other_articles[:6]
-        
+
 class FormsetsContextMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
             context.update({
-                'image_formset': ImageFormSet(self.request.POST, self.request.FILES), 
+                'image_formset': ImageFormSet(self.request.POST, self.request.FILES),
                 'file_formset': FileFormSet(self.request.POST, self.request.FILES)
             })
         else:
             context.update({
-                'image_formset': ImageFormSet(), 
+                'image_formset': ImageFormSet(),
                 'file_formset': FileFormSet()
             })
         return context
@@ -95,7 +95,7 @@ class CategoryView(NavigationContextMixin, ListView):
 class ArticleDetailView(NavigationContextMixin, CommentsContextMixin, DetailView):
     template_name = 'my_newsapp/detail.html'
     model = Article
-    
+
 class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, CreateView):
     template_name = 'my_newsapp/create_article.html'
     form_class = ArticleForm
@@ -114,14 +114,14 @@ class CreateArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsCont
         return super(CreateArticleView, self).get(request, *args, **kwargs)
 
     def are_valid(self, *forms):
-        return all([form.is_valid() for form in forms]) 
+        return all([form.is_valid() for form in forms])
 
     def create_article(self, request, form, image_formset, file_formset):
         form.save(commit=False)
         form.instance.author = self.request.user
         image_formset.instance = file_formset.instance = form.save()
         image_formset.save()
-        file_formset.save() 
+        file_formset.save()
 
 class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContextMixin, UpdateView):
     template_name = 'my_newsapp/edit_article.html'
@@ -129,13 +129,13 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
     model = Article
     success_msg = 'Article updated'
     login_url = 'my_newsapp:login'
-    
+
     def get_context_data(self, **kwargs):
         context = super(EditArticleView, self).get_context_data(**kwargs)
         context['image_formset'].instance = self.get_object()
-        context['image_formset'].selected_images = self.request.POST.getlist('image-checkbox[]') 
+        context['image_formset'].selected_images = self.request.POST.getlist('image-checkbox[]')
         return context
-        
+
     def get_object(self, queryset=None):
         return Article.objects.get(id=self.kwargs['id'])
 
@@ -145,9 +145,9 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
         image_formset = ImageFormSet(request.POST, request.FILES, instance=instance, request=request)
         file_formset = FileFormSet(request.POST, request.FILES, instance=instance)
 
-        if self.are_valid(form, image_formset, file_formset):            
+        if self.are_valid(form, image_formset, file_formset):
             self.delete_selected_files_and_images(request)
-            self.update_article(form, image_formset, file_formset)  
+            self.update_article(form, image_formset, file_formset)
             messages.info(self.request, self.success_msg)
             return HttpResponseRedirect(instance.get_absolute_url())
         return super(EditArticleView, self).get(request, *args, **kwargs)
@@ -163,8 +163,8 @@ class EditArticleView(LoginRequiredMixin, NavigationContextMixin, FormsetsContex
 
     def update_article(self, *forms):
         for form in forms:
-            form.save() 
-        
+            form.save()
+
 
 @method_decorator(require_http_methods(['POST']), name='dispatch')
 class DeleteArticleView(LoginRequiredMixin, DeleteView):
@@ -172,11 +172,11 @@ class DeleteArticleView(LoginRequiredMixin, DeleteView):
     pk_url_kwarg = 'id'
     login_url = 'my_newsapp:login'
     success_url = reverse_lazy('my_newsapp:home')
-        
+
 class MyNewsLoginView(auth_views.LoginView):
     form_class = LoginForm
     template_name = 'my_newsapp/login.html'
-    redirect_authenticated_user = True 
+    redirect_authenticated_user = True
 
 class MyNewsLogoutView(auth_views.LogoutView):
     next_page = 'my_newsapp:login'
@@ -190,4 +190,9 @@ def download_file(request, id):
             response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
             return response
     raise Http404
-    
+
+
+class ExportToXLSXView(View):
+    # function for exporting data to xlsx file
+    def export_to_xlsx(self, queryset, fields, filename):
+        return export_xlsx(queryset, fields, filename)

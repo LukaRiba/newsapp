@@ -17,6 +17,13 @@ class ArticleAdmin(TranslationAdmin): # inheriting from Translation Admin for ad
     # Fields shown in list view
     list_display = ('id', 'title', 'pub_date_reformated', 'author_link', 'category_link', 'comments_link',)
     superuser_permission_needed = ('id', 'title')
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('author', 'category'),
+            ),
+        }),
+    )
 
     def pub_date_reformated(self, obj):
         return obj.pub_date.strftime('%b %d, %Y')

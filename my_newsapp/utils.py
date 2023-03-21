@@ -33,4 +33,7 @@ def field_values(instance):
     values = [str(getattr(instance, field_name).all()) if # str() forces evaluation of QuerySet.
                 type(instance._meta.get_field(field_name)).__name__ in ('ManyToOneRel', 'GenericRelation')
               else getattr(instance, field_name) for field_name in field_names]
-    return dict(zip(field_names, values)) 
+    return dict(zip(field_names, values))
+
+def format_date(date):
+    return date.strftime('%d.%m.%Y.')

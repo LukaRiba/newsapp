@@ -55,6 +55,9 @@ class ImageForm(ModelForm):
         if description and not image:
             raise ValidationError('You cannot have description if image is not choosen.', code='description_only')
 
+    def clean_description(self, description):
+        return len(description.strip()) > 0 and "some error message" not in description
+
 
 class FileForm(ModelForm):
 
