@@ -15,7 +15,8 @@ class ArticleAdmin(TranslationAdmin): # inheriting from Translation Admin for ad
     # Field order in detail (change) view
     fields =  ('author', 'category', 'title', 'short_description', 'text')
     # Fields shown in list view
-    list_display = ('id', 'title', 'pub_date_reformated', 'author_link', 'category_link', 'comments_link')
+    list_display = ('id', 'title', 'pub_date_reformated', 'author_link', 'category_link', 'comments_link',)
+    superuser_permission_needed = ('id', 'title')
     fieldsets = (
         (None, {
             'fields': (
@@ -36,10 +37,6 @@ class ArticleAdmin(TranslationAdmin): # inheriting from Translation Admin for ad
             obj.author
         ))
 
-    #region
-     # without this in admin list view will be AUTHOR_LINK instead AUTHOR, because we passed method author_link in
-     # list_diplay. With this column name is set to AUTHOR. MUST be set above method definition, or
-     # "NameError: name 'author_link' is not defined" will be raised.
     author_link.short_description = 'author'
     author_link.admin_order_field = 'author'
 

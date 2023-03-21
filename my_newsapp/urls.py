@@ -15,5 +15,6 @@ urlpatterns = [
     url(r'^edit-article/(?P<id>\d+)/$', views.EditArticleView.as_view(), name='edit-article'),
     url(r'^download-file/(?P<id>\d+)/$', views.download_file, name='download-file'),
     url(r'^delete-article/(?P<id>\d+)/$', views.DeleteArticleView.as_view(), name='delete-article'),
+    url(r'^export-article/(?P<id>\d+)/$', views.ExportToXLSX.as_view(), name='export-article'),
     url(r'^$', views.HomeView.as_view(), name='home'),
 ]

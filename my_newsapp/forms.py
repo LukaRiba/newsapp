@@ -24,6 +24,9 @@ class ArticleForm(ModelForm):
         # disables html required attribute in fields
         # self.use_required_attribute =  False
 
+    def validate_text(self, text: str):
+        return len(text) > 100
+
 class ImageForm(ModelForm):
 
     class Meta:
