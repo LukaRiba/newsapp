@@ -8,7 +8,7 @@ from .models import Category, Article, Image, File
 
 # IMPORTANT:
 # 1. For modeltranslation integration with admin to work, we must put 'modeltranslation' before 'django.contrib.admin'
-#    in settings.INSTALLED_APPS 
+#    in settings.INSTALLED_APPS
 # 2. We cannot use @admin.register decorator on ArticleAdmin class when inheriting from TranslationAdmin Both Article
 #    and ArticleAdmin have to be registered with admin.site.register(Article, ArticleAdmin) - see below
 class ArticleAdmin(TranslationAdmin): # inheriting from Translation Admin for adding translation fields in Article change views
@@ -28,20 +28,20 @@ class ArticleAdmin(TranslationAdmin): # inheriting from Translation Admin for ad
             reverse('admin:auth_user_change', args=(obj.author.pk,)),
             obj.author
         ))
-        
-    #region    
+
+    #region
      # without this in admin list view will be AUTHOR_LINK instead AUTHOR, because we passed method author_link in
      # list_diplay. With this column name is set to AUTHOR. MUST be set above method definition, or
      # "NameError: name 'author_link' is not defined" will be raised.
-    author_link.short_description = 'author' 
-    author_link.admin_order_field = 'author'    
+    author_link.short_description = 'author'
+    author_link.admin_order_field = 'author'
 
     def category_link(self, obj):
         return mark_safe('<a href="{}">{}</a>'.format(
             reverse('admin:my_newsapp_category_change', args=(obj.category.pk,)),
-            obj.category          
+            obj.category
         ))
-    category_link.short_description = 'category' 
+    category_link.short_description = 'category'
     category_link.admin_order_field = 'category'
 
     def comments_link(self, obj):
@@ -50,11 +50,11 @@ class ArticleAdmin(TranslationAdmin): # inheriting from Translation Admin for ad
             return mark_safe('<a href="{}{}">{}</a>'.format(
                 reverse('admin:comments_comment_changelist'),
                 '?owner={}&type={}'.format(obj.id, 'comments'),
-                '{} Comments'.format(obj.comments.filter(parent=None).count())          
+                '{} Comments'.format(obj.comments.filter(parent=None).count())
             ))
         return 'no Comments'
     comments_link.short_description = 'comments'
-    comments_link.admin_order_field = 'comments_count' 
+    comments_link.admin_order_field = 'comments_count'
 
     def get_queryset(self, request):
         qs = super(ArticleAdmin, self).get_queryset(request)
@@ -73,7 +73,7 @@ class ArticleAdmin(TranslationAdmin): # inheriting from Translation Admin for ad
         #endregion
         qs = qs.annotate(
             comments_count=ExpressionWrapper(
-                Count('comments'), 
+                Count('comments'),
                 output_field=IntegerField()
             )
         )

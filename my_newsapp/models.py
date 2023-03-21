@@ -23,13 +23,14 @@ class CategoriesQuerySet(models.QuerySet):
 
     def has_secondary(self):
         return self.filter(status='S').exists()
-    
+
     def get_secondary(self):
         return self.get(status='S')
 
 class Category(models.Model):
     title = models.CharField(max_length=100, unique=True)
-    slug = AutoSlugField(null=True, default=None, unique=True, populate_from='title') 
+    description = models.CharField(max_length=300, blank=True, null=True)
+    slug = AutoSlugField(null=True, default=None, unique=True, populate_from='title')
     image = models.ImageField()
     status = models.CharField(max_length=1, choices=CATEGORY_RELEVANCE_CHOICES, unique=True, blank=True, null=True)
 
@@ -39,7 +40,7 @@ class Category(models.Model):
         verbose_name_plural = 'categories'
 
     def get_absolute_url(self):
-        return reverse('my_newsapp:category', kwargs={'slug': self.slug})   
+        return reverse('my_newsapp:category', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.title
@@ -56,7 +57,7 @@ class Article(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            'my_newsapp:article-detail', 
+            'my_newsapp:article-detail',
             kwargs={'category': self.category.slug, 'id':self.id, 'slug': self.slug}
         )
 
@@ -68,23 +69,23 @@ class Article(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(
-        validators=[FileExtensionValidator(['bmp', 'gif', 'png', 'jpg', 'jpeg'])], 
-        blank=True, 
+        validators=[FileExtensionValidator(['bmp', 'gif', 'png', 'jpg', 'jpeg'])],
+        blank=True,
         null=True
     )
     description = models.CharField(max_length=200, blank=True, null=True)
     article = models.ForeignKey(Article, related_name='images', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.image}' 
+        return f'{self.image}'
 
 class File(models.Model):
     file = models.FileField(
-        upload_to='files/', 
-        validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],  
-        blank=True, 
+        upload_to='files/',
+        validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'])],
+        blank=True,
         null=True
-    )                            
+    )
     article = models.ForeignKey(Article, related_name='files', on_delete=models.CASCADE)
 
     CONTENT_TYPE_ICON_PAIRS = (

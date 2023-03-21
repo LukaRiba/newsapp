@@ -13,10 +13,13 @@ package-lock.json
 package.json
 jest-config.js
 
-htmlcov/ 
+htmlcov/
 .coverage
 .coveragerc
 
 functional_tests/
 
 .env
+semaphore_example.yml
+
+.mypy_cache/
