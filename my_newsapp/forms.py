@@ -23,9 +23,12 @@ class ArticleForm(ModelForm):
         self.helper.form_tag = False
         # disables html required attribute in fields
         # self.use_required_attribute =  False
-        
+
+    def validate_text(self, text: str):
+        return len(text) > 100
+
 class ImageForm(ModelForm):
-    
+
     class Meta:
         model = Image
         fields = ('image', 'description')
@@ -51,10 +54,10 @@ class ImageForm(ModelForm):
         # Check if there is description but no image
         if description and not image:
             raise ValidationError('You cannot have description if image is not choosen.', code='description_only')
-         
+
 
 class FileForm(ModelForm):
-    
+
     class Meta:
         model = File
         fields = ('file',)
@@ -65,15 +68,15 @@ class FileForm(ModelForm):
 class ImageInlineFormSet(BaseInlineFormSet):
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None) 
-        self.selected_images = kwargs.pop('selected_images', None) 
+        self.request = kwargs.pop('request', None)
+        self.selected_images = kwargs.pop('selected_images', None)
         super(ImageInlineFormSet, self).__init__(*args, **kwargs)
 
     def clean(self):
         super(ImageInlineFormSet, self).clean()
 
         #  Don't bother validating the formset unless each form is valid on its own
-        if any(self.errors): 
+        if any(self.errors):
             return
 
         if not any([ 'image' in key for key in self.files.keys() ]): # if no image has been uploaded.
@@ -94,7 +97,7 @@ class ImageInlineFormSet(BaseInlineFormSet):
                         )
                     images.append(image_name)
             # Ako uploadamo sliku u npr. drugoj formi, a u prvoj ne, KeyError will raise za prvu formu
-            except KeyError: 
+            except KeyError:
                 pass
 
     # str(image_id) bacause 'image-checkbox[]' stores values as strings, not as integers.
@@ -103,15 +106,15 @@ class ImageInlineFormSet(BaseInlineFormSet):
             try: # when clean() is called from EditArticleView post() method
                 if not str(image_id) in self.request.POST.getlist('image-checkbox[]'):
                     return False
-            except AttributeError: # when clean() is called second time, in case of invalid image_formset when post() returns get() 
-                if not str(image_id) in self.selected_images: 
+            except AttributeError: # when clean() is called second time, in case of invalid image_formset when post() returns get()
+                if not str(image_id) in self.selected_images:
                     return False
         return True
-    
+
     def image_ids(self):
         return [image.id for image in self.instance.images.all()]
 
-ImageFormSet = inlineformset_factory(Article, Image, form=ImageForm, formset=ImageInlineFormSet, 
+ImageFormSet = inlineformset_factory(Article, Image, form=ImageForm, formset=ImageInlineFormSet,
                                      extra=1, max_num=20,  can_delete=True)
 
 class FileInlineFormSet(BaseInlineFormSet):
@@ -135,8 +138,8 @@ class FileInlineFormSet(BaseInlineFormSet):
                 files.append(file_name)
             except KeyError:
                 pass
-            
-FileFormSet = inlineformset_factory(Article, File, form=FileForm, formset=FileInlineFormSet, 
+
+FileFormSet = inlineformset_factory(Article, File, form=FileForm, formset=FileInlineFormSet,
                                      extra=1, max_num=20,  can_delete=True)
 
 class LoginForm(AuthenticationForm):
@@ -148,5 +151,5 @@ class LoginForm(AuthenticationForm):
         # self.use_required_attribute = False
         self.helper.layout = Layout(
             Field('username'),
-            Field('password'),    
+            Field('password'),
             )

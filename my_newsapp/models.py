@@ -12,6 +12,7 @@ from comments.models import Comment
 CATEGORY_RELEVANCE_CHOICES = (
     ('P', 'Primary'),
     ('S', 'Secondary'),
+    ('T', 'Tertiary')
 )
 
 class CategoriesQuerySet(models.QuerySet):
@@ -29,7 +30,6 @@ class CategoriesQuerySet(models.QuerySet):
 
 class Category(models.Model):
     title = models.CharField(max_length=100, unique=True)
-    description = models.CharField(max_length=300, blank=True, null=True)
     slug = AutoSlugField(null=True, default=None, unique=True, populate_from='title')
     image = models.ImageField()
     status = models.CharField(max_length=1, choices=CATEGORY_RELEVANCE_CHOICES, unique=True, blank=True, null=True)
